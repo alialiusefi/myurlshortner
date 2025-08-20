@@ -1,0 +1,20 @@
+# https://docs.gradle.org/current/userguide/version_catalogs.html#sec:version-catalog-declaration
+[versions]
+quarkus = "3.25.3"
+vavr = "0.10.7"
+
+[libraries]
+quarkus-bom = { module = "io.quarkus.platform:quarkus-bom", version.ref = "quarkus" }
+quarkus-restjackson = { module = "io.quarkus:quarkus-rest-jackson", version.ref = "quarkus" }
+quarkus-arc = { module = "io.quarkus:quarkus-arc", version.ref = "quarkus" }
+quarkus-junit = { module = "io.quarkus:quarkus-junit5", version.ref = "quarkus" }
+quarkus-restassured = { module = "io.rest-assured:rest-assured", version.ref = "quarkus" }
+vavr-core = { module = "io.vavr:vavr", version.ref = "vavr"}
+
+# This groups the above libraries by bundle, to be referneced in gradle.kts
+[bundles]
+quarkus = ["quarkus-bom", "quarkus-restjackson", "quarkus-arc", "quarkus-junit", "quarkus-restassured"]
+vavr = ["vavr-core"]
+
+[plugins]
+quarkus = { id = "io.quarkus", version = "3.25.3" }
