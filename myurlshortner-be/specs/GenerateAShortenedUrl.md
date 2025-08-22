@@ -13,6 +13,15 @@ Authorization:
 {
   "url": "https://www.google.com"
 }
+{
+  "url": "www.google.com"
+}
+{
+  "url": "google.com"
+}
+{
+  "url": "http://google.com"
+}
 ```
 
 ### Responses

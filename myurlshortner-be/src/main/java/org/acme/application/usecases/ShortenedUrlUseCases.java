@@ -3,7 +3,7 @@ package org.acme.application.usecases;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.domain.ShortenedUrl;
-import org.acme.domain.exceptions.ShortenedUrlValidationError;
+import org.acme.domain.exceptions.ShortenUrlValidationError;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.service.ShortenedUrlService;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ public class ShortenedUrlUseCases {
         this.service = service;
     }
 
-    public Either<ShortenedUrlValidationError, ShortenedUrl> generateShortenedUrl(String originalUrl) {
+    public Either<ShortenUrlValidationError, ShortenedUrl> generateShortenedUrl(String originalUrl) {
         for (int i = 0; i < 3; i++) {
             try {
                 return service.generateShortenedUrl(originalUrl);
