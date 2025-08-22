@@ -34,7 +34,6 @@ public class UrlValidatorTest {
         );
         for (String testCase: testCases) {
             var errors = UrlValidator.validateUrl(testCase);
-            System.out.println(testCase);
             assertThat("Should not have error", errors.isEmpty());
         }
     }
