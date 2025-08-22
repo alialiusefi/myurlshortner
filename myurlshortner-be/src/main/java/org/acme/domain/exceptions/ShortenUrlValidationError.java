@@ -2,10 +2,10 @@ package org.acme.domain.exceptions;
 
 import java.util.List;
 
-public class ShortenedUrlValidationError extends Exception {
+public class ShortenUrlValidationError extends Exception {
     private List<ShortenUrlException> errors;
 
-    public ShortenedUrlValidationError(List<ShortenUrlException> errors) {
+    public ShortenUrlValidationError(List<ShortenUrlException> errors) {
         this.errors = errors;
     }
 
