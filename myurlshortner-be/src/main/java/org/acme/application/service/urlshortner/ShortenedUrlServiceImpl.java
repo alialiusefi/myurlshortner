@@ -8,7 +8,7 @@ import org.acme.domain.exceptions.ShortenedUrlValidationError;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
-import org.acme.domain.service.ShortenedUrlValidator;
+import org.acme.domain.service.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     public Either<ShortenedUrlValidationError, ShortenedUrl> generateShortenedUrl(String originalUrl) throws SaveShortenedUrlError {
-        List<ShortenedUrlException> errors = ShortenedUrlValidator.validateUrl(originalUrl);
+        List<ShortenedUrlException> errors = UrlValidator.validateUrl(originalUrl);
         if (!errors.isEmpty()) {
             return Either.left(new ShortenedUrlValidationError(errors));
         }
