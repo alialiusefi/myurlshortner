@@ -27,6 +27,7 @@ public class UrlValidatorTest {
     @Test
     public void shouldAcceptValidUrls() {
         List<String> testCases = List.of(
+                "subdomain.domain.com",
                 "www.google.com",
                 "http://www.google.com",
                 "https://www.google.com",
