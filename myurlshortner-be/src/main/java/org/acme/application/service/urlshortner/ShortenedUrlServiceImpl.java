@@ -3,7 +3,7 @@ package org.acme.application.service.urlshortner;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.domain.ShortenedUrl;
-import org.acme.domain.exceptions.ShortenedUrlException;
+import org.acme.domain.exceptions.ShortenUrlException;
 import org.acme.domain.exceptions.ShortenedUrlValidationError;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
@@ -42,7 +42,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     public Either<ShortenedUrlValidationError, ShortenedUrl> generateShortenedUrl(String originalUrl) throws SaveShortenedUrlError {
-        List<ShortenedUrlException> errors = UrlValidator.validateUrl(originalUrl);
+        List<ShortenUrlException> errors = UrlValidator.validateUrl(originalUrl);
         if (!errors.isEmpty()) {
             return Either.left(new ShortenedUrlValidationError(errors));
         }

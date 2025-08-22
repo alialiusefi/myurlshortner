@@ -1,6 +1,6 @@
 package org.acme.domain.exceptions;
 
-public abstract class ShortenedUrlException extends Exception {
+public abstract class ShortenUrlException extends Exception {
     protected String code;
     protected String message;
 
@@ -12,7 +12,7 @@ public abstract class ShortenedUrlException extends Exception {
         return this.code;
     }
 
-    public static class UrlFormatIsNotValid extends ShortenedUrlException {
+    public static class UrlFormatIsNotValid extends ShortenUrlException {
         private final static String CODE = "URL_FORMAT_IS_NOT_VALID";
 
         public UrlFormatIsNotValid() {
@@ -21,7 +21,7 @@ public abstract class ShortenedUrlException extends Exception {
         }
     }
 
-    public static class UrlIsEmptyException extends ShortenedUrlException {
+    public static class UrlIsEmptyException extends ShortenUrlException {
         private final static String CODE = "URL_IS_EMPTY";
 
         public UrlIsEmptyException() {
@@ -30,7 +30,7 @@ public abstract class ShortenedUrlException extends Exception {
         }
     }
 
-    public static class UrlIsNotHttpException extends ShortenedUrlException {
+    public static class UrlIsNotHttpException extends ShortenUrlException {
         private final static String CODE = "URL_IS_NOT_HTTP";
 
         public UrlIsNotHttpException(String url) {
@@ -39,7 +39,7 @@ public abstract class ShortenedUrlException extends Exception {
         }
     }
 
-    public static class UrlIsTooLongException extends ShortenedUrlException {
+    public static class UrlIsTooLongException extends ShortenUrlException {
         private final static String CODE = "URL_IS_TOO_LONG";
 
         public UrlIsTooLongException(Integer expectedSize, Integer actualSize) {
@@ -48,7 +48,7 @@ public abstract class ShortenedUrlException extends Exception {
         }
     }
 
-    public static class UrlIsMissingHostNameException extends ShortenedUrlException {
+    public static class UrlIsMissingHostNameException extends ShortenUrlException {
         private final static String CODE = "URL_IS_MISSING_A_HOSTNAME";
 
         public UrlIsMissingHostNameException(String url) {
