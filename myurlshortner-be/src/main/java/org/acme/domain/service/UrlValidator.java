@@ -10,6 +10,7 @@ public class UrlValidator {
     private final static String HTTP_PREFIX = "http";
     private final static String HTTPS_PREFIX = "https";
     private final static String SEPARATOR = "://";
+    private final static String REGEX = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
 
     public static List<ShortenedUrlException> validateUrl(String url) {
         if (url.isBlank()) {
@@ -37,6 +38,10 @@ public class UrlValidator {
         if (removedHttp.isBlank()) {
             listOfErrors.add(new ShortenedUrlException.UrlIsMissingHostNameException(url));
             return listOfErrors;
+        }
+
+        if (!removedHttp.matches(REGEX)) {
+            listOfErrors.add(new ShortenedUrlException.UrlFormatIsNotValid());
         }
 
         return listOfErrors;

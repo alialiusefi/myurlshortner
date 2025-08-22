@@ -12,6 +12,15 @@ public abstract class ShortenedUrlException extends Exception {
         return this.code;
     }
 
+    public static class UrlFormatIsNotValid extends ShortenedUrlException {
+        private final static String CODE = "URL_FORMAT_IS_NOT_VALID";
+
+        public UrlFormatIsNotValid() {
+            this.message = "The url format is not valid.";
+            this.code = CODE;
+        }
+    }
+
     public static class UrlIsEmptyException extends ShortenedUrlException {
         private final static String CODE = "URL_IS_EMPTY";
 
