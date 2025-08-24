@@ -1,8 +1,13 @@
 {
   "dependencies": {
+    "@emotion/react": "^11.14.1",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.1",
+    "@mui/material-nextjs": "^7.3.1",
     "next": "^15.3.5",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "webpack": "^5.101.3"
   },
   "scripts": {
     "dev": "next dev",
