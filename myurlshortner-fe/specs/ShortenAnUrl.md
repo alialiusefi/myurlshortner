@@ -7,7 +7,7 @@ Started At: 2025-08-21T19:58
 When the user opens the homepage, he's greeted with a form the allows him to submit a valid url to shorten.
 The form consists of:
 
-- Title 
+- Title
 - URL Input
   - Label: URL
   - Placeholder: https://www.example.com
@@ -23,4 +23,3 @@ Upon submission, a small closeable modal must appear with the short url. The mod
 - Short url
   - It is presented in an easy selectable box, with a button on the right side to copy.
 - Exit Button on the top right
-

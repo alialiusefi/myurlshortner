@@ -1,4 +1,3 @@
 export default function Page() {
-  return <h1>Work in progress</h1>
+  return <h1>Work in progress</h1>;
 }
-    
