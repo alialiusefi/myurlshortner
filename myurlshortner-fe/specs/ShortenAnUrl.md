@@ -19,7 +19,8 @@ The form consists of:
 Upon submission, a small closeable modal must appear with the short url. The modal consists of:
 
 - Success Message:
-  - Your url has been shortened successfully.
+  - Success!
+- Description:
+  - 'URL: <shortened-url-here>'
 - Short url
-  - It is presented in an easy selectable box, with a button on the right side to copy.
-- Exit Button on the top right
+  - It is presented in a selectable text and linked to the link itself.
