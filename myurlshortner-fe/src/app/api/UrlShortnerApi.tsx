@@ -24,7 +24,6 @@ export default async function shortenUrlOperaton(
       }
     }
     const jsonResponse = await rawResponse.json();
-    console.log(jsonResponse);
     return new ShortenUrlResponse(jsonResponse.shortened_url);
   } catch (e) {
     console.error(`Error while calling the BE! ${e}`);
