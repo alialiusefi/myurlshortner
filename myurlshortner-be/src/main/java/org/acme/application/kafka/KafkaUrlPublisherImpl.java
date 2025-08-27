@@ -27,6 +27,7 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
                 .setUserAgent(userAgent)
                 .setUniqueIdentifier(shortenedUrl.getPublicIdentifier())
                 .build();
+
         emitter.sendAndAwait(event);
     }
 }

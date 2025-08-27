@@ -69,10 +69,8 @@ accessed the original url.
 Headers:
 
 - Key: {unique-identifier}
-- Partition: 0
-- Timestamp: 2025-08266T05:29:27Z // Example
 - Topic: shortened-url-events
-- Schema: shortened-url-events.com.acme.events.UserAccessedShortenedUrl
+- ArtifactId: com.acme.events.UserAccessedShortenedUrl
   Event:
 
 ```json
