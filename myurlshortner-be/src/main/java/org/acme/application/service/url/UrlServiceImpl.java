@@ -16,8 +16,8 @@ import java.util.List;
 
 @Singleton
 public class UrlServiceImpl implements UrlService {
-    private final ShortenedUrlRepository repo;
-    private final KafkaUrlPublisher publisher;
+    final ShortenedUrlRepository repo;
+    final KafkaUrlPublisher publisher;
 
     private UrlServiceImpl(ShortenedUrlRepository repo, KafkaUrlPublisher publisher) {
         this.repo = repo;
@@ -44,7 +44,6 @@ public class UrlServiceImpl implements UrlService {
 
         var shortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
         if (shortenedUrl != null) {
-            // todo push to real kafka
             publisher.publishUserAccessedShortenedUrl(shortenedUrl, userAgent);
             return Either.right(shortenedUrl.getOriginalUrl());
         } else {

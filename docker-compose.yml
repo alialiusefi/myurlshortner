@@ -1,0 +1,46 @@
+services:
+  kafka-broker-and-controller:
+    image: apache/kafka:4.0.0
+    environment:
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka-broker-and-controller-data:/var/lib/kafka/data
+    ports:
+      - "9092:9092"
+    networks:
+      - docker-network
+
+  schema-registry:
+    image: apicurio/apicurio-registry:3.0.12
+    ports:
+      - "8901:8080"
+    networks:
+      - docker-network
+  schema-registry-ui:
+    image: apicurio/apicurio-registry-ui:3.0.12
+    environment:
+      REGISTRY_API_URL: http://localhost:8901/apis/registry/v3
+    ports:
+      - "8888:8080"
+    networks:
+      - docker-network
+volumes:
+  kafka-broker-and-controller-data:
+
+networks:
+  docker-network:
+    driver: bridge

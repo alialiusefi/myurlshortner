@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository {
-    private final ConcurrentHashMap<String, ShortenedUrl> data;
+    final ConcurrentHashMap<String, ShortenedUrl> data;
 
     ShortenedUrlRepositoryImpl() {
         this.data = new ConcurrentHashMap<>();

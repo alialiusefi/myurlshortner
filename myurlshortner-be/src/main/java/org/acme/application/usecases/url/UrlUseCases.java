@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 @Singleton
 public class UrlUseCases {
-    private UrlService service;
+    final UrlService service;
 
     private UrlUseCases(UrlService service) {
         this.service = service;

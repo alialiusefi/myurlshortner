@@ -57,27 +57,29 @@ No Response Body
 
 ### Redirect Logic Description
 
-After the user visits the shortened link and handled by FE, FE will use this endpoint to get the url to redirect the user to.
+After the user visits the shortened link and handled by FE, FE will use this endpoint to get the url to redirect the
+user to.
 User-Agent is a required header, it will be used for reporting.
 
-There will be an event published when the endpoint is called successfully, as this means that the user has effectively accessed the original url. 
+There will be an event published when the endpoint is called successfully, as this means that the user has effectively
+accessed the original url.
 
 ### User Redirected Event Example
 
-Headers: 
+Headers:
+
 - Key: {unique-identifier}
 - Partition: 0
 - Timestamp: 2025-08266T05:29:27Z // Example
 - Topic: shortened-url-events
 - Schema: shortened-url-events.com.acme.events.UserAccessedShortenedUrl
-Event:
+  Event:
+
 ```json
 {
-  "data": {
-    "unique_identifier": "OLIcbYN7iW",
-    "original_url": "https://www.google.com?query=test&some=long_gibberish",
-    "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0" 
-  }
+  "unique_identifier": "OLIcbYN7iW",
+  "original_url": "https://www.google.com?query=test&some=long_gibberish",
+  "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
 }
 ```
 

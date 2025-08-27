@@ -17,6 +17,8 @@ dependencies {
     implementation(enforcedPlatform(libs.quarkus.bom))
     implementation(libs.quarkus.restjackson)
     implementation(libs.quarkus.arc)
+    implementation(libs.quarkus.kafka)
+    implementation(libs.quarkus.apicurioregistry.avro)
     implementation(libs.vavr.core)
     implementation(libs.jspecify.core)
     testImplementation(libs.quarkus.junit)
