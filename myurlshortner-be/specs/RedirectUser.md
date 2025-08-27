@@ -21,12 +21,36 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Fir
 
 ### Responses
 
-```
+```http
 307 Temporary Redirect
 Location: https://www.example.com?query=test
 ```
 
+```http
+400 Bad Request
+{
+    errors: [
+        {
+            "code": UNIQUE_IDENTIFIER_IS_TOO_LONG
+            "message": "The unique identifier provided is too long."
+        }
+    ]
+}
+{
+    errors: [
+        {
+            "code": UNIQUE_IDENTIFIER_CANNOT_BE_EMPTY
+            "message": "The unique identifier cannot be empty."
+        },
+        {
+            "code": USER_AGENT_CANNOT_BE_EMPTY
+            "message": "The user agent header cannot be empty."
+        }
+    ]
+}
 ```
+
+```http
 404 Not Found
 No Response Body
 ```
@@ -51,6 +75,7 @@ Event:
 {
   "data": {
     "unique_identifier": "OLIcbYN7iW",
+    "original_url": "https://www.google.com?query=test&some=long_gibberish",
     "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0" 
   }
 }

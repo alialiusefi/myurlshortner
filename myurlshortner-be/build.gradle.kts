@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.quarkus.restjackson)
     implementation(libs.quarkus.arc)
     implementation(libs.vavr.core)
+    implementation(libs.jspecify.core)
     testImplementation(libs.quarkus.junit)
     testImplementation(libs.quarkus.restassured)
 }
