@@ -19,11 +19,11 @@ public class UrlUseCases {
 
     public Either<GetUrlError, URI> getUrl(String uniqueIdentifier, String userAgent) {
         var errors = new ArrayList<UrlValidationException>();
-        if (uniqueIdentifier == null) {
+        if (uniqueIdentifier == null || uniqueIdentifier.isBlank()) {
             errors.add(new UrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
         }
-        if (userAgent == null) {
-            errors.add(new UrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
+        if (userAgent == null || userAgent.isBlank()) {
+            errors.add(new UrlValidationException.UserAgentCannotBeEmptyValidationException());
         }
         if (!errors.isEmpty()) {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));
