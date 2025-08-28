@@ -64,21 +64,9 @@ User-Agent is a required header, it will be used for reporting.
 There will be an event published when the endpoint is called successfully, as this means that the user has effectively
 accessed the original url.
 
-### User Redirected Event Example
-
-Headers:
-
-- Key: {unique-identifier}
-- Topic: shortened-url-events
-- ArtifactId: com.acme.events.UserAccessedShortenedUrl
-  Event:
-
-```json
-{
-  "unique_identifier": "OLIcbYN7iW",
-  "original_url": "https://www.google.com?query=test&some=long_gibberish",
-  "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-}
-```
+### User data to save
+- User Device
+- User Browser
+- User OS
 
 ### Why Status Code 307 was picked
