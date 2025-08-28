@@ -49,9 +49,9 @@ public class UrlShortnerController {
             ShortenUrlRequest request
     ) {
         return this.useCases.generateShortenedUrl(request.url()).fold(
-                errors -> {
+                error -> {
                     var response = new ShortenUrlErrorsResponse(
-                            errors.getErrors().stream().map(
+                            error.errors().stream().map(
                                     err -> new ShortenUrlError(err.getCode(), err.getMessage())
                             ).toList()
                     );

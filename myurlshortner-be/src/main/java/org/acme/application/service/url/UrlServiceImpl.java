@@ -47,7 +47,7 @@ public class UrlServiceImpl implements UrlService {
             publisher.publishUserAccessedShortenedUrl(shortenedUrl, userAgent);
             return Either.right(shortenedUrl.getOriginalUrl());
         } else {
-            return Either.left(GetUrlError.createFromOperationErrors(List.of(new GetUrlException.ShortenedUrlIsNotFound())));
+            return Either.left(GetUrlError.createFromOperationErrors(new GetUrlException.ShortenedUrlIsNotFound()));
         }
     }
 }

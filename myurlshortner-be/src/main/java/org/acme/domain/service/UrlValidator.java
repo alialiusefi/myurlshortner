@@ -1,6 +1,6 @@
 package org.acme.domain.service;
 
-import org.acme.domain.exceptions.ShortenUrlException;
+import org.acme.domain.exceptions.shortenurl.ShortenUrlValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +12,13 @@ public class UrlValidator {
     private final static String SEPARATOR = "://";
     private final static String REGEX = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
 
-    public static List<ShortenUrlException> validateUrl(String url) {
+    public static List<ShortenUrlValidationException> validateUrl(String url) {
         if (url.isBlank()) {
-            return List.of(new ShortenUrlException.UrlIsEmptyException());
+            return List.of(new ShortenUrlValidationException.UrlIsEmptyException());
         }
-        var listOfErrors = new ArrayList<ShortenUrlException>();
+        var listOfErrors = new ArrayList<ShortenUrlValidationException>();
         if (url.length() > MAX_URL_SIZE) {
-            listOfErrors.add(new ShortenUrlException.UrlIsTooLongException(MAX_URL_SIZE, url.length()));
+            listOfErrors.add(new ShortenUrlValidationException.UrlIsTooLongException(MAX_URL_SIZE, url.length()));
         }
 
         String removedHttp = url;
@@ -26,22 +26,22 @@ public class UrlValidator {
             int indexOfSeparator = url.indexOf(SEPARATOR);
             String protocol = url.substring(0, indexOfSeparator);
             if (protocol.isBlank()) {
-                listOfErrors.add(new ShortenUrlException.UrlIsNotHttpException(url));
+                listOfErrors.add(new ShortenUrlValidationException.UrlIsNotHttpException(url));
             }
             if (protocol.equals(HTTPS_PREFIX) || protocol.equals(HTTP_PREFIX)) {
                 removedHttp = url.substring(indexOfSeparator + SEPARATOR.length());
             } else {
-                listOfErrors.add(new ShortenUrlException.UrlIsNotHttpException(url));
+                listOfErrors.add(new ShortenUrlValidationException.UrlIsNotHttpException(url));
             }
         }
 
         if (removedHttp.isBlank()) {
-            listOfErrors.add(new ShortenUrlException.UrlIsMissingHostNameException(url));
+            listOfErrors.add(new ShortenUrlValidationException.UrlIsMissingHostNameException(url));
             return listOfErrors;
         }
 
         if (!removedHttp.matches(REGEX)) {
-            listOfErrors.add(new ShortenUrlException.UrlFormatIsNotValid());
+            listOfErrors.add(new ShortenUrlValidationException.UrlFormatIsNotValid());
         }
 
         return listOfErrors;
