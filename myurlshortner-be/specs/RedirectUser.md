@@ -70,3 +70,5 @@ accessed the original url.
 - User OS
 
 ### Why Status Code 307 was picked
+When returning TEMPORARY_REDIRECT, we are allowing the possibility to change where the short url will redirect to.
+Also, it does not allow the user to tamper with the redirect request.
