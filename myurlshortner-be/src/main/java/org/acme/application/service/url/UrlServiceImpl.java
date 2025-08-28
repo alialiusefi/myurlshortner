@@ -12,7 +12,6 @@ import org.jspecify.annotations.NonNull;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 public class UrlServiceImpl implements UrlService {
