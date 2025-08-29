@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "UserAccessedShortenedUrl",
+  "namespace": "com.acme.events",
+  "fields": [
+    {
+      "name": "unique_identifier",
+      "type": "string"
+    },
+    {
+      "name": "original_url",
+      "type": "string"
+    },
+    {
+      "name": "user_agent",
+      "type": "string"
+    }
+  ]
+}

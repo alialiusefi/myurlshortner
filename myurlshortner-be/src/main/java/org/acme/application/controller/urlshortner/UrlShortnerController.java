@@ -2,6 +2,7 @@ package org.acme.application.controller.urlshortner;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -49,14 +50,8 @@ public class UrlShortnerController {
             ShortenUrlRequest request
     ) {
         return this.useCases.generateShortenedUrl(request.url()).fold(
-                errors -> {
-                    var response = new ShortenUrlErrorsResponse(
-                            errors.getErrors().stream().map(
-                                    err -> new ShortenUrlError(err.getCode(), err.getMessage())
-                            ).toList()
-                    );
-                    return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-                },
+                error -> Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse(error.errors())).build(),
                 success -> Response.status(Response.Status.CREATED)
                         .entity(new ShortenUrlResponse(success.shortenedUrl(hostname))).build()
         );
