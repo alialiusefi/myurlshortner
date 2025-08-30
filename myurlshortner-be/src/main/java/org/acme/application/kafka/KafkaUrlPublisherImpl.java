@@ -8,13 +8,13 @@ import org.acme.domain.ShortenedUrl;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
 
-@IfBuildProfile(allOf = {"dev", "prod"})
+@IfBuildProfile(anyOf = {"dev", "prod"})
 @Singleton
 public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
     final MutinyEmitter<UserAccessedShortenedUrl> emitter;
 
     KafkaUrlPublisherImpl(
-            @Channel("shortened-url-events") MutinyEmitter<UserAccessedShortenedUrl> emitter
+            @Channel("user-accessed-shortened-url") MutinyEmitter<UserAccessedShortenedUrl> emitter
     ) {
         this.emitter = emitter;
     }

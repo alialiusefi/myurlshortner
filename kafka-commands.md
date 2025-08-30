@@ -40,7 +40,6 @@ curl -X POST http://localhost:8901/apis/registry/v3/groups/com.acme.events/artif
     "artifactId": "UserAccessedShortenedUrl",
     "artifactType": "AVRO",
     "firstVersion": {
-        "version": "1",
         "content": {
             "content": "{\"type\":\"record\",\"name\":\"UserAccessedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"user_agent\",\"type\":\"string\"}]}",
             "contentType": "application/json"
