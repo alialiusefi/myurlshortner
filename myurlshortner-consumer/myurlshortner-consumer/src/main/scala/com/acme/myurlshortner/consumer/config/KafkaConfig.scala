@@ -10,7 +10,7 @@ case class KafkaConfig(
   val registryUrl: String,
   val consumerGroup: String,
   val artifactGroupId: String,
-  val topicConfigs: List[KafkaTopicConfig]
+  val shortenedUrlUserEventsTopic: KafkaTopicConfig,
 )
 
 case class KafkaTopicConfig(
@@ -23,6 +23,6 @@ object KafkaConfigLoader {
     registryUrl     <- System.env("REGISTRY_URL")
     consumerGroup   <- System.env("CONSUMER_GROUP")
     artifactGroupId <- System.env("ARTIFACT_GROUP_ID")
-    userEventsTopic <- System.env("USER_EVENTS_TOPIC").map(op => op.get.split(",").toList)
-  } yield (KafkaConfig(urls, registryUrl.get, artifactGroupId.get, consumerGroup.get, userEventsTopic.map(a => KafkaTopicConfig(a))))
+    shortenedUrlUserEventsTopic <- System.env("SHORTENED_URL_USER_EVENTS_TOPIC")
+  } yield (KafkaConfig(urls, registryUrl.get, artifactGroupId.get, consumerGroup.get, KafkaTopicConfig(shortenedUrlUserEventsTopic.get)))
 }

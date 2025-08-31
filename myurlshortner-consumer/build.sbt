@@ -31,7 +31,7 @@ lazy val userEventsConsumer = project
       "dev.zio"     %% "zio"               % zioVersion,
       "dev.zio"     %% "zio-streams"       % zioVersion,
       "dev.zio"     %% "zio-kafka"         % zioKafkaVersion,
-      "io.apicurio" % "apicurio-registry-serdes-avro-serde" % "2.6.13.Final" % Test,
+      "io.apicurio" % "apicurio-registry-serdes-avro-serde" % "2.6.13.Final",
       "dev.zio"     %% "zio-kafka-testkit" % zioKafkaVersion   % Test,
       "dev.zio"     %% "zio-test"          % zioVersion        % Test,
       "dev.zio"     %% "zio-test-sbt"      % zioVersion        % Test
