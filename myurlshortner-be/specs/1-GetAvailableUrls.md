@@ -17,7 +17,6 @@ https://{hostname}/shortened-urls?page=1&size=10&status=available
 ### Responses
 
 200 OK
-
 ```json
 {
   "data": [
@@ -32,7 +31,6 @@ https://{hostname}/shortened-urls?page=1&size=10&status=available
 ```
 
 400 Bad Request
-
 ```json
 {
   "errors": [

@@ -27,7 +27,6 @@ Authorization:
 ### Responses
 
 201 Created
-
 ```json
 {
   "shortened_url": "https://{hostname}/goto/wLf16-ft"
@@ -36,7 +35,6 @@ Authorization:
 ```
 
 400 Bad Request
-
 ```json
 {
   "errors": [
@@ -65,12 +63,12 @@ Authorization:
 ```
 
 404 NotFound
-
+No Response Body
 
 ### Generate Logic Description
 
 The shortened url will consist of the prefix of hostname + prefix,
-action identifier to redirect /go-to and generated unique short identifier.
+action identifier to redirect /goto and generated unique short identifier.
 
 Unique short identifier will be generated randomly from the ASCII table excluding some characters. It will result up to 62^10 combinations.
 

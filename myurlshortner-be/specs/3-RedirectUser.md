@@ -14,7 +14,6 @@ Returns an url for user redirection.
 
 ```http
 GET https://{hostname}/url/{unique-identifier}
-Content-Type: 
 Authorization: 
 User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0
 ```
@@ -24,6 +23,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Fir
 ```http
 307 Temporary Redirect
 Location: https://www.example.com?query=test
+No Response Body
 ```
 
 ```http
@@ -64,7 +64,7 @@ User-Agent is a required header, it will be used for reporting.
 There will be an event published when the endpoint is called successfully, as this means that the user has effectively
 accessed the original url.
 
-### User data to save
+### User data to publish
 - User Device
 - User Browser
 - User OS
