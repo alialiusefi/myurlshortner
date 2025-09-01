@@ -1,6 +1,6 @@
 package org.acme.domain.service;
 
-import org.acme.domain.exceptions.shortenurl.ShortenUrlValidationException;
+import org.acme.domain.exceptions.url.ShortenUrlValidationException;
 
 import java.util.ArrayList;
 import java.util.List;

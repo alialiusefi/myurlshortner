@@ -1,4 +1,4 @@
-package org.acme.application.controller.urlshortner;
+package org.acme.application.controller.url;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -54,11 +54,11 @@ public class UrlShortnerController {
                     var total = success._1;
                     var results = success._2.stream()
                             .map(
-                                    row -> new UrlShortnerList.UrlShortnerListRow(
+                                    row -> new UrlList.UrlRow(
                                             row.getOriginalUrl().toString(),
                                             row.shortenedUrl(hostname))
                             ).toList();
-                    return Response.ok().entity(new UrlShortnerList(results, total)).build();
+                    return Response.ok().entity(new UrlList(results, total)).build();
                 }
         );
     }

@@ -3,7 +3,7 @@ package org.acme.application.usecases;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.domain.ShortenedUrl;
-import org.acme.domain.exceptions.shortenurl.ShortenUrlError;
+import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.service.ShortenedUrlService;
 import org.slf4j.Logger;

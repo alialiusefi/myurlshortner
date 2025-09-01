@@ -2,7 +2,7 @@ package org.acme.domain.service;
 
 import io.vavr.control.Either;
 import org.acme.domain.ShortenedUrl;
-import org.acme.domain.exceptions.shortenurl.ShortenUrlError;
+import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.repo.SaveShortenedUrlError;
 
 public interface ShortenedUrlService {

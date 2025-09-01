@@ -6,11 +6,9 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
 import jakarta.inject.Inject;
-import org.acme.application.controller.urlshortner.UrlShortnerList;
+import org.acme.application.controller.url.UrlList;
 import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
-import org.acme.domain.repo.ShortenedUrlRepository;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,10 +47,10 @@ class UrlShortnerControllerIT {
                 .then()
                 .statusCode(200)
                 .body("total", Matchers.equalTo(1));
-        var data = result.extract().jsonPath(config).getList("data", UrlShortnerList.UrlShortnerListRow.class);
+        var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
         assertThat(data, Matchers.not(Matchers.empty()));
         assertThat(data, Matchers.contains(
-                new UrlShortnerList.UrlShortnerListRow("https://www.google.com", "http://localhost/goto/abcdefghik")
+                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik")
         ));
     }
 
