@@ -1,17 +1,21 @@
 # Get Available Urls
 
+StartedAt: 2025-09-01
+Time to develop: 2hr
+Time to test: 1hr
+
 ### Description
 
-Returns list of shortened urls that should be accessible with their metadata.
+Returns list of shortened urls instead of mock.
 
 ### Requests
 
-> page - page number
-> size - page size
-> status - filtering by status of url
+> page - page number, [1,INTEGER_MAX]
+> size - page size, [1, 100]
 
 ```http
-https://{hostname}/shortened-urls?page=1&size=10&status=available
+Authorization:
+https://{hostname}/shortened-urls?page=1&size=10
 ```
 
 ### Responses
@@ -22,7 +26,7 @@ https://{hostname}/shortened-urls?page=1&size=10&status=available
   "data": [
     {
       "url": "https://www.google.com",
-      "shortened_url": "https://www.shortner.com/hfu2--$31D123c"
+      "shortened_url": "https://{hostname}/goto/nbjgop38vn"
     }
   ],
   "total": 1
@@ -34,6 +38,14 @@ https://{hostname}/shortened-urls?page=1&size=10&status=available
 ```json
 {
   "errors": [
+    {
+      "code": "PAGE_QUERY_PARAM_IS_NOT_CORRECT",
+      "message": "The provided page '$s' should start from 1."
+    },
+    {
+      "code": "SIZE_QUERY_PARAM_IS_NOT_CORRECT",
+      "message": "The provided size '$s' should be from 1 to 100."
+    }
   ]
 }
 ```
@@ -41,4 +53,7 @@ https://{hostname}/shortened-urls?page=1&size=10&status=available
 404 NotFound
 No Response Body
 
-### Dependencies
+### Tech Debt and Blockers
+- Integration tests do not check content.
+- No Error handling.
+- Mock data.
