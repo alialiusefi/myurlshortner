@@ -1,8 +1,6 @@
 package org.acme.application.kafka;
 
-import io.quarkus.arc.DefaultBean;
 import io.quarkus.arc.profile.IfBuildProfile;
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Singleton;
 import org.acme.domain.ShortenedUrl;
 import org.jspecify.annotations.NonNull;

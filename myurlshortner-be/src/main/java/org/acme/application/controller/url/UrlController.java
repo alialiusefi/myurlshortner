@@ -34,7 +34,7 @@ public class UrlController {
                 ).orElseGet(() ->
                         errors.urlValidationErrors()
                                 .map(e ->
-                                        Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(e)).build()
+                                        Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainErrors(e)).build()
                                 ).orElseThrow()
                 ),
 

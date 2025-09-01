@@ -1,8 +1,10 @@
 package org.acme.application.service.url;
 
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.application.kafka.KafkaUrlPublisher;
+import org.acme.domain.ShortenedUrl;
 import org.acme.domain.exceptions.url.GetUrlError;
 import org.acme.domain.exceptions.url.GetUrlException;
 import org.acme.domain.exceptions.url.UrlValidationException;
@@ -12,6 +14,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class UrlServiceImpl implements UrlService {
@@ -48,5 +51,9 @@ public class UrlServiceImpl implements UrlService {
         } else {
             return Either.left(GetUrlError.createFromOperationErrors(new GetUrlException.ShortenedUrlIsNotFound()));
         }
+    }
+
+    public Tuple2<Long, List<ShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size) {
+        return repo.listAvailableShortenedUrls(page, size);
     }
 }

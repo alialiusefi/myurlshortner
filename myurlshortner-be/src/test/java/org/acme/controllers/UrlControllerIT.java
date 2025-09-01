@@ -7,7 +7,6 @@ import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.junit.jupiter.api.Test;
 
-
 import java.net.URI;
 
 import static io.restassured.RestAssured.given;

@@ -18,7 +18,7 @@ public class UrlValidatorTest {
                 "www.google.com://",
                 ""
         );
-        for (String testCase: testCases) {
+        for (String testCase : testCases) {
             var errors = UrlValidator.validateUrl(testCase);
             assertThat("Should have error", !errors.isEmpty());
         }
@@ -33,7 +33,7 @@ public class UrlValidatorTest {
                 "https://www.google.com",
                 "google.com"
         );
-        for (String testCase: testCases) {
+        for (String testCase : testCases) {
             var errors = UrlValidator.validateUrl(testCase);
             assertThat("Should not have error", errors.isEmpty());
         }

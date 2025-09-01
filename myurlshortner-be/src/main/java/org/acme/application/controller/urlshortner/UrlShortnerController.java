@@ -4,9 +4,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
+import org.acme.application.usecases.url.UrlUseCases;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -14,33 +13,15 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 public class UrlShortnerController {
     @ConfigProperty(name = "app.hostname")
     private String hostname;
-    private final ShortenedUrlUseCases useCases;
+    private final ShortenedUrlUseCases shortenedUrlUseCases;
+    private final UrlUseCases urlUseCases;
 
-    public UrlShortnerController(ShortenedUrlUseCases useCases) {
-        this.useCases = useCases;
-    }
-
-    private final String MOCK_URL = "https://www.shortner.com/goto/wLf16-ft";
-
-    @GET
-    @Path("/shortened-urls")
-    @Produces(APPLICATION_JSON)
-    public Response getShortenedUrls(
-            @QueryParam("page") String page,
-            @QueryParam("size") String size,
-            @QueryParam("status") String status
+    public UrlShortnerController(
+            ShortenedUrlUseCases shortenedUrlUseCases,
+            UrlUseCases urlUseCases
     ) {
-        var row = new UrlShortnerList.UrlShortnerListRow(
-                "https://www.google.com",
-                MOCK_URL
-        );
-        var total = 1L;
-        return Response.ok(
-                new UrlShortnerList(
-                        List.of(row),
-                        total
-                )
-        ).build();
+        this.shortenedUrlUseCases = shortenedUrlUseCases;
+        this.urlUseCases = urlUseCases;
     }
 
     @POST
@@ -49,11 +30,36 @@ public class UrlShortnerController {
     public Response generateAShortenedUrl(
             ShortenUrlRequest request
     ) {
-        return this.useCases.generateShortenedUrl(request.url()).fold(
+        return this.shortenedUrlUseCases.generateShortenedUrl(request.url()).fold(
                 error -> Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new ErrorResponse(error.errors())).build(),
+                        .entity(ErrorResponse.buildFromDomainErrors(error.errors())).build(),
                 success -> Response.status(Response.Status.CREATED)
                         .entity(new ShortenUrlResponse(success.shortenedUrl(hostname))).build()
+        );
+    }
+
+    @GET
+    @Path("/shortened-urls")
+    @Produces(APPLICATION_JSON)
+    public Response getShortenedUrls(
+            @QueryParam("page") Integer page,
+            @QueryParam("size") Integer size
+    ) {
+        return this.urlUseCases.listAvailableUrls(
+                page,
+                size
+        ).fold(
+                error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainApplicationErrors(error.getErrors())).build(),
+                success -> {
+                    var total = success._1;
+                    var results = success._2.stream()
+                            .map(
+                                    row -> new UrlShortnerList.UrlShortnerListRow(
+                                            row.getOriginalUrl().toString(),
+                                            row.shortenedUrl(hostname))
+                            ).toList();
+                    return Response.ok().entity(new UrlShortnerList(results, total)).build();
+                }
         );
     }
 }
