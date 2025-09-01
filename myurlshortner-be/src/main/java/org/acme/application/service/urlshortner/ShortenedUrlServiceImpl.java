@@ -1,14 +1,16 @@
 package org.acme.application.service.urlshortner;
 
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.domain.ShortenedUrl;
-import org.acme.domain.exceptions.shortenurl.ShortenUrlError;
-import org.acme.domain.exceptions.shortenurl.ShortenUrlValidationException;
+import org.acme.domain.exceptions.url.ShortenUrlError;
+import org.acme.domain.exceptions.url.ShortenUrlValidationException;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.service.UrlValidator;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,5 +53,10 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         repo.insertShortenedUrl(shortUrl);
         logger.debug("Successfully generated a short url!");
         return Either.right(shortUrl);
+    }
+
+    @Override
+    public Tuple2<Long, List<ShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size) {
+        return repo.listAvailableShortenedUrls(page, size);
     }
 }

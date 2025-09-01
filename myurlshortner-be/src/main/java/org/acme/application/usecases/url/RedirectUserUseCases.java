@@ -10,10 +10,10 @@ import java.net.URI;
 import java.util.ArrayList;
 
 @Singleton
-public class UrlUseCases {
+public class RedirectUserUseCases {
     final UrlService service;
 
-    private UrlUseCases(UrlService service) {
+    private RedirectUserUseCases(UrlService service) {
         this.service = service;
     }
 
@@ -30,5 +30,4 @@ public class UrlUseCases {
         }
         return service.getUrl(uniqueIdentifier, userAgent);
     }
-
 }

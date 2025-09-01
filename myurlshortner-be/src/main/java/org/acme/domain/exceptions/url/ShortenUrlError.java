@@ -1,4 +1,4 @@
-package org.acme.domain.exceptions.shortenurl;
+package org.acme.domain.exceptions.url;
 
 import java.util.List;
 
