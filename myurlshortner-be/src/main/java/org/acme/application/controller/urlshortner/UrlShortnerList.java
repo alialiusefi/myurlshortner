@@ -6,7 +6,7 @@ public record UrlShortnerList(
         List<UrlShortnerListRow> data,
         Long total
 ) {
-    record UrlShortnerListRow(
+    public record UrlShortnerListRow(
             String url,
             String shortenedUrl
     ) {

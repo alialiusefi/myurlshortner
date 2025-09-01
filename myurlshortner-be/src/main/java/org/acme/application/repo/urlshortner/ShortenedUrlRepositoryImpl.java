@@ -38,6 +38,11 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository {
         return data.get(uniqueIdentifier);
     }
 
+    public void cleanup() {
+        data.clear();
+        data.put("abcdefghik", new ShortenedUrl(URI.create("https://www.google.com"), "abcdefghik"));
+    }
+
     public Tuple2<Long, List<ShortenedUrl>> listAvailableShortenedUrls(@NonNull Integer page, @NonNull Integer size) {
         return Tuple.of(
                 Integer.toUnsignedLong(data.size()),

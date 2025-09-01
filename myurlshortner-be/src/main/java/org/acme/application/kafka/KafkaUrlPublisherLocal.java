@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-@IfBuildProfile("local")
+@IfBuildProfile(anyOf = {"local", "test"})
 public class KafkaUrlPublisherLocal implements KafkaUrlPublisher {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 

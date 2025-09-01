@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import org.acme.domain.ShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -19,13 +20,16 @@ public class UrlControllerIT {
 
     @Test
     void shouldReturnTemporaryRedirect() throws SaveShortenedUrlError {
-        repo.insertShortenedUrl(new ShortenedUrl(URI.create("http://www.example.com"), "abcdeabcde"));
+        var originalUrl = URI.create("http://www.example.com");
+        repo.insertShortenedUrl(new ShortenedUrl(originalUrl, "abcdeabcde"));
         given()
                 .header("User-Agent", "Test/V1")
                 .when()
                 .redirects().follow(false)
                 .get("/urls/abcdeabcde")
-                .then().statusCode(307);
+                .then()
+                .statusCode(307)
+                .header("Location", Matchers.is(originalUrl.toString()));
     }
 
     @Test
