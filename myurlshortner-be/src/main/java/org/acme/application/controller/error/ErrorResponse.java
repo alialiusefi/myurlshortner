@@ -16,7 +16,7 @@ public class ErrorResponse {
         return new ErrorResponse(errors.stream().map(a -> new Error(a.code, a.message)).toList());
     }
 
-    public static ErrorResponse buildFromDomainApplicationErrors(List<? extends ApplicationException> errors) {
+    public static ErrorResponse buildFromApplicationErrors(List<? extends ApplicationException> errors) {
         return new ErrorResponse(errors.stream().map(a -> new Error(a.code, a.message)).toList());
     }
 

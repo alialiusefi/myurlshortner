@@ -4,7 +4,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
-import org.acme.application.usecases.url.UrlUseCases;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -14,14 +13,11 @@ public class UrlShortnerController {
     @ConfigProperty(name = "app.hostname")
     private String hostname;
     private final ShortenedUrlUseCases shortenedUrlUseCases;
-    private final UrlUseCases urlUseCases;
 
     public UrlShortnerController(
-            ShortenedUrlUseCases shortenedUrlUseCases,
-            UrlUseCases urlUseCases
+            ShortenedUrlUseCases shortenedUrlUseCases
     ) {
         this.shortenedUrlUseCases = shortenedUrlUseCases;
-        this.urlUseCases = urlUseCases;
     }
 
     @POST
@@ -45,11 +41,11 @@ public class UrlShortnerController {
             @QueryParam("page") Integer page,
             @QueryParam("size") Integer size
     ) {
-        return this.urlUseCases.listAvailableUrls(
+        return this.shortenedUrlUseCases.listAvailableUrls(
                 page,
                 size
         ).fold(
-                error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainApplicationErrors(error.getErrors())).build(),
+                error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromApplicationErrors(error.getErrors())).build(),
                 success -> {
                     var total = success._1;
                     var results = success._2.stream()

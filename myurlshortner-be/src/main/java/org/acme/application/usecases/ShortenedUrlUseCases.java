@@ -1,13 +1,21 @@
 package org.acme.application.usecases;
 
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
+import org.acme.application.exception.ApplicationException;
+import org.acme.application.exception.PageNumberIsNotCorrectException;
+import org.acme.application.exception.PageSizeIsNotCorrectException;
+import org.acme.application.exception.url.GetAvailableUrlsError;
 import org.acme.domain.ShortenedUrl;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.service.ShortenedUrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class ShortenedUrlUseCases {
@@ -30,5 +38,20 @@ public class ShortenedUrlUseCases {
         var message = "Failed to generate url after all retry attempts";
         logger.error(message);
         throw new IllegalStateException(message);
+    }
+
+    public Either<GetAvailableUrlsError, Tuple2<Long, List<ShortenedUrl>>> listAvailableUrls(Integer page, Integer size) {
+        List<ApplicationException> errors = new ArrayList<>();
+        if (page == null || page < 1) {
+            errors.add(new PageNumberIsNotCorrectException(page));
+        }
+        if (size == null || size < 1 || size > 100) {
+            errors.add(new PageSizeIsNotCorrectException(size));
+        }
+        if (errors.isEmpty()) {
+            return Either.right(service.listOfAvailableUrls(page, size));
+        } else {
+            return Either.left(new GetAvailableUrlsError(errors));
+        }
     }
 }

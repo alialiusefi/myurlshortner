@@ -6,14 +6,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
-import org.acme.application.usecases.url.UrlUseCases;
+import org.acme.application.usecases.url.RedirectUserUseCases;
 import org.acme.domain.exceptions.url.GetUrlException;
 
 @Path("/urls")
 public class UrlController {
-    private final UrlUseCases useCases;
+    private final RedirectUserUseCases useCases;
 
-    private UrlController(UrlUseCases useCases) {
+    private UrlController(RedirectUserUseCases useCases) {
         this.useCases = useCases;
     }
 
