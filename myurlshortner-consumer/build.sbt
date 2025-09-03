@@ -20,12 +20,13 @@ lazy val root = project
     publish / skip := true,
     run / fork := true
   )
-
 val zioVersion = "2.1.20"
 val zioKafkaVersion = "3.0.0"
 
+
 lazy val userEventsConsumer = project
   .in(file("myurlshortner-consumer"))
+  .enablePlugins(SbtAvro)
   .settings(
     libraryDependencies ++= Seq(
       "dev.zio"     %% "zio"               % zioVersion,
@@ -41,4 +42,3 @@ lazy val userEventsConsumer = project
     excludeDependencies += "org.scala-lang.modules" % "scala-collection-compat_2.13"
   )
   .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
-
