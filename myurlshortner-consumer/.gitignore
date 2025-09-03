@@ -212,6 +212,7 @@ local.properties
 
 # sbteclipse plugin
 .target
+.bsp
 
 # Tern plugin
 .tern-project
