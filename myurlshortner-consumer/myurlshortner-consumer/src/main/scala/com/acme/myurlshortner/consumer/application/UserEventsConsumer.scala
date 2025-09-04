@@ -18,44 +18,47 @@ import com.acme.events.ShortenedUrlUserEvents
 import org.apache.kafka.common.serialization.StringDeserializer
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
 
-
 object UserEventsConsumer extends ZIOAppDefault {
 
   def run: ZIO[ZIOAppArgs & Scope, Any, Unit] = for {
     config           <- KafkaConfigLoader.getKafkaConfigFromEnv()
     consumerSettings <- prepareConsumerSettings(config)
-    keyDes <- prepareKeyDeserializer()
-    valueDes <- prepareValueDeserializer()
-    consumer <- Consumer.consumeWith(
-        settings = consumerSettings,
-        subscription = Subscription.topics(
-          config.shortenedUrlUserEventsTopic.topic
-        ),
-        keyDeserializer = keyDes,
-        valueDeserializer = valueDes,
-        commitRetryPolicy = Schedule.forever,
-      ) { record => ShortenedUrlUserEventsUseCases.handleUserAccessedShortenedUrl(record.value().userAccessedShortenedUrlEvent)
-      .fold(
-        fail => ZIO.logError(s"${fail}"),
-        success => ZIO.unit
-      )
-      }.fork
-     _ <- consumer.join
+    keyDes           <- prepareKeyDeserializer()
+    valueDes         <- prepareValueDeserializer()
+    consumer         <- Consumer
+                          .consumeWith(
+                            settings = consumerSettings,
+                            subscription = Subscription.topics(
+                              config.shortenedUrlUserEventsTopic.topic
+                            ),
+                            keyDeserializer = keyDes,
+                            valueDeserializer = valueDes,
+                            commitRetryPolicy = Schedule.forever
+                          ) { record =>
+                            ShortenedUrlUserEventsUseCases
+                              .handleUserAccessedShortenedUrl(record.value().userAccessedShortenedUrlEvent)
+                              .fold(
+                                fail => ZIO.logError(s"${fail}"),
+                                success => ZIO.unit
+                              )
+                          }
+                          .fork
+    _                <- consumer.join
   } yield ()
 
   def prepareConsumerSettings(config: KafkaConfig) = ZIO.succeed(
-                          ConsumerSettings(
-                            bootstrapServers = config.bootstrapServers
-                          ).withGroupId(config.consumerGroup)
-                        )
+    ConsumerSettings(
+      bootstrapServers = config.bootstrapServers
+    ).withGroupId(config.consumerGroup)
+  )
 
   def prepareValueDeserializer() = for {
-    map <- KafkaConfigLoader.deserializerConfigMap()
+    map          <- KafkaConfigLoader.deserializerConfigMap()
     deserializer <- Deserializer.fromKafkaDeserializer(AvroKafkaDeserializer[ShortenedUrlUserEvents](), map, false)
   } yield (deserializer)
 
   def prepareKeyDeserializer() = for {
-    map <- KafkaConfigLoader.deserializerConfigMap()
+    map          <- KafkaConfigLoader.deserializerConfigMap()
     deserializer <- Deserializer.fromKafkaDeserializer(StringDeserializer(), map, false)
   } yield (deserializer)
 }

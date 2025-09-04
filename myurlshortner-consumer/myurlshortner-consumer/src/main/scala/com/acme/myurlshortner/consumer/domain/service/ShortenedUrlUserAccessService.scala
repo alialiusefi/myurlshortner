@@ -4,5 +4,5 @@ import com.acme.myurlshortner.consumer.domain.command.SaveShortenedUrlUserAccess
 import zio.ZIO
 
 trait ShortenedUrlUserAccessService {
-    def saveUserAccess(command: SaveShortenedUrlUserAccessCommand): ZIO[Any, Nothing, Unit]
+  def saveUserAccess(command: SaveShortenedUrlUserAccessCommand): ZIO[Any, Nothing, Unit]
 }

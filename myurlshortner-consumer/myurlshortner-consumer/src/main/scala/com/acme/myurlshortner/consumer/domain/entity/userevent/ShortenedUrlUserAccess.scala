@@ -6,9 +6,9 @@ import com.acme.myurlshortner.consumer.domain.entity.useragent.OperatingSystem
 import com.acme.myurlshortner.consumer.domain.entity.useragent.Device
 
 case class ShortenedUrlUserAccess(
-    val browser: BrowserType,
-    val device: Device,
-    val os: OperatingSystem,
-    val shortenedUrl: URI,
-    val originalUrl: URI,
+  val browser: BrowserType,
+  val device: Device,
+  val os: OperatingSystem,
+  val shortenedUrl: URI,
+  val originalUrl: URI
 )
