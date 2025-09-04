@@ -22,20 +22,20 @@ lazy val root = project
   )
 val zioVersion = "2.1.20"
 val zioKafkaVersion = "3.0.0"
-
+val apiCurioSerdesVersion = "2.6.13.Final"
 
 lazy val userEventsConsumer = project
   .in(file("myurlshortner-consumer"))
   .enablePlugins(SbtAvro)
   .settings(
     libraryDependencies ++= Seq(
-      "dev.zio"     %% "zio"               % zioVersion,
-      "dev.zio"     %% "zio-streams"       % zioVersion,
-      "dev.zio"     %% "zio-kafka"         % zioKafkaVersion,
-      "io.apicurio" % "apicurio-registry-serdes-avro-serde" % "2.6.13.Final",
-      "dev.zio"     %% "zio-kafka-testkit" % zioKafkaVersion   % Test,
-      "dev.zio"     %% "zio-test"          % zioVersion        % Test,
-      "dev.zio"     %% "zio-test-sbt"      % zioVersion        % Test
+      "dev.zio"     %% "zio"                                   % zioVersion,
+      "dev.zio"     %% "zio-streams"                           % zioVersion,
+      "dev.zio"     %% "zio-kafka"                             % zioKafkaVersion,
+      "io.apicurio" % "apicurio-registry-serdes-avro-serde"    % apiCurioSerdesVersion,
+      "dev.zio"     %% "zio-kafka-testkit"                     % zioKafkaVersion   % Test,
+      "dev.zio"     %% "zio-test"                              % zioVersion        % Test,
+      "dev.zio"     %% "zio-test-sbt"                          % zioVersion        % Test
     )
   )
   .settings(
