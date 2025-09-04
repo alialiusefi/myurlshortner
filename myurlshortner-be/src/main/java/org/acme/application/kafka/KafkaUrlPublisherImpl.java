@@ -17,9 +17,8 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
     final String hostname;
 
     KafkaUrlPublisherImpl(
-            @Channel("user-accessed-shortened-url") MutinyEmitter<ShortenedUrlUserEvents> emitter,
-            @ConfigProperty(name = "app.hostname")
-            String hostname
+            @Channel("shortened-url-user-events") MutinyEmitter<ShortenedUrlUserEvents> emitter,
+            @ConfigProperty(name = "app.hostname") String hostname
     ) {
         this.emitter = emitter;
         this.hostname = hostname;
