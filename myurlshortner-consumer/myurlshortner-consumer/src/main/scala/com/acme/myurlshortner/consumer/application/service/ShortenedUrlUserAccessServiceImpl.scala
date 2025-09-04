@@ -1,15 +1,15 @@
 package com.acme.myurlshortner.consumer.application.service
 
-import com.acme.myurlshortner.consumer.domain.service.ShortenedUrlUserAccessService
-import com.acme.myurlshortner.consumer.domain.command.SaveShortenedUrlUserAccessCommand
-import zio.ZIO
 import com.acme.myurlshortner.consumer.application.repo.ShortenedUrlUserAccessRepository
+import com.acme.myurlshortner.consumer.domain.command.SaveShortenedUrlUserAccessCommand
 import com.acme.myurlshortner.consumer.domain.entity.useragent._
 import com.acme.myurlshortner.consumer.domain.entity.userevent.ShortenedUrlUserAccess
+import com.acme.myurlshortner.consumer.domain.service.ShortenedUrlUserAccessService
+import zio.ZIO
 
 object ShortenedUrlUserAccessServiceImpl extends ShortenedUrlUserAccessService {
 
-  override def saveUserAccess(command: SaveShortenedUrlUserAccessCommand) = for {
+  override def saveUserAccess(command: SaveShortenedUrlUserAccessCommand): ZIO[Any, Nothing, Unit] = for {
     browser <- ZIO.succeed(
                  command.userAgent match
                    case a if a.contains(MozillaFirefox.userAgentValue) => MozillaFirefox

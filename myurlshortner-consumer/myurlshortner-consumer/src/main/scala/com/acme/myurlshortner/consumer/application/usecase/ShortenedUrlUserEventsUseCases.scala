@@ -1,12 +1,11 @@
 package com.acme.myurlshortner.consumer.application.usecase
 
 import com.acme.events.UserAccessedShortenedUrl
-import zio._
-import java.net.URI
-import zio.Exit.Success
-import zio.Exit.Failure
 import com.acme.myurlshortner.consumer.application.service.ShortenedUrlUserAccessServiceImpl
 import com.acme.myurlshortner.consumer.domain.command.SaveShortenedUrlUserAccessCommand
+import zio._
+
+import java.net.URI
 
 object ShortenedUrlUserEventsUseCases {
 

@@ -1,5 +1,5 @@
 addSbtPlugin("ch.epfl.scala"                     % "sbt-bloop"                 % "1.4.8")
-addSbtPlugin("ch.epfl.scala"                     % "sbt-scalafix"              % "0.9.29")
+addSbtPlugin("ch.epfl.scala"                     % "sbt-scalafix"              % "0.14.3")
 addSbtPlugin("com.eed3si9n"                      % "sbt-buildinfo"             % "0.10.0")
 addSbtPlugin("com.github.cb372"                  % "sbt-explicit-dependencies" % "0.2.15")
 addSbtPlugin("com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings"          % "3.0.0")

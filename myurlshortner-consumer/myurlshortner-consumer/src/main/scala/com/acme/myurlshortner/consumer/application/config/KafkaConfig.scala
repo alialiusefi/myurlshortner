@@ -1,12 +1,8 @@
 package com.acme.myurlshortner.consumer.application.config
 
-import zio.ConfigProvider
-import zio._
-import zio.Exit.Success
-import zio.Exit.Failure
 import io.apicurio.registry.serde.SerdeConfig
 import io.apicurio.registry.serde.avro.AvroKafkaSerdeConfig
-import io.apicurio.registry.serde.avro.ReflectAvroDatumProvider
+import zio._
 
 case class KafkaConfig(
   val bootstrapServers: List[String],
@@ -26,7 +22,7 @@ object KafkaConfigLoader {
   } yield (KafkaConfig(urls, consumerGroup.get, KafkaTopicConfig(shortenedUrlUserEventsTopic.get)))
 
   // https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-configuring-kafka-client-serdes.html
-  def deserializerConfigMap() = for {
+  def deserializerConfigMap(): ZIO[Any, SecurityException, Map[String, String]] = for {
     registryUrl <- System.env("REGISTRY_URL")
     map         <- ZIO.succeed(
                      Map(

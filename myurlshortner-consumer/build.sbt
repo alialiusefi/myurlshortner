@@ -4,7 +4,9 @@ inThisBuild(
     homepage     := Some(url("https://zio.github.io/myurlshortner-consumer/")),
     licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers   := List(),
-    scalaVersion := "3.7.2"
+    scalaVersion := "3.7.2",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
   )
 )
 
@@ -41,3 +43,6 @@ lazy val userEventsConsumer = project
     excludeDependencies += "org.scala-lang.modules" % "scala-collection-compat_2.13"
   )
   .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
+  .settings(
+    scalacOptions += "-Wunused:imports"
+  )

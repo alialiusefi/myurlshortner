@@ -1,22 +1,19 @@
 package com.acme.myurlshortner.consumer.application
 
-import zio._
-import zio.ZIOApp
-import zio.{Scope, ZIO, ZIOAppArgs}
-import zio.ZLayer
-import zio.Executor
-import zio.Runtime
-import zio.ZIOAppDefault
-import zio.kafka.consumer._
-import zio.kafka.consumer.Consumer
-import com.acme.myurlshortner.consumer.application.config.KafkaConfigLoader
-import zio.kafka.serde.Deserializer
-import io.apicurio.registry.serde.avro.AvroKafkaDeserializer
-import scala.caps.consume
-import com.acme.myurlshortner.consumer.application.config.KafkaConfig
 import com.acme.events.ShortenedUrlUserEvents
-import org.apache.kafka.common.serialization.StringDeserializer
+import com.acme.myurlshortner.consumer.application.config.KafkaConfig
+import com.acme.myurlshortner.consumer.application.config.KafkaConfigLoader
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
+import io.apicurio.registry.serde.avro.AvroKafkaDeserializer
+import org.apache.kafka.common.serialization.StringDeserializer
+import zio.Scope
+import zio.ZIO
+import zio.ZIOAppArgs
+import zio.ZIOAppDefault
+import zio._
+import zio.kafka.consumer.Consumer
+import zio.kafka.consumer._
+import zio.kafka.serde.Deserializer
 
 object UserEventsConsumer extends ZIOAppDefault {
 
@@ -46,18 +43,18 @@ object UserEventsConsumer extends ZIOAppDefault {
     _                <- consumer.join
   } yield ()
 
-  def prepareConsumerSettings(config: KafkaConfig) = ZIO.succeed(
+  def prepareConsumerSettings(config: KafkaConfig): ZIO[Any, Nothing, ConsumerSettings] = ZIO.succeed(
     ConsumerSettings(
       bootstrapServers = config.bootstrapServers
     ).withGroupId(config.consumerGroup)
   )
 
-  def prepareValueDeserializer() = for {
+  def prepareValueDeserializer(): ZIO[Any, Throwable, Deserializer[Any, ShortenedUrlUserEvents]] = for {
     map          <- KafkaConfigLoader.deserializerConfigMap()
     deserializer <- Deserializer.fromKafkaDeserializer(AvroKafkaDeserializer[ShortenedUrlUserEvents](), map, false)
   } yield (deserializer)
 
-  def prepareKeyDeserializer() = for {
+  def prepareKeyDeserializer(): ZIO[Any, Throwable, Deserializer[Any, String]] = for {
     map          <- KafkaConfigLoader.deserializerConfigMap()
     deserializer <- Deserializer.fromKafkaDeserializer(StringDeserializer(), map, false)
   } yield (deserializer)
