@@ -44,5 +44,5 @@ lazy val userEventsConsumer = project
   )
   .settings(testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"))
   .settings(
-    scalacOptions += "-Wunused:imports"
+    scalacOptions += "-Wunused:imports" // required by OrganizeImports
   )
