@@ -19,9 +19,10 @@ object UserEventsConsumer extends ZIOAppDefault {
 
   def run: ZIO[ZIOAppArgs & Scope, Any, Unit] = for {
     config           <- KafkaConfigLoader.getKafkaConfigFromEnv()
+    desConfigMap     <- KafkaConfigLoader.deserializerConfigMap()
     consumerSettings <- prepareConsumerSettings(config)
-    keyDes           <- prepareKeyDeserializer()
-    valueDes         <- prepareValueDeserializer()
+    keyDes           <- prepareKeyDeserializer(desConfigMap)
+    valueDes         <- prepareValueDeserializer(desConfigMap)
     consumer         <- Consumer
                           .consumeWith(
                             settings = consumerSettings,
@@ -49,13 +50,14 @@ object UserEventsConsumer extends ZIOAppDefault {
     ).withGroupId(config.consumerGroup)
   )
 
-  def prepareValueDeserializer(): ZIO[Any, Throwable, Deserializer[Any, ShortenedUrlUserEvents]] = for {
-    map          <- KafkaConfigLoader.deserializerConfigMap()
-    deserializer <- Deserializer.fromKafkaDeserializer(AvroKafkaDeserializer[ShortenedUrlUserEvents](), map, false)
+  def prepareValueDeserializer(
+    configMap: Map[String, String]
+  ): ZIO[Any, Throwable, Deserializer[Any, ShortenedUrlUserEvents]] = for {
+    deserializer <-
+      Deserializer.fromKafkaDeserializer(AvroKafkaDeserializer[ShortenedUrlUserEvents](), configMap, false)
   } yield (deserializer)
 
-  def prepareKeyDeserializer(): ZIO[Any, Throwable, Deserializer[Any, String]] = for {
-    map          <- KafkaConfigLoader.deserializerConfigMap()
-    deserializer <- Deserializer.fromKafkaDeserializer(StringDeserializer(), map, false)
+  def prepareKeyDeserializer(configMap: Map[String, String]): ZIO[Any, Throwable, Deserializer[Any, String]] = for {
+    deserializer <- Deserializer.fromKafkaDeserializer(StringDeserializer(), configMap, false)
   } yield (deserializer)
 }
