@@ -4,12 +4,12 @@ import com.acme.myurlshortner.consumer.application.repo.ShortenedUrlUserAccessRe
 import com.acme.myurlshortner.consumer.domain.command.SaveShortenedUrlUserAccessCommand
 import com.acme.myurlshortner.consumer.domain.entity.useragent._
 import com.acme.myurlshortner.consumer.domain.entity.userevent.ShortenedUrlUserAccess
-import com.acme.myurlshortner.consumer.domain.service.ShortenedUrlUserAccessService
+import com.acme.myurlshortner.consumer.domain.service.ShortenedUrlUserEventsService
 import zio.ZIO
 
-object ShortenedUrlUserAccessServiceImpl extends ShortenedUrlUserAccessService {
+object ShortenedUrlUserEventsServiceImpl extends ShortenedUrlUserEventsService {
 
-  override def saveUserAccess(command: SaveShortenedUrlUserAccessCommand): ZIO[Any, Nothing, Unit] = for {
+  override def saveUserAccess(command: SaveShortenedUrlUserAccessCommand): ZIO[Any, Nothing, ShortenedUrlUserAccess] = for {
     browser <- ZIO.succeed(
                  command.userAgent match
                    case a if a.contains(MozillaFirefox.userAgentValue) => MozillaFirefox
@@ -32,14 +32,17 @@ object ShortenedUrlUserAccessServiceImpl extends ShortenedUrlUserAccessService {
                    case c if c.contains(Linux.userAgentValue)     => Linux
                    case d                                         => OtherOS
                )
-    _       <- ShortenedUrlUserAccessRepository.saveShortenedUrlUserAccess(
-                 ShortenedUrlUserAccess(
+    userAccess <- ZIO.succeed(
+      ShortenedUrlUserAccess(
                    browser = browser,
                    device = device,
                    os = os,
                    shortenedUrl = command.shortenedUrl,
                    originalUrl = command.originalUrl
                  )
+      )
+    _       <- ShortenedUrlUserAccessRepository.saveShortenedUrlUserAccess(
+                 userAccess
                )
-  } yield (ZIO.unit)
+  } yield (userAccess)
 }

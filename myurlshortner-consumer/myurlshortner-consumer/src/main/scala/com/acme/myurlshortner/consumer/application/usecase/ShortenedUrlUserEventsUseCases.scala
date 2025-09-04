@@ -1,7 +1,7 @@
 package com.acme.myurlshortner.consumer.application.usecase
 
 import com.acme.events.UserAccessedShortenedUrl
-import com.acme.myurlshortner.consumer.application.service.ShortenedUrlUserAccessServiceImpl
+import com.acme.myurlshortner.consumer.application.service.ShortenedUrlUserEventsServiceImpl
 import com.acme.myurlshortner.consumer.domain.command.SaveShortenedUrlUserAccessCommand
 import zio._
 
@@ -13,7 +13,7 @@ object ShortenedUrlUserEventsUseCases {
     originalUrl  <- ZIO.attempt(URI.create(event.original_url.toString()))
     shortenedUrl <- ZIO.attempt(URI.create(event.shortened_url.toString()))
     userAgent    <- ZIO.succeed(event.user_agent.toString())
-    _            <- ShortenedUrlUserAccessServiceImpl.saveUserAccess(
+    _            <- ShortenedUrlUserEventsServiceImpl.saveUserAccess(
                       SaveShortenedUrlUserAccessCommand(userAgent, originalUrl, shortenedUrl)
                     )
   } yield (ZIO.unit)
