@@ -10,7 +10,6 @@ import com.acme.myurlshortner.consumer.domain.entity.userevent.ShortenedUrlUserA
 object ShortenedUrlUserAccessServiceImpl extends ShortenedUrlUserAccessService {
 
   override def saveUserAccess(command: SaveShortenedUrlUserAccessCommand) = for {
-    _       <- ZIO.logInfo(s"${command}")
     browser <- ZIO.succeed(
                  command.userAgent match
                    case a if a.contains(MozillaFirefox.userAgentValue) => MozillaFirefox
