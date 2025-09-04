@@ -25,6 +25,7 @@ object KafkaConfigLoader {
     shortenedUrlUserEventsTopic <- System.env("SHORTENED_URL_USER_EVENTS_TOPIC")
   } yield (KafkaConfig(urls, consumerGroup.get, KafkaTopicConfig(shortenedUrlUserEventsTopic.get)))
 
+  // https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-configuring-kafka-client-serdes.html
   def deserializerConfigMap() = for {
     registryUrl <- System.env("REGISTRY_URL")
     map         <- ZIO.succeed(

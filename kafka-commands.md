@@ -48,7 +48,11 @@ curl -X POST http://localhost:8901/apis/registry/v3/groups/com.acme.events/artif
 }'
 ```
 
-- Create nested schema 
-- https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-managing-registry-artifacts-api.html#managing-artifact-versions-using-rest-api_registry
-- https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-configuring-kafka-client-serdes.html
-- localhost:8888 for UI registry
+- Create nested schema
+
+- https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-managing-registry-artifacts-ui.html
+
+UI Registry
+```http
+http://localhost:8888
+```
