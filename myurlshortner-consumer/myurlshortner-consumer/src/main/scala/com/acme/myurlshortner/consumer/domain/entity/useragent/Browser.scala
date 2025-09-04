@@ -1,11 +1,12 @@
 package com.acme.myurlshortner.consumer.domain.entity.useragent
 
-sealed trait BrowserType(
+// Data Type with is-a relationship
+sealed abstract class BrowserType(
   val value: String,
-  val userAgentValue: String
-) {}
+  val userAgentValue: String | Nothing
+)
 
-object MozillaFirefox extends BrowserType("Mozilla Firefox", "Firefox") {}
-object Chrome         extends BrowserType("Google Chrome", "Chrome")    {}
-object Safari         extends BrowserType("Safari", "Safari")           {}
-object OtherBrowser   extends BrowserType("Other", "")                  {}
+case object MozillaFirefox extends BrowserType("Mozilla Firefox", "Firefox")
+case object Chrome         extends BrowserType("Google Chrome", "Chrome")    
+case object Safari         extends BrowserType("Safari", "Safari")           
+case object OtherBrowser   extends BrowserType("Other", null)                 

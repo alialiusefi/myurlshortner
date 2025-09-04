@@ -1,9 +1,12 @@
 package com.acme.myurlshortner.consumer.domain.entity.useragent
 
-sealed trait Device(val value: String, val userAgentValue: String)
+sealed trait Device(
+    val value: String,
+    val userAgentValue: String | Nothing
+)
 
-object PC      extends Device("", "")
-object Mac     extends Device("Macintosh", "CPU OS")
-object iPad    extends Device("iPad", "CPU iPad")
-object iPhone  extends Device("iPhone", "CPU iPhone")
-object Android extends Device("Android", "Android")
+case object PC      extends Device("PC", null)
+case object Mac     extends Device("Macintosh", "CPU OS")
+case object iPad    extends Device("iPad", "CPU iPad")
+case object iPhone  extends Device("iPhone", "CPU iPhone")
+case object Android extends Device("Android", "Android")
