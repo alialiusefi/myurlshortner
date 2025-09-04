@@ -1,22 +1,27 @@
 package org.acme.application.kafka;
 
+import com.acme.events.ShortenedUrlUserEvents;
 import com.acme.events.UserAccessedShortenedUrl;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.inject.Singleton;
 import org.acme.domain.ShortenedUrl;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
 
 @IfBuildProfile(anyOf = {"dev", "prod"})
 @Singleton
 public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
-    final MutinyEmitter<UserAccessedShortenedUrl> emitter;
+    final MutinyEmitter<ShortenedUrlUserEvents> emitter;
+    final String hostname;
 
     KafkaUrlPublisherImpl(
-            @Channel("user-accessed-shortened-url") MutinyEmitter<UserAccessedShortenedUrl> emitter
+            @Channel("shortened-url-user-events") MutinyEmitter<ShortenedUrlUserEvents> emitter,
+            @ConfigProperty(name = "app.hostname") String hostname
     ) {
         this.emitter = emitter;
+        this.hostname = hostname;
     }
 
     @Override
@@ -27,9 +32,9 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
         var event = UserAccessedShortenedUrl.newBuilder()
                 .setOriginalUrl(shortenedUrl.getOriginalUrl().toString())
                 .setUserAgent(userAgent)
-                .setUniqueIdentifier(shortenedUrl.getPublicIdentifier())
+                .setShortenedUrl(shortenedUrl.shortenedUrl(hostname))
                 .build();
 
-        emitter.sendAndAwait(event);
+        emitter.sendAndAwait(ShortenedUrlUserEvents.newBuilder().setUserAccessedShortenedUrlEvent(event).build());
     }
 }
