@@ -1,6 +1,5 @@
 package com.acme.myurlshortner.consumer.domain.entity.useragent
 
-// User-Agent: Mozilla/5.0 (<system-information>) <platform> (<platform-details>) <extensions>
 sealed trait BrowserType(
   val value: String,
   val userAgentValue: String
