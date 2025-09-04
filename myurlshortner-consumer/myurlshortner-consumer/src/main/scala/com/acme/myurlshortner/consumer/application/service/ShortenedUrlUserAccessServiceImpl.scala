@@ -27,9 +27,9 @@ object ShortenedUrlUserAccessServiceImpl extends ShortenedUrlUserAccessService {
                )
     os      <- ZIO.succeed(
                  command.userAgent match
-                   case a if a.contains(Windows.value)   => Windows
-                   case b if b.contains(Macintosh.value) => Macintosh
-                   case c if c.contains(Linux.value)     => Linux
+                   case a if a.contains(Windows.userAgentValue)   => Windows
+                   case b if b.contains(Macintosh.userAgentValue) => Macintosh
+                   case c if c.contains(Linux.userAgentValue)     => Linux
                    case d                                => OtherOS
                )
     _       <- ShortenedUrlUserAccessRepository.saveShortenedUrlUserAccess(
