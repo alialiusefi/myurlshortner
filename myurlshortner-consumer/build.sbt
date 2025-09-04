@@ -2,7 +2,7 @@ inThisBuild(
   List(
     organization := "com.acme",
     homepage     := Some(url("https://zio.github.io/myurlshortner-consumer/")),
-    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    licenses     := List(),
     developers   := List(),
     scalaVersion := "3.7.2",
     semanticdbEnabled := true,

@@ -1,4 +1,0 @@
-sbt linguist-vendored
-website/* linguist-vendored
-docs/* linguist-vendored
-
