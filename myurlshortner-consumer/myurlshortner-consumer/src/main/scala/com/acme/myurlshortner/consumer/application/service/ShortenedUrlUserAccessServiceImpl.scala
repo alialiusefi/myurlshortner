@@ -30,7 +30,7 @@ object ShortenedUrlUserAccessServiceImpl extends ShortenedUrlUserAccessService {
                    case a if a.contains(Windows.userAgentValue)   => Windows
                    case b if b.contains(Macintosh.userAgentValue) => Macintosh
                    case c if c.contains(Linux.userAgentValue)     => Linux
-                   case d                                => OtherOS
+                   case d                                         => OtherOS
                )
     _       <- ShortenedUrlUserAccessRepository.saveShortenedUrlUserAccess(
                  ShortenedUrlUserAccess(

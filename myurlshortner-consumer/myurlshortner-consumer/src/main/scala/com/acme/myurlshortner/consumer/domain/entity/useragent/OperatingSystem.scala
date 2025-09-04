@@ -2,7 +2,7 @@ package com.acme.myurlshortner.consumer.domain.entity.useragent
 
 sealed trait OperatingSystem(
   val value: String,
-  val userAgentValue: String | Nothing,
+  val userAgentValue: String | Nothing
 )
 
 case object Windows   extends OperatingSystem("Windows", "Windows")

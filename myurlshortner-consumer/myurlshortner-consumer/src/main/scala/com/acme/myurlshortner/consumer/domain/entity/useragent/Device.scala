@@ -1,8 +1,8 @@
 package com.acme.myurlshortner.consumer.domain.entity.useragent
 
 sealed trait Device(
-    val value: String,
-    val userAgentValue: String | Nothing
+  val value: String,
+  val userAgentValue: String | Nothing
 )
 
 case object PC      extends Device("PC", null)

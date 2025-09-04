@@ -7,6 +7,6 @@ sealed abstract class BrowserType(
 )
 
 case object MozillaFirefox extends BrowserType("Mozilla Firefox", "Firefox")
-case object Chrome         extends BrowserType("Google Chrome", "Chrome")    
-case object Safari         extends BrowserType("Safari", "Safari")           
-case object OtherBrowser   extends BrowserType("Other", null)                 
+case object Chrome         extends BrowserType("Google Chrome", "Chrome")
+case object Safari         extends BrowserType("Safari", "Safari")
+case object OtherBrowser   extends BrowserType("Other", null)
