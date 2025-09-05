@@ -40,6 +40,18 @@ services:
       - "8888:8080"
     networks:
       - docker-network
+  postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_URL=postgresql://localhost:5432/postgres
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=safetypassword
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+
 volumes:
   kafka-broker-and-controller-data:
 
