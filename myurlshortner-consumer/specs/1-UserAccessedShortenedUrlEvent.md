@@ -16,7 +16,7 @@ Since this is the first implementation, Codebase has to be prepared:
 - Database schema sql init
 - Database connection config
 - Database connection pool 
-- Scala ZIO Framework
+- ~~Scala ZIO Framework~~ Spring Framework with Kotlin
 - Kafka Consumer Configuration
 - Kafka Consumer
 - Apicurio Registry Deserializer Configuration
