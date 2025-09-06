@@ -4,9 +4,14 @@ import com.acme.myurlshortner.consumer.domain.entity.userevent.ShortenedUrlUserA
 import zio.ZIO
 import zio._
 
-object ShortenedUrlUserAccessRepository {
+class ShortenedUrlUserAccessRepository(
+  //val transactor: DBTransactor
+) {
 
-  def saveShortenedUrlUserAccess(entity: ShortenedUrlUserAccess): ZIO[Any, Nothing, UIO[Unit]] = for {
-    _ <- ZIO.logInfo(s"Saved: ${entity}")
-  } yield (ZIO.unit)
+  def saveShortenedUrlUserAccess(entity: ShortenedUrlUserAccess) = ???
+
+}
+
+object ShortenedUrlUserAccessRepository {
+  def layer : ZLayer[Any, Throwable, ShortenedUrlUserAccessRepository] = ZLayer.succeed(ShortenedUrlUserAccessRepository())
 }

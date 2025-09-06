@@ -1,8 +1,11 @@
 package com.acme.myurlshortner.consumer.application
 
 import com.acme.events.ShortenedUrlUserEvents
+import com.acme.myurlshortner.consumer.application.config.ConnectionPoolConfig
 import com.acme.myurlshortner.consumer.application.config.KafkaConfig
 import com.acme.myurlshortner.consumer.application.config.KafkaConfigLoader
+import com.acme.myurlshortner.consumer.application.repo.ShortenedUrlUserAccessRepository
+import com.acme.myurlshortner.consumer.application.service.ShortenedUrlUserEventsService
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
 import io.apicurio.registry.serde.avro.AvroKafkaDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -17,7 +20,9 @@ import zio.kafka.serde.Deserializer
 
 object UserEventsConsumer extends ZIOAppDefault {
 
-  def run: ZIO[ZIOAppArgs & Scope, Any, Unit] = for {
+  override def runtime: Runtime[Any]          = Runtime.default
+  def run: ZIO[Scope & ZIOAppArgs, Any, Unit] = (for {
+    useCases         <- ZIO.service[ShortenedUrlUserEventsUseCases]
     config           <- KafkaConfigLoader.getKafkaConfigFromEnv()
     desConfigMap     <- KafkaConfigLoader.deserializerConfigMap()
     consumerSettings <- prepareConsumerSettings(config)
@@ -33,7 +38,7 @@ object UserEventsConsumer extends ZIOAppDefault {
                             valueDeserializer = valueDes,
                             commitRetryPolicy = Schedule.forever
                           ) { record =>
-                            ShortenedUrlUserEventsUseCases
+                            useCases
                               .handleUserAccessedShortenedUrl(record.value().userAccessedShortenedUrlEvent)
                               .fold(
                                 fail => ZIO.logError(s"${fail}"),
@@ -42,7 +47,12 @@ object UserEventsConsumer extends ZIOAppDefault {
                           }
                           .fork
     _                <- consumer.join
-  } yield ()
+  } yield ()).provideSome[Scope](
+    ShortenedUrlUserEventsUseCases.layer,
+    ShortenedUrlUserEventsService.layer,
+    ShortenedUrlUserAccessRepository.layer,
+    ConnectionPoolConfig.layer
+  )
 
   def prepareConsumerSettings(config: KafkaConfig): ZIO[Any, Nothing, ConsumerSettings] = ZIO.succeed(
     ConsumerSettings(
