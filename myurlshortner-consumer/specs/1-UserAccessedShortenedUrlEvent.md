@@ -31,4 +31,4 @@ Since this is the first implementation, Codebase has to be prepared:
 - User OS
 - ShortenedUrl
 - OriginalUrl
-
+- AccessedAt
