@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myurlshortner-be
+  labels:
+    app: myurlshortner-be
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myurlshortner-be
+  template:
+    metadata:
+      labels:
+        app: myurlshortner-be
+    spec:
+      containers:
+        - name: myurlshortner-be
+          image: alialiusefi/myurlshortner-be:1.0.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: REGISTRY_URL
+              value: "http://to-be-defined:8080"
+            - name: KAFKA_SERVERS
+              value: "to-be-defined:9094"
+            - name: JAVA_OPTS_APPEND
+              value: "-Dquarkus.profile=prod -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /q/health/live
+              port: 8080
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /q/health/ready
+              port: 8080
