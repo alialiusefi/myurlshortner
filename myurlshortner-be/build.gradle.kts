@@ -21,6 +21,8 @@ dependencies {
     implementation(libs.quarkus.apicurioregistry.avro)
     implementation(libs.vavr.core)
     implementation(libs.jspecify.core)
+    implementation(libs.quarkus.health)
+    implementation(libs.quarkus.image.docker)
     testImplementation(libs.quarkus.junit)
     testImplementation(libs.quarkus.restassured)
 }
@@ -39,4 +41,8 @@ tasks.withType<Test> {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.compilerArgs.add("-parameters")
+}
+
+tasks.register("printVersion") {
+    println(project.version)
 }

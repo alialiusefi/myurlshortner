@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myurlshortner-consumer
+  labels:
+    app: myurlshortner-consumer
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myurlshortner-consumer
+  template:
+    metadata:
+      labels:
+        app: myurlshortner-consumer
+    spec:
+      containers:
+        - name: myurlshortner-consumer
+          image: alialiusefi/myurlshortner-consumer:1.0.0
+          ports:
+            - containerPort: 7070
+          env:
+            - name: REGISTRY_URL
+              value: http://to-be-defined:8080/apis/registry/v3
+            - name: KAFKA_SERVERS
+              value: to-be-defined:9094
+            - name: POSTGRES_URL
+              value: jdbc:postgresql://to-be-defined:5432/postgres
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /actuator/health/liveness
+              port: 7070
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /actuator/health/readiness
+              port: 7070

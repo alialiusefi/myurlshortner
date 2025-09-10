@@ -1,4 +1,6 @@
 import org.apache.avro.tool.SpecificCompilerTool
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     kotlin("jvm") version "2.2.0"
@@ -23,6 +25,8 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:1.0.0-rc-1")
     implementation("org.apache.avro:avro:1.12.0")
@@ -58,8 +62,7 @@ buildscript {
 }
 
 val avroCompiledDir = "build/avro-generated"
-
-tasks.register("avroCompile") {
+val avroCompile = tasks.register("avroCompile") {
     inputs.dir("src/main/avro")
     outputs.dir(avroCompiledDir)
     logging.captureStandardOutput(LogLevel.INFO)
@@ -79,4 +82,17 @@ tasks.register("avroCompile") {
 
 java.sourceSets["main"].java {
     srcDir(avroCompiledDir)
+}
+
+tasks.named<KotlinCompile>("compileKotlin") {
+    dependsOn(avroCompile)
+}
+
+tasks.named<BootBuildImage>("bootBuildImage") {
+    imageName = "alialiusefi/myurlshortner-consumer:${project.version}"
+    buildpacks = listOf("paketobuildpacks/amazon-corretto:9", "urn:cnb:builder:paketo-buildpacks/java")
+}
+
+tasks.register("printVersion") {
+    println(project.version)
 }

@@ -1,0 +1,28 @@
+services:
+  be:
+    image: alialiusefi/myurlshortner-be:1.0.0
+    environment:
+      REGISTRY_URL: "http://schema-registry:8080"
+      KAFKA_SERVERS: "kafka-broker-and-controller:9094"
+      JAVA_OPTS_APPEND: "-Dquarkus.profile=dev -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka-broker-and-controller
+      - schema-registry
+    networks:
+      - docker-network
+  consumer:
+    image: alialiusefi/myurlshortner-consumer:1.0.0
+    environment:
+      REGISTRY_URL: "http://schema-registry:8080/apis/registry/v3"
+      KAFKA_SERVERS: "kafka-broker-and-controller:9094"
+      POSTGRES_URL: "jdbc:postgresql://postgres:5432/postgres"
+      spring_profiles_active: "dev"
+    ports:
+      - "7070:8080"
+    depends_on:
+      - kafka-broker-and-controller
+      - schema-registry
+    networks:
+      - docker-network

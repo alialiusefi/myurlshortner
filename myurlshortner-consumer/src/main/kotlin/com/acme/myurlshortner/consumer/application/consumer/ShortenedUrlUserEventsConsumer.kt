@@ -15,6 +15,7 @@ class ShortenedUrlUserEventsConsumer(
 
     @KafkaListener(
         topics = ["shortened-url-events"],
+        autoStartup = "\${app.kafka.enabled}"
     )
     fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
         val record = message.value()
