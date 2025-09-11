@@ -32,9 +32,14 @@ kubernetes-be:
 	kubectl apply -f k8s/myurlshortner-be/prod/deployment.yaml
 kubernetes-consumer: 
 	kubectl apply -f k8s/myurlshortner-consumer/prod/deployment.yaml
-kubernetes: kubernetes-secrets kubernetes-be kubernetes-consumer
+kubernetes-postgres:
+	kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.0.yaml
+	kubectl apply -f k8s/postgres/prod/cluster.yaml
+kuberenetes-apicurio:
+	kubectl apply -f k8s/apicurio-registry/prod/pod.yaml
+	kubectl apply -f k8s/apicurio-registry/prod/service.yaml
+kubernetes: kubernetes-secrets kubernetes-be kubernetes-consumer kubernetes-postgres kuberenetes-apicurio
 
-prod: be-artifact consumer-artifact
-	kubectl apply -f k8s/postgres/prod/secrets.yaml
+prod: be-artifact consumer-artifact kubernetes-secrets kubernetes-postgres kuberenetes-apicurio
 	kubectl apply -f k8s/myurlshortner-be/prod/deployment.yaml
 	kubectl apply -f k8s/myurlshortner-consumer/prod/deployment.yaml

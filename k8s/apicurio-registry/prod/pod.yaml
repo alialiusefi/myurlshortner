@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apicurio-registry
+spec:
+  containers:
+  - name: apicurio-registry
+    image: apicurio/apicurio-registry:3.0.12
+    ports:
+      - containerPort: 8888
+    env:
+    - name: APICURIO_STORAGE_KIND
+      value: sql
+    - name: APICURIO_STORAGE_SQL_KIND
+      value: postgresql
+    - name: APICURIO_DATASOURCE_URL
+      value: jdbc:postgresql://postgres-rw:5432/apicurio
+    - name: APICURIO_DATASOURCE_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: db-secret
+          key: username
+    - name: APICURIO_DATASOURCE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: db-secret
+          key: password
+    - name: QUARKUS_HTTP_PORT
+      value: "8888"
+    - name: QUARKUS_HTTP_CORS_ORIGINS
+      value: http://localhost:8080
+  - name: apicurio-registry-ui
+    image: apicurio/apicurio-registry-ui:3.0.12
+    ports:
+      - containerPort: 8080
+    env:
+    - name: REGISTRY_API_URL
+      value: http://localhost:8888/apis/registry/v3

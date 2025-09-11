@@ -22,7 +22,7 @@ spec:
             - containerPort: 7070
           env:
             - name: REGISTRY_URL
-              value: http://to-be-defined:8080/apis/registry/v3
+              value: http://apicurio-service:8888/apis/registry/v3
             - name: KAFKA_SERVERS
               value: to-be-defined:9094
             - name: POSTGRES_URL
