@@ -13,3 +13,5 @@ spec:
       owner: myurlshortner
       secret:
         name: db-secret
+      postInitSQL:
+        - create database apicurio owner myurlshortner

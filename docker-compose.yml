@@ -30,6 +30,12 @@ services:
       - kafka-broker-and-controller
     networks:
       - docker-network
+    environment:
+      APICURIO_STORAGE_KIND: sql
+      APICURIO_STORAGE_SQL_KIND: postgresql
+      APICURIO_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      APICURIO_DATASOURCE_USERNAME: postgres
+      APICURIO_DATASOURCE_PASSWORD: safetypassword
   schema-registry-ui:
     image: apicurio/apicurio-registry-ui:3.0.12
     environment:
