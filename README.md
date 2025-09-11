@@ -39,7 +39,9 @@ This is the FE of the application.
 ## Postgres
 
 This is the database that is shared between backend applications.
-
+- Instance: CloudNativePG
+- Manifest: kubectl apply --server-side -f \
+  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.0.yaml
 ## Kafka
 
 This is the event platform used to handle events in current system. 

@@ -26,9 +26,14 @@ spec:
             - name: KAFKA_SERVERS
               value: to-be-defined:9094
             - name: POSTGRES_URL
-              value: jdbc:postgresql://to-be-defined:5432/postgres
+              value: jdbc:postgresql://postgres-rw:5432/myurlshortner
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
