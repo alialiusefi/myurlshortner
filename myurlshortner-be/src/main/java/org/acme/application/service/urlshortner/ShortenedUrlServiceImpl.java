@@ -49,6 +49,9 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             return Either.left(new ShortenUrlError(errors));
         }
         String uniqueIdentifier = this.generateUniqueIdentifier();
+        if (originalUrl.startsWith("www.")) {
+            originalUrl = "https://" + originalUrl;
+        }
         ShortenedUrl shortUrl = new ShortenedUrl(URI.create(originalUrl), uniqueIdentifier);
         repo.insertShortenedUrl(shortUrl);
         logger.debug("Successfully generated a short url!");

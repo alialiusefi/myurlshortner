@@ -61,13 +61,19 @@ class UrlShortnerControllerIT {
                         "url": "https://www.example.com"
                     }
                 """.stripIndent();
-        given()
+        var shortenedUrl = given()
                 .body(body)
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/shorten")
                 .then()
                 .statusCode(201)
-                .body("shortened_url", Matchers.startsWith("http://localhost/goto/"));
+                .body("shortened_url", Matchers.startsWith("http://localhost/goto/"))
+                .extract().body().jsonPath().getString("shortened_url");
+        var uid = shortenedUrl.substring(shortenedUrl.lastIndexOf("/") + 1);
+        var getShortenedUrl = repo.getShortenedUrl(uid);
+
+        assertThat("Shortened url exists", getShortenedUrl != null);
+        assertThat("Starts with https", getShortenedUrl.getOriginalUrl().toString().startsWith("https"));
     }
 }
