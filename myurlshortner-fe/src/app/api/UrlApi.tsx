@@ -12,7 +12,9 @@ export async function getOriginalUrl(
       return new GetOriginalUrlResponse(originalUrl);
     }
     console.error(`Unexpected response code from BE: ${response.status}`);
-  });
+  }).catch(
+    e => console.error(`Uncaught exception: ${e}`)
+  ).then(() => null);
 }
 
 export class GetOriginalUrlResponse {
