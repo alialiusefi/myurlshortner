@@ -2,7 +2,7 @@
 import shortenUrlOperaton, {
   ShortenUrlResponse,
 } from "../../app/api/UrlShortnerApi";
-import {ErrorResponse} from "../../app/api/Errors";
+import { ErrorResponse } from "../../app/api/Errors";
 import Button from "@mui/material/Button";
 import Input from "@mui/material/Input";
 import InputLabel from "@mui/material/InputLabel";
@@ -57,20 +57,25 @@ export default function ShortenUrlForm() {
     };
     return (
       <Dialog
-        data-testid='success-dialog'
+        data-testid="success-dialog"
         sx={style}
         open={openModalUrlState}
         onClose={() => setOpenModalUrlState(false)}
       >
         <Grid container sx={{ justifyContent: "center", alignItems: "center" }}>
           <Box padding={2}>
-            <Typography data-testid='title-text' id="modal-modal-title" variant="h6" component="h2">
+            <Typography
+              data-testid="title-text"
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+            >
               Success!
             </Typography>
             <Typography id="modal-modal-description">
               URL:
               <Link
-                data-testid='shortened-url-link'
+                data-testid="shortened-url-link"
                 sx={{ padding: 0.5 }}
                 href={shortenedUrlState.shortenedUrl}
                 underline="hover"
