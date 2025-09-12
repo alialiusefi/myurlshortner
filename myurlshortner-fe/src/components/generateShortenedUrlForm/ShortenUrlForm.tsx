@@ -1,8 +1,8 @@
 "use client";
 import shortenUrlOperaton, {
-  ErrorResponse,
   ShortenUrlResponse,
 } from "../../app/api/UrlShortnerApi";
+import {ErrorResponse} from "../../app/api/Errors";
 import Button from "@mui/material/Button";
 import Input from "@mui/material/Input";
 import InputLabel from "@mui/material/InputLabel";
