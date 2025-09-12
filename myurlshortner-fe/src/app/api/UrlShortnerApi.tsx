@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorResponse } from "./Errors";
+
 export default async function shortenUrlOperaton(
   url: string,
 ): Promise<ShortenUrlResponse | ErrorResponse> {
@@ -43,23 +45,5 @@ export class ShortenUrlResponse {
 
   constructor(url: string) {
     this.shortened_url = url;
-  }
-}
-
-export class ErrorResponse {
-  errors: [Error];
-
-  constructor(errors: [Error]) {
-    this.errors = errors;
-  }
-}
-
-export class Error {
-  code: string;
-  message: string;
-
-  constructor(code: string, message: string) {
-    this.code = code;
-    this.message = message;
   }
 }
