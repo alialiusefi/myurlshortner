@@ -39,7 +39,7 @@ public class UrlController {
                 ),
 
                 success -> Response.status(Response.Status.TEMPORARY_REDIRECT)
-                        .location(success)
+                        .header("Location", success.toString())
                         .build()
         );
     }
