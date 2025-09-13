@@ -7,13 +7,15 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.OffsetDateTime;
+
 @Singleton
 @IfBuildProfile(anyOf = {"local", "test"})
 public class KafkaUrlPublisherLocal implements KafkaUrlPublisher {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public void publishUserAccessedShortenedUrl(@NonNull ShortenedUrl shortenedUrl, @NonNull String userAgent) {
+    public void publishUserAccessedShortenedUrl(@NonNull ShortenedUrl shortenedUrl, @NonNull String userAgent, @NonNull OffsetDateTime accessedAt) {
         logger.info("Message sent successfully!");
     }
 }

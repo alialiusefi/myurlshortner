@@ -8,11 +8,14 @@ import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
 import jakarta.inject.Inject;
 import org.acme.application.controller.url.UrlList;
 import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
+import org.acme.domain.ShortenedUrl;
+import org.acme.domain.repo.SaveShortenedUrlError;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.time.OffsetDateTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,12 +39,14 @@ class UrlShortnerControllerIT {
     JsonPathConfig config = JsonPathConfig.jsonPathConfig().with().jackson2ObjectMapperFactory(factory);
 
     @BeforeEach
-    void cleanup() {
+    void cleanup() throws SaveShortenedUrlError {
         repo.cleanup();
     }
 
     @Test
-    void testGetUrlsEndpoint() {
+    void testGetUrlsEndpoint() throws SaveShortenedUrlError {
+        var datetime = OffsetDateTime.now();
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime));
         var result = given()
                 .when().get("/shortened-urls?page=1&size=10")
                 .then()
@@ -50,7 +55,7 @@ class UrlShortnerControllerIT {
         var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
         assertThat(data, Matchers.not(Matchers.empty()));
         assertThat(data, Matchers.contains(
-                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik")
+                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime)
         ));
     }
 
@@ -71,9 +76,9 @@ class UrlShortnerControllerIT {
                 .body("shortened_url", Matchers.startsWith("http://localhost/goto/"))
                 .extract().body().jsonPath().getString("shortened_url");
         var uid = shortenedUrl.substring(shortenedUrl.lastIndexOf("/") + 1);
-        var getShortenedUrl = repo.getShortenedUrl(uid);
+        var maybeShortenedUrl = repo.getShortenedUrl(uid);
 
-        assertThat("Shortened url exists", getShortenedUrl != null);
-        assertThat("Starts with https", getShortenedUrl.getOriginalUrl().toString().startsWith("https"));
+        assertThat("Shortened url exists", maybeShortenedUrl.isPresent());
+        assertThat("Starts with https", maybeShortenedUrl.get().getOriginalUrl().toString().startsWith("https"));
     }
 }

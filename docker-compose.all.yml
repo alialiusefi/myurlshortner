@@ -5,6 +5,10 @@ services:
       REGISTRY_URL: "http://schema-registry:8080"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"
       JAVA_OPTS_APPEND: "-Dquarkus.profile=dev -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+      POSTGRES_URL: "jdbc:postgresql://postgres:5432/postgres"
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: safetypassword
+      POSTGRES_DB: postgres
     ports:
       - "8080:8080"
     depends_on:

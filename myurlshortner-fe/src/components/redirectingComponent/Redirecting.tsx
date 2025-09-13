@@ -4,7 +4,6 @@ import Grid from "@mui/material/Grid";
 
 export default async function Redirecting(props: { uniqueId: string }) {
   const originalUrl = await getOriginalUrl(props.uniqueId);
-
   if (originalUrl != null) {
     return (
       <Grid

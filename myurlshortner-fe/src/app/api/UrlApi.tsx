@@ -3,21 +3,21 @@ export async function getOriginalUrl(
 ): Promise<GetOriginalUrlResponse | null> {
   return fetch(`http://localhost:8080/urls/${uniqueId}`, {
     redirect: "manual",
-  }).then((response) => {
-    if (response.status == 404) {
+  })
+    .then((response) => {
+      if (response.status == 404) {
+        return null;
+      }
+      if (response.status == 307) {
+        const originalUrl = response.headers.get("Location");
+        return new GetOriginalUrlResponse(originalUrl);
+      }
+      console.error(`Unexpected response code from BE: ${response.status}`);
+    })
+    .catch((e) => {
+      console.error(`Uncaught exception: ${e}`);
       return null;
-    }
-    if (response.status == 307) {
-      const originalUrl = response.headers.get("Location");
-      return new GetOriginalUrlResponse(originalUrl);
-    }
-    console.error(`Unexpected response code from BE: ${response.status}`);
-  }).catch(
-    e => {
-      console.error(`Excpetion caught: ${e}`);
-      return null;
-    }
-  )
+    });
 }
 
 export class GetOriginalUrlResponse {

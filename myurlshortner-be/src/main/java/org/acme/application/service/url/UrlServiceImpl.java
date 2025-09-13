@@ -11,6 +11,7 @@ import org.acme.domain.service.UrlService;
 import org.jspecify.annotations.NonNull;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 @Singleton
@@ -41,9 +42,12 @@ public class UrlServiceImpl implements UrlService {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));
         }
 
-        var shortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
-        if (shortenedUrl != null) {
-            publisher.publishUserAccessedShortenedUrl(shortenedUrl, userAgent);
+        var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
+        var accessedAt = OffsetDateTime.now();
+
+        if (maybeShortenedUrl.isPresent()) {
+            var shortenedUrl = maybeShortenedUrl.get();
+            publisher.publishUserAccessedShortenedUrl(shortenedUrl, userAgent, accessedAt);
             return Either.right(shortenedUrl.getOriginalUrl());
         } else {
             return Either.left(GetUrlError.createFromOperationErrors(new GetUrlException.ShortenedUrlIsNotFound()));

@@ -11,6 +11,7 @@ class UserAccessedShortenedUrlRepoImpl(
 ) : UserAccessedShortenedUrlRepo {
     override fun saveUserAccessedShortenedUrl(access: UserAccessedShortenedUrl) {
         UserAccessedShortenedUrlTable.insert {
+            it[uniqueIdentifier] = access.uniqueIdentifier
             it[browser] = access.browser.toString()
             it[operatingSystem] = access.operatingSystem.toString()
             it[device] = access.device.toString()

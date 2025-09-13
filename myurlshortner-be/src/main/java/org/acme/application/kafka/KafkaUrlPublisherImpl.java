@@ -10,6 +10,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
 
+import java.time.OffsetDateTime;
+
 @IfBuildProfile(anyOf = {"dev", "prod"})
 @Singleton
 public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
@@ -27,12 +29,15 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
     @Override
     public void publishUserAccessedShortenedUrl(
             @NonNull ShortenedUrl shortenedUrl,
-            @NonNull String userAgent
+            @NonNull String userAgent,
+            @NonNull OffsetDateTime accessedAt
     ) {
         var event = UserAccessedShortenedUrl.newBuilder()
                 .setOriginalUrl(shortenedUrl.getOriginalUrl().toString())
                 .setUserAgent(userAgent)
                 .setShortenedUrl(shortenedUrl.shortenedUrl(hostname))
+                .setUniqueIdentifier(shortenedUrl.getPublicIdentifier())
+                .setAccessedAt(accessedAt.toString())
                 .build();
 
         emitter.sendAndAwait(ShortenedUrlUserEvents.newBuilder().setUserAccessedShortenedUrlEvent(event).build());

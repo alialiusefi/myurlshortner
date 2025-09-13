@@ -24,6 +24,7 @@ class ShortenedUrlUserEventsServiceImpl(
     ) {
         repo.saveUserAccessedShortenedUrl(
             UserAccessedShortenedUrl(
+                uniqueIdentifier = command.uniqueIdentifier,
                 originalUrl = command.originalUrl,
                 shortenedUrl = command.shortenedUrl,
                 device = when {

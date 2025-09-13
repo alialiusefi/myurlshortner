@@ -7,6 +7,9 @@
     "next": "^15.3.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "swr": "^2.3.6",
+    "ts-time": "^0.2.1",
+    "ts-time-format": "^0.2.1",
     "webpack": "^5.101.3"
   },
   "scripts": {

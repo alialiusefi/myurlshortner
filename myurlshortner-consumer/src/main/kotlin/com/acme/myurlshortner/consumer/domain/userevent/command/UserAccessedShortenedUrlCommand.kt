@@ -4,6 +4,7 @@ import java.net.URI
 import java.time.OffsetDateTime
 
 data class UserAccessedShortenedUrlCommand(
+    val uniqueIdentifier: String,
     val originalUrl: URI,
     val shortenedUrl: URI,
     val userAgent: String,

@@ -3,9 +3,11 @@ package org.acme.application.service.urlshortner;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.acme.domain.ShortenedUrl;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.ShortenUrlValidationException;
+import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
@@ -43,6 +45,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
+    @Transactional
     public Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(String originalUrl) throws SaveShortenedUrlError {
         List<ShortenUrlValidationException> errors = UrlValidator.validateUrl(originalUrl);
         if (!errors.isEmpty()) {
@@ -59,7 +62,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Tuple2<Long, List<ShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size) {
-        return repo.listAvailableShortenedUrls(page, size);
+    public Tuple2<Long, List<AvailableShortenedUrlWithAccessCount>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending) {
+        return repo.listAvailableShortenedUrls(page, size, isAscending);
     }
 }
