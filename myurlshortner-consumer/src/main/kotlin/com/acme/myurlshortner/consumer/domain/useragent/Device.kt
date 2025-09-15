@@ -7,7 +7,7 @@ sealed class Device {
         this.userAgentValue = userAgentValue
     }
 
-    data object PC : Device("PC")
+    data object PC : Device("Windows")
     data object Mac : Device("Mac")
     data object iPad : Device("iPad")
     data object iPhone : Device("iPhone")
