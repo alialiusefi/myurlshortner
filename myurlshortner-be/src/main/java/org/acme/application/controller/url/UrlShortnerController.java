@@ -39,11 +39,13 @@ public class UrlShortnerController {
     @Produces(APPLICATION_JSON)
     public Response getShortenedUrls(
             @QueryParam("page") Integer page,
-            @QueryParam("size") Integer size
+            @QueryParam("size") Integer size,
+            @QueryParam("order") String order
     ) {
         return this.shortenedUrlUseCases.listAvailableUrls(
                 page,
-                size
+                size,
+                order
         ).fold(
                 error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromApplicationErrors(error.getErrors())).build(),
                 success -> {
@@ -51,8 +53,11 @@ public class UrlShortnerController {
                     var results = success._2.stream()
                             .map(
                                     row -> new UrlList.UrlRow(
-                                            row.getOriginalUrl().toString(),
-                                            row.shortenedUrl(hostname))
+                                            row.shortenedUrl().getOriginalUrl().toString(),
+                                            row.shortenedUrl().shortenedUrl(hostname),
+                                            row.accessCount(),
+                                            row.shortenedUrl().getCreatedAt()
+                                    )
                             ).toList();
                     return Response.ok().entity(new UrlList(results, total)).build();
                 }

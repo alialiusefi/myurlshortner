@@ -1,5 +1,6 @@
 package org.acme.application.controller.url;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record UrlList(
@@ -8,7 +9,9 @@ public record UrlList(
 ) {
     public record UrlRow(
             String url,
-            String shortenedUrl
+            String shortenedUrl,
+            Long accessCount,
+            OffsetDateTime createdAt
     ) {
     }
 }

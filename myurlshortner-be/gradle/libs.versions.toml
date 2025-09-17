@@ -3,7 +3,6 @@
 quarkus = "3.25.3"
 vavr = "0.10.7"
 jspecify = "1.0.0"
-apicurio = "2.6.13.Final"
 
 [libraries]
 quarkus-bom = { module = "io.quarkus.platform:quarkus-bom", version.ref = "quarkus" }
@@ -15,12 +14,15 @@ quarkus-kafka = { module = "io.quarkus:quarkus-messaging-kafka", version.ref = "
 quarkus-apicurioregistry-avro = { module = "io.quarkus:quarkus-apicurio-registry-avro", version.ref = "quarkus" }
 quarkus-health = { module = "io.quarkus:quarkus-smallrye-health", version.ref = "quarkus" }
 quarkus-image-docker = { module = "io.quarkus:quarkus-container-image-docker", version.ref = "quarkus" }
+quarkus-jdbc-postgres = { module = "io.quarkus:quarkus-jdbc-postgresql", version.ref = "quarkus"}
+quarkus-hibernate = { module = "io.quarkus:quarkus-hibernate-orm-panache", version.ref = "quarkus"}
+quarkus-flyway = { module = "io.quarkus:quarkus-flyway", version.ref = "quarkus"}
 vavr-core = { module = "io.vavr:vavr", version.ref = "vavr" }
 jspecify-core = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 # This groups the above libraries by bundle, to be referneced in gradle.kts
 [bundles]
-quarkus = ["quarkus-bom", "quarkus-health", "quarkus-image-docker", "quarkus-restjackson", "quarkus-arc", "quarkus-junit", "quarkus-restassured", "quarkus-kafka", "quarkus-apicurioregistry-avro"]
+quarkus = ["quarkus-bom", "quarkus-flyway", "quarkus-hibernate", "quarkus-jdbc-postgres", "quarkus-health", "quarkus-image-docker", "quarkus-restjackson", "quarkus-arc", "quarkus-junit", "quarkus-restassured", "quarkus-kafka", "quarkus-apicurioregistry-avro"]
 vavr = ["vavr-core"]
 jspecify = ["jspecify-core"]
 

@@ -4,6 +4,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./ui/theme";
 import "./ui/global.css";
+import MyUrlShorterAppBar from "components/appbar/MyUrlShortnerAppBar";
 
 export default function RootLayout({
   children,
@@ -14,7 +15,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme}>
+            <MyUrlShorterAppBar />
+            {children}
+          </ThemeProvider>
           <CssBaseline />
         </AppRouterCacheProvider>
       </body>

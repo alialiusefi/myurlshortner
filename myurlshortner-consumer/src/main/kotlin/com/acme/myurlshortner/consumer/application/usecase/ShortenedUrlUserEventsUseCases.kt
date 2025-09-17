@@ -16,6 +16,7 @@ class ShortenedUrlUserEventsUseCases(
         event: UserAccessedShortenedUrl,
     ) {
         val command = UserAccessedShortenedUrlCommand(
+            uniqueIdentifier = event.uniqueIdentifier,
             originalUrl = URI.create(event.originalUrl),
             shortenedUrl = URI.create(event.shortenedUrl),
             userAgent = event.userAgent,
