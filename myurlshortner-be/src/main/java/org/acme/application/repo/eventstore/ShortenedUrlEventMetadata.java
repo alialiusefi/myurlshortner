@@ -9,17 +9,17 @@ import java.time.OffsetDateTime;
 
 @Embeddable
 public class ShortenedUrlEventMetadata {
-    String artifactId;
-    Integer version;
+    private String artifactId;
+    private Integer version;
 
     @Enumerated(EnumType.STRING)
-    ShortenedUrlRecordType recordName;
+    private ShortenedUrlRecordType recordName;
 
-    OffsetDateTime eventDateTime;
+    private OffsetDateTime eventDateTime;
 
-    OffsetDateTime publishedAt;
+    private OffsetDateTime publishedAt;
 
-    OffsetDateTime processedAt;
+    private OffsetDateTime processedAt;
 
     public ShortenedUrlEventMetadata() {
     }

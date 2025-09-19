@@ -13,12 +13,12 @@ import java.util.UUID;
 @Table(name = "shortened_url_event_store")
 public class ShortenedUrlEventEntity {
     @Id
-    UUID eventId;
-    String uniqueIdentifier;
+    private UUID eventId;
+    private String uniqueIdentifier;
     @Embedded
-    ShortenedUrlEventMetadata metadata;
+    private ShortenedUrlEventMetadata metadata;
     @JdbcTypeCode(SqlTypes.JSON)
-    String event;
+    private String event;
 
     public ShortenedUrlEventEntity() {
     }

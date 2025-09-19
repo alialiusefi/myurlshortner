@@ -80,10 +80,10 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     private ShortenedUrlEventEnvelop<?> toShortenedUrlEvent(ShortenedUrlEventEntity dbEntity) {
         var meta = toEnvelopMetadata(dbEntity.getEventId(), dbEntity.getMetadata());
-        switch (dbEntity.getMetadata().recordName) {
+        switch (dbEntity.getMetadata().getRecordName()) {
             case USER_CREATED_SHORTENED_URL -> {
                 try {
-                    var deserialized = mapper.readValue(dbEntity.event, V4UserCreatedShortenedUrlEvent.class);
+                    var deserialized = mapper.readValue(dbEntity.getEvent(), V4UserCreatedShortenedUrlEvent.class);
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
                             deserialized
