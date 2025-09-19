@@ -8,5 +8,5 @@ flyway -user=postgres -password=safetypassword -url=jdbc:postgresql://localhost:
 ```
 
 ```bash
-flyway -user=postgres -password=safetypassword -url=jdbc:postgresql://localhost:5432/postgres migrate
+flyway -user=postgres -password=safetypassword -url=jdbc:postgresql://localhost:5432/postgres -baselineOnMigrate="true" -baselineVersion=0 migrate
 ```

@@ -1,18 +1,22 @@
 package org.acme.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
 import jakarta.inject.Inject;
 import org.acme.application.controller.url.UrlList;
+import org.acme.application.kafka.KafkaUrlPublisherLocal;
 import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
-import org.acme.domain.ShortenedUrl;
+import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
@@ -28,6 +32,9 @@ class UrlShortnerControllerIT {
 
     @Inject
     ShortenedUrlRepositoryImpl repo;
+
+    @InjectMock
+    KafkaUrlPublisherLocal publisher;
 
     Jackson2ObjectMapperFactory factory = new Jackson2ObjectMapperFactory() {
         @Override
@@ -80,5 +87,6 @@ class UrlShortnerControllerIT {
 
         assertThat("Shortened url exists", maybeShortenedUrl.isPresent());
         assertThat("Starts with https", maybeShortenedUrl.get().getOriginalUrl().toString().startsWith("https"));
+        Mockito.verify(publisher).publishUserCreatedShortenedUrl(Mockito.any(V4UserCreatedShortenedUrlEvent.class));
     }
 }

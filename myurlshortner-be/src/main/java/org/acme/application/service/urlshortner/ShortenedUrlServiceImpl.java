@@ -4,7 +4,11 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-import org.acme.domain.ShortenedUrl;
+import org.acme.application.kafka.KafkaUrlPublisher;
+import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
+import org.acme.domain.command.CreateShortenedUrlCommand;
+import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.ShortenUrlValidationException;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
@@ -24,10 +28,14 @@ import java.util.stream.IntStream;
 @Singleton
 public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     private final ShortenedUrlRepository repo;
+    private final ShortenedUrlEventRepository eventStore;
+    private final KafkaUrlPublisher publisher;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    ShortenedUrlServiceImpl(ShortenedUrlRepository repo) {
+    ShortenedUrlServiceImpl(ShortenedUrlRepository repo, ShortenedUrlEventRepository eventStore, KafkaUrlPublisher publisher) {
         this.repo = repo;
+        this.eventStore = eventStore;
+        this.publisher = publisher;
     }
 
     private String generateUniqueIdentifier() {
@@ -46,7 +54,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     @Transactional
-    public Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(String originalUrl) throws SaveShortenedUrlError {
+    public Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(@NonNull CreateShortenedUrlCommand command) throws SaveShortenedUrlError {
+        var originalUrl = command.originalUrl();
         List<ShortenUrlValidationException> errors = UrlValidator.validateUrl(originalUrl);
         if (!errors.isEmpty()) {
             return Either.left(new ShortenUrlError(errors));
@@ -57,6 +66,13 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         }
         ShortenedUrl shortUrl = new ShortenedUrl(URI.create(originalUrl), uniqueIdentifier);
         repo.insertShortenedUrl(shortUrl);
+        var event = ShortenedUrlEventEnvelopFactory.createV4CreatedShortenUrlEvent(
+                shortUrl.getPublicIdentifier(),
+                shortUrl.getCreatedAt(),
+                shortUrl.getOriginalUrl()
+        );
+        eventStore.insertEvent(event);
+        publisher.publishUserCreatedShortenedUrl(event.getEvent());
         logger.debug("Successfully generated a short url!");
         return Either.right(shortUrl);
     }

@@ -1,4 +1,4 @@
-package org.acme.domain;
+package org.acme.domain.entity;
 
 import java.net.URI;
 import java.time.OffsetDateTime;

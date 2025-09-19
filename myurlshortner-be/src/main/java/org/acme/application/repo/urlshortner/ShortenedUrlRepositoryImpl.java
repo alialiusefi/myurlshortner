@@ -6,7 +6,7 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-import org.acme.domain.ShortenedUrl;
+import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
