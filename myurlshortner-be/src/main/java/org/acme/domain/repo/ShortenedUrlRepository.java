@@ -1,7 +1,7 @@
 package org.acme.domain.repo;
 
 import io.vavr.Tuple2;
-import org.acme.domain.ShortenedUrl;
+import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
 import org.jspecify.annotations.NonNull;
 

@@ -2,7 +2,7 @@ package org.acme.controllers;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import org.acme.domain.ShortenedUrl;
+import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.hamcrest.Matchers;

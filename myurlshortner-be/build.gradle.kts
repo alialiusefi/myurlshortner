@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.quarkus.health)
     implementation(libs.quarkus.image.docker)
     testImplementation(libs.quarkus.junit)
+    testImplementation(libs.quarkus.junit.mockito)
     testImplementation(libs.quarkus.restassured)
 }
 

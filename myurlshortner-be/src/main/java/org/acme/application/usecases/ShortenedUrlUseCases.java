@@ -8,7 +8,8 @@ import org.acme.application.exception.OrderParamIsNotCorrectException;
 import org.acme.application.exception.PageNumberIsNotCorrectException;
 import org.acme.application.exception.PageSizeIsNotCorrectException;
 import org.acme.application.exception.url.GetAvailableUrlsError;
-import org.acme.domain.ShortenedUrl;
+import org.acme.domain.command.CreateShortenedUrlCommand;
+import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
 import org.acme.domain.repo.SaveShortenedUrlError;
@@ -32,7 +33,7 @@ public class ShortenedUrlUseCases {
     public Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(String originalUrl) {
         for (int i = 0; i < 3; i++) {
             try {
-                return service.generateShortenedUrl(originalUrl);
+                return service.generateShortenedUrl(new CreateShortenedUrlCommand(originalUrl));
             } catch (SaveShortenedUrlError e) {
                 logger.warn("Unable to generate url", e);
             }
