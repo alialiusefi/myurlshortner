@@ -3,16 +3,17 @@ package org.acme.application.repo.eventstore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
+import org.acme.domain.events.ShortenedUrlRecordType;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
 import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Singleton
+@ApplicationScoped
 public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedUrlEventEntity> {
     private final ObjectMapper mapper;
 
@@ -22,6 +23,10 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     public Optional<ShortenedUrlEventEnvelop<?>> getShortenedUrlEventByEventId(UUID eventId) {
         return find("eventId = ?1", eventId).firstResultOptional().map(this::toShortenedUrlEvent);
+    }
+
+    public Optional<ShortenedUrlEventEnvelop<?>> getLatestShortenedUrlEventByIdAndType(String uniqueIdentifier, ShortenedUrlRecordType recordType) {
+        return find("uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc limit 1", uniqueIdentifier, recordType).firstResultOptional().map(this::toShortenedUrlEvent);
     }
 
     @Transactional
