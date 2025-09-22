@@ -27,7 +27,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     @Transactional
     public void insertShortenedUrl(@NonNull ShortenedUrl shortenedUrl) throws SaveShortenedUrlError {
         if (this.getShortenedUrl(shortenedUrl.getPublicIdentifier()).isPresent()) {
-            throw new SaveShortenedUrlError(true);
+            throw new SaveShortenedUrlError(shortenedUrl.getPublicIdentifier());
         } else {
             this.persist(
                     toEntity(shortenedUrl)
