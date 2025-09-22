@@ -11,7 +11,7 @@ import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
-import org.acme.domain.events.V5UserUpdatedOriginalUrl;
+import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
@@ -106,7 +106,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                 repo::updateShortenedUrl
         ).map(
                 shortenedUrl -> {
-                    ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrl> event = ShortenedUrlEventEnvelopFactory.createV5UpdatedOriginalUrlEvent(
+                    ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV5UpdatedOriginalUrlEvent(
                             shortenedUrl.getPublicIdentifier(),
                             shortenedUrl.getOriginalUrl(),
                             shortenedUrl.getUpdatedAt()

@@ -4,7 +4,7 @@ import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrl;
+import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class KafkaUrlPublisherLocal implements KafkaUrlPublisher {
     }
 
     @Override
-    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrl event) {
+    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrlEvent event) {
         logger.info("Message sent successfully!");
     }
 }

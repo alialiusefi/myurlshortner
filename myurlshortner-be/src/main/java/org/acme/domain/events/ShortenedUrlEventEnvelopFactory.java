@@ -23,7 +23,7 @@ public class ShortenedUrlEventEnvelopFactory {
         );
     }
 
-    public static ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrl> createV5UpdatedOriginalUrlEvent(
+    public static ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrlEvent> createV5UpdatedOriginalUrlEvent(
             String uniqueIdentifier,
             URI newOriginalUrl,
             OffsetDateTime updatedAt
@@ -37,7 +37,7 @@ public class ShortenedUrlEventEnvelopFactory {
                 updatedAt,
                 now,
                 now,
-                new V5UserUpdatedOriginalUrl(uniqueIdentifier, newOriginalUrl, updatedAt)
+                new V5UserUpdatedOriginalUrlEvent(uniqueIdentifier, newOriginalUrl, updatedAt)
         );
     }
 }

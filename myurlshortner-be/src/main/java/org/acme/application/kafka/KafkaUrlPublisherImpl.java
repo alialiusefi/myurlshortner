@@ -9,7 +9,7 @@ import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.inject.Singleton;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrl;
+import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
@@ -64,7 +64,7 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
     }
 
     @Override
-    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrl event) {
+    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrlEvent event) {
         emitter.sendAndAwait(
                 ShortenedUrlUserEvents.newBuilder()
                         .setUserUpdatedOriginalUrlEvent(

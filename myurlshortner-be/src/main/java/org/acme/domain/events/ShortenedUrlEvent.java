@@ -1,5 +1,5 @@
 package org.acme.domain.events;
 
-public sealed interface ShortenedUrlEvent permits V4UserCreatedShortenedUrlEvent, V5UserUpdatedOriginalUrl {
+public sealed interface ShortenedUrlEvent permits V4UserCreatedShortenedUrlEvent, V5UserUpdatedOriginalUrlEvent {
 
 }

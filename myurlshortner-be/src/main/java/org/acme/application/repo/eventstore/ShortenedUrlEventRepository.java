@@ -7,7 +7,7 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrl;
+import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -44,7 +44,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                     );
 
                 }
-                case V5UserUpdatedOriginalUrl updatedEvent -> {
+                case V5UserUpdatedOriginalUrlEvent updatedEvent -> {
                     var jsonString = mapper.writeValueAsString(updatedEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -104,7 +104,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
                 }
                 case USER_UPDATED_ORIGINAL_URL -> {
-                    var deserialized = mapper.readValue(dbEntity.getEvent(), V5UserUpdatedOriginalUrl.class);
+                    var deserialized = mapper.readValue(dbEntity.getEvent(), V5UserUpdatedOriginalUrlEvent.class);
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
                             deserialized
