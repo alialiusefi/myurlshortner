@@ -30,13 +30,13 @@ public class UrlServiceImpl implements UrlService {
     ) {
         var errors = new ArrayList<GetUrlValidationException>();
         if (uniqueIdentifier.isBlank()) {
-            errors.add(new GetUrlValidationException.UniqueIdentifierCannotBeEmptyValidationExceptionGet());
+            errors.add(new GetUrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
         }
         if (uniqueIdentifier.length() > 10) {
-            errors.add(new GetUrlValidationException.UniqueIdentifierIsTooLongValidationExceptionGet());
+            errors.add(new GetUrlValidationException.UniqueIdentifierIsTooLongValidationException());
         }
         if (userAgent.isBlank()) {
-            errors.add(new GetUrlValidationException.UserAgentCannotBeEmptyValidationExceptionGet());
+            errors.add(new GetUrlValidationException.UserAgentCannotBeEmptyValidationException());
         }
         if (!errors.isEmpty()) {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));

@@ -20,10 +20,10 @@ public class RedirectUserUseCases {
     public Either<GetUrlError, URI> getUrl(String uniqueIdentifier, String userAgent) {
         var errors = new ArrayList<GetUrlValidationException>();
         if (uniqueIdentifier == null || uniqueIdentifier.isBlank()) {
-            errors.add(new GetUrlValidationException.UniqueIdentifierCannotBeEmptyValidationExceptionGet());
+            errors.add(new GetUrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
         }
         if (userAgent == null || userAgent.isBlank()) {
-            errors.add(new GetUrlValidationException.UserAgentCannotBeEmptyValidationExceptionGet());
+            errors.add(new GetUrlValidationException.UserAgentCannotBeEmptyValidationException());
         }
         if (!errors.isEmpty()) {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));
