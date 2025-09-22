@@ -7,6 +7,7 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V5UserUpdatedOriginalUrl;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -29,9 +30,9 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
             throw new IllegalStateException("Event already exists!");
         }
         var embeddedMetadata = toEmbeddedMetadata(envelop.getMetadata());
-        switch (envelop.getEvent()) {
-            case V4UserCreatedShortenedUrlEvent createdEvent -> {
-                try {
+        try {
+            switch (envelop.getEvent()) {
+                case V4UserCreatedShortenedUrlEvent createdEvent -> {
                     var jsonString = mapper.writeValueAsString(createdEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -41,10 +42,22 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                                     jsonString
                             )
                     );
-                } catch (JsonProcessingException e) {
-                    throw new IllegalStateException("Incorrect json provided", e);
+
+                }
+                case V5UserUpdatedOriginalUrl updatedEvent -> {
+                    var jsonString = mapper.writeValueAsString(updatedEvent);
+                    persist(
+                            new ShortenedUrlEventEntity(
+                                    envelop.getMetadata().getEventId(),
+                                    updatedEvent.uniqueIdentifier(),
+                                    embeddedMetadata,
+                                    jsonString
+                            )
+                    );
                 }
             }
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Incorrect json provided", e);
         }
     }
 
@@ -80,19 +93,27 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     private ShortenedUrlEventEnvelop<?> toShortenedUrlEvent(ShortenedUrlEventEntity dbEntity) {
         var meta = toEnvelopMetadata(dbEntity.getEventId(), dbEntity.getMetadata());
-        switch (dbEntity.getMetadata().getRecordName()) {
-            case USER_CREATED_SHORTENED_URL -> {
-                try {
+        try {
+            switch (dbEntity.getMetadata().getRecordName()) {
+                case USER_CREATED_SHORTENED_URL -> {
                     var deserialized = mapper.readValue(dbEntity.getEvent(), V4UserCreatedShortenedUrlEvent.class);
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
                             deserialized
                     );
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+
                 }
+                case USER_UPDATED_ORIGINAL_URL -> {
+                    var deserialized = mapper.readValue(dbEntity.getEvent(), V5UserUpdatedOriginalUrl.class);
+                    return new ShortenedUrlEventEnvelop<>(
+                            meta,
+                            deserialized
+                    );
+                }
+                default -> throw new IllegalStateException("Unsupported event type!");
             }
-            default -> throw new IllegalStateException("Unsupported event type!");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

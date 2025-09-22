@@ -2,6 +2,7 @@ package org.acme.application.kafka;
 
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V5UserUpdatedOriginalUrl;
 import org.jspecify.annotations.NonNull;
 
 import java.time.OffsetDateTime;
@@ -16,5 +17,9 @@ public interface KafkaUrlPublisher {
 
     void publishUserCreatedShortenedUrl(
             @NonNull V4UserCreatedShortenedUrlEvent event
+    );
+
+    void publishUserUpdatedOriginalUrl(
+            @NonNull V5UserUpdatedOriginalUrl event
     );
 }

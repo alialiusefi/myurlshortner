@@ -1,5 +1,6 @@
 package org.acme.domain.repo;
 
+import io.smallrye.common.constraint.NotNull;
 import io.vavr.Tuple2;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
@@ -14,4 +15,7 @@ public interface ShortenedUrlRepository {
     Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier);
 
     Tuple2<Long, List<AvailableShortenedUrlWithAccessCount>> listAvailableShortenedUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending);
+
+    @NotNull
+    ShortenedUrl updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl);
 }

@@ -1,7 +1,9 @@
 package org.acme.domain.service;
 
-import org.acme.domain.exceptions.url.ShortenUrlValidationException;
+import io.vavr.control.Either;
+import org.acme.domain.exceptions.url.UrlValidationException;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,13 +14,16 @@ public class UrlValidator {
     private final static String SEPARATOR = "://";
     private final static String REGEX = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
 
-    public static List<ShortenUrlValidationException> validateUrl(String url) {
+    public static Either<List<UrlValidationException>, URI> validateUrl(String hostname, String url) {
         if (url.isBlank()) {
-            return List.of(new ShortenUrlValidationException.UrlIsEmptyException());
+            return Either.left(List.of(new UrlValidationException.UrlIsEmptyException()));
         }
-        var listOfErrors = new ArrayList<ShortenUrlValidationException>();
+        if (url.startsWith(".")) {
+            return Either.left(List.of(new UrlValidationException.UrlFormatIsNotValid()));
+        }
+        var listOfErrors = new ArrayList<UrlValidationException>();
         if (url.length() > MAX_URL_SIZE) {
-            listOfErrors.add(new ShortenUrlValidationException.UrlIsTooLongException(MAX_URL_SIZE, url.length()));
+            listOfErrors.add(new UrlValidationException.UrlIsTooLongException(MAX_URL_SIZE, url.length()));
         }
 
         String removedHttp = url;
@@ -26,24 +31,45 @@ public class UrlValidator {
             int indexOfSeparator = url.indexOf(SEPARATOR);
             String protocol = url.substring(0, indexOfSeparator);
             if (protocol.isBlank()) {
-                listOfErrors.add(new ShortenUrlValidationException.UrlIsNotHttpException(url));
+                listOfErrors.add(new UrlValidationException.UrlIsNotHttpException(url));
             }
             if (protocol.equals(HTTPS_PREFIX) || protocol.equals(HTTP_PREFIX)) {
                 removedHttp = url.substring(indexOfSeparator + SEPARATOR.length());
             } else {
-                listOfErrors.add(new ShortenUrlValidationException.UrlIsNotHttpException(url));
+                listOfErrors.add(new UrlValidationException.UrlIsNotHttpException(url));
             }
         }
 
         if (removedHttp.isBlank()) {
-            listOfErrors.add(new ShortenUrlValidationException.UrlIsMissingHostNameException(url));
-            return listOfErrors;
+            listOfErrors.add(new UrlValidationException.UrlIsMissingHostNameException(url));
+            return Either.left(listOfErrors);
         }
 
         if (!removedHttp.matches(REGEX)) {
-            listOfErrors.add(new ShortenUrlValidationException.UrlFormatIsNotValid());
+            listOfErrors.add(new UrlValidationException.UrlFormatIsNotValid());
         }
 
-        return listOfErrors;
+        URI originalUrl = URI.create(patchOriginalUrlWithHttps(url));
+        if (originalUrl.getHost().equals(hostname) && originalUrl.getPath().startsWith("/goto")) {
+            listOfErrors.add(new UrlValidationException.UrlFormatIsNotValid());
+        }
+
+        if (!listOfErrors.isEmpty()) {
+            return Either.left(listOfErrors);
+        } else {
+            return Either.right(originalUrl);
+        }
+    }
+
+    private static String patchOriginalUrlWithHttps(String originalUrl) {
+        if (!originalUrl.startsWith(HTTP_PREFIX) && !originalUrl.startsWith(HTTPS_PREFIX)) {
+            if (!originalUrl.startsWith("www.")) {
+                return "https://www." + originalUrl;
+            } else {
+                return "https://" + originalUrl;
+            }
+        } else {
+            return originalUrl;
+        }
     }
 }

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.time.OffsetDateTime;
 
 import static io.restassured.RestAssured.given;
@@ -53,7 +54,7 @@ class UrlShortnerControllerIT {
     @Test
     void testGetUrlsEndpoint() throws SaveShortenedUrlError {
         var datetime = OffsetDateTime.now();
-        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime));
         var result = given()
                 .when().get("/shortened-urls?page=1&size=10")
                 .then()
@@ -88,5 +89,82 @@ class UrlShortnerControllerIT {
         assertThat("Shortened url exists", maybeShortenedUrl.isPresent());
         assertThat("Starts with https", maybeShortenedUrl.get().getOriginalUrl().toString().startsWith("https"));
         Mockito.verify(publisher).publishUserCreatedShortenedUrl(Mockito.any(V4UserCreatedShortenedUrlEvent.class));
+    }
+
+    @Test
+    void testUpdateShortenedUrl() throws SaveShortenedUrlError {
+        var url = "youtube.com";
+        var uid = "abcdefghik";
+        var entity = new ShortenedUrl(URI.create(url), uid);
+        repo.insertShortenedUrl(entity);
+
+        var body = """
+                {
+                    "url": "google.com"
+                }
+                """.stripIndent();
+        given()
+                .body(body)
+                .contentType(ContentType.JSON)
+                .when()
+                .patch(String.format("/shortened-urls/%s", uid))
+                .then()
+                .statusCode(204);
+
+        var found = repo.getShortenedUrl(uid);
+        assertThat("Shortened url exists", found.isPresent());
+        var foundShortenedUrl = found.get();
+        assertThat("Url has changed", !foundShortenedUrl.getOriginalUrl().equals(URI.create("google.com")));
+        assertThat("Updated at has changed", foundShortenedUrl.getUpdatedAt().isAfter(entity.getUpdatedAt()));
+        assertThat("Created at didn't change", foundShortenedUrl.getCreatedAt().isEqual(entity.getCreatedAt()));
+    }
+
+    @Test
+    void testUpdateShortenedUrlNotFound() throws SaveShortenedUrlError {
+        var body = """
+                {
+                    "url": "google.com"
+                }
+                """.stripIndent();
+        given()
+                .body(body)
+                .contentType(ContentType.JSON)
+                .when()
+                .patch("/shortened-urls/abcdabcd12")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void testUpdateShortenedUrlBadRequest() throws SaveShortenedUrlError {
+        var url = "youtube.com";
+        var uid = "abcdefghik";
+        var entity = new ShortenedUrl(URI.create(url), uid);
+        repo.insertShortenedUrl(entity);
+
+        var body = """
+                {
+                    "url": "something"
+                }
+                """.stripIndent();
+        given()
+                .body(body)
+                .contentType(ContentType.JSON)
+                .when()
+                .patch("/shortened-urls/abcdefghik")
+                .then()
+                .statusCode(400);
+        var body2 = """
+                {
+                    "url": ""
+                }
+                """.stripIndent();
+        given()
+                .body(body2)
+                .contentType(ContentType.JSON)
+                .when()
+                .patch("/shortened-urls/abcdefghik")
+                .then()
+                .statusCode(400);
     }
 }
