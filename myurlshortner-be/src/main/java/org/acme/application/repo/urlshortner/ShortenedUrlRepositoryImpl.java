@@ -7,6 +7,7 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import org.acme.application.repo.exception.ShortenedUrlOptimisticLockException;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
 import org.acme.domain.repo.SaveShortenedUrlError;
@@ -102,10 +103,16 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
 
     @Override
     @Transactional
-    public @NotNull ShortenedUrl updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl) {
-        var entity = getSession().merge(toEntity(shortenedUrl));
-        persist(entity);
-        return shortenedUrl;
+    public @NotNull void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
+        var count = update("set originalUrl = ?1, updatedAt = ?2 where uniqueIdentifier = ?3 and updatedAt = ?4",
+                shortenedUrl.getOriginalUrl().toString(),
+                shortenedUrl.getUpdatedAt(),
+                shortenedUrl.getPublicIdentifier(),
+                existingUpdatedAt
+        );
+        if (count != 1) {
+            throw new ShortenedUrlOptimisticLockException(shortenedUrl.getPublicIdentifier(), existingUpdatedAt);
+        }
     }
 
     private ShortenedUrlEntity toEntity(ShortenedUrl from) {

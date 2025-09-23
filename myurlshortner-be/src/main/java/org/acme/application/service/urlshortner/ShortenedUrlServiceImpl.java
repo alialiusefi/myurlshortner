@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -96,15 +97,17 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         if (maybeShortenedUrl.isEmpty()) {
             return Either.left(UpdateOriginalUrlError.createFromOperationError(Optional.of(new UpdateOriginalUrlException.ShortenedUrlIsNotFound())));
         }
-        Either<List<UrlValidationException>, URI> either = UrlValidator.validateUrl(hostname, command.newOriginalUrl());
-        if (either.isLeft()) {
-            return Either.left(UpdateOriginalUrlError.createFromValidationErrors(either.getLeft()));
+        Either<List<UrlValidationException>, URI> urlEither = UrlValidator.validateUrl(hostname, command.newOriginalUrl());
+        if (urlEither.isLeft()) {
+            return Either.left(UpdateOriginalUrlError.createFromValidationErrors(urlEither.getLeft()));
         }
 
-        return Either.right(maybeShortenedUrl.map(
-                url -> url.updateOriginalUrl(either.get())).map(
-                repo::updateShortenedUrl
-        ).map(
+        return Either.right(maybeShortenedUrl.map(url -> {
+            OffsetDateTime existingVersion = url.getUpdatedAt();
+            ShortenedUrl updated = url.updateOriginalUrl(urlEither.get());
+            repo.updateShortenedUrl(updated, existingVersion);
+            return updated;
+        }).map(
                 shortenedUrl -> {
                     ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV5UpdatedOriginalUrlEvent(
                             shortenedUrl.getPublicIdentifier(),
