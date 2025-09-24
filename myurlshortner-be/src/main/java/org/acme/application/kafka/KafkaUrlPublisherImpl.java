@@ -3,11 +3,13 @@ package org.acme.application.kafka;
 import com.acme.events.ShortenedUrlUserEvents;
 import com.acme.events.UserAccessedShortenedUrl;
 import com.acme.events.UserCreatedShortenedUrl;
+import com.acme.events.UserUpdatedOriginalUrl;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.inject.Singleton;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
@@ -58,6 +60,20 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
                                         .build()
                         )
                         .build()
+        );
+    }
+
+    @Override
+    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrlEvent event) {
+        emitter.sendAndAwait(
+                ShortenedUrlUserEvents.newBuilder()
+                        .setUserUpdatedOriginalUrlEvent(
+                                UserUpdatedOriginalUrl.newBuilder()
+                                        .setUniqueIdentifier(event.uniqueIdentifier())
+                                        .setNewOriginalUrl(event.newOriginalUrl().toString())
+                                        .setUpdatedAt(event.updatedAt().toString())
+                                        .build()
+                        ).build()
         );
     }
 }

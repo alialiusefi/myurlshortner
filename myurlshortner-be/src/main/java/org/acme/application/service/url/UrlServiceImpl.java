@@ -5,7 +5,7 @@ import jakarta.inject.Singleton;
 import org.acme.application.kafka.KafkaUrlPublisher;
 import org.acme.domain.exceptions.url.GetUrlError;
 import org.acme.domain.exceptions.url.GetUrlException;
-import org.acme.domain.exceptions.url.UrlValidationException;
+import org.acme.domain.exceptions.url.GetUrlValidationException;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.UrlService;
 import org.jspecify.annotations.NonNull;
@@ -28,15 +28,15 @@ public class UrlServiceImpl implements UrlService {
             @NonNull String uniqueIdentifier,
             @NonNull String userAgent
     ) {
-        var errors = new ArrayList<UrlValidationException>();
+        var errors = new ArrayList<GetUrlValidationException>();
         if (uniqueIdentifier.isBlank()) {
-            errors.add(new UrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
+            errors.add(new GetUrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
         }
         if (uniqueIdentifier.length() > 10) {
-            errors.add(new UrlValidationException.UniqueIdentifierIsTooLongValidationException());
+            errors.add(new GetUrlValidationException.UniqueIdentifierIsTooLongValidationException());
         }
         if (userAgent.isBlank()) {
-            errors.add(new UrlValidationException.UserAgentCannotBeEmptyValidationException());
+            errors.add(new GetUrlValidationException.UserAgentCannotBeEmptyValidationException());
         }
         if (!errors.isEmpty()) {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));

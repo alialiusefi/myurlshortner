@@ -3,14 +3,17 @@ package org.acme.application.usecases;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
+import org.acme.application.controller.url.UpdateOriginalUrlRequest;
 import org.acme.application.exception.ApplicationException;
 import org.acme.application.exception.OrderParamIsNotCorrectException;
 import org.acme.application.exception.PageNumberIsNotCorrectException;
 import org.acme.application.exception.PageSizeIsNotCorrectException;
 import org.acme.application.exception.url.GetAvailableUrlsError;
 import org.acme.domain.command.CreateShortenedUrlCommand;
+import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.exceptions.url.ShortenUrlError;
+import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.service.ShortenedUrlService;
@@ -66,5 +69,11 @@ public class ShortenedUrlUseCases {
         } else {
             return Either.left(new GetAvailableUrlsError(errors));
         }
+    }
+
+    public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(String uniqueIdentifier, UpdateOriginalUrlRequest request) {
+        return service.updateOriginalUrl(
+                new UpdateOriginalUrlCommand(uniqueIdentifier, request.url())
+        );
     }
 }

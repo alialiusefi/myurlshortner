@@ -57,6 +57,10 @@ Authorization:
     {
       "code": "URL_IS_TOO_LONG",
       "details": "The url is too long."
+    },
+    {
+      "code": "URL_CANNOT_BE_A_SHORTENED_URL",
+      "details": "The provided url %s cannot be a shortened url."
     }
   ]
 }

@@ -8,7 +8,7 @@ import java.util.List;
 public class ErrorResponse {
     private List<Error> errors;
 
-    private ErrorResponse(List<Error> errors) {
+    public ErrorResponse(List<Error> errors) {
         this.errors = errors;
     }
 

@@ -1,7 +1,6 @@
 package org.acme.application.repo.urlshortner;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -12,20 +11,19 @@ import java.time.OffsetDateTime;
 @Table(name = "shortened_urls")
 public class ShortenedUrlEntity extends PanacheEntityBase {
     @Id
-    @Column(name = "unique_identifier")
     private String uniqueIdentifier;
-    @Column(name = "original_url")
     private String originalUrl;
-    @Column(name = "created_at")
     private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     public ShortenedUrlEntity() {
     }
 
-    public ShortenedUrlEntity(String uniqueIdentifier, String originalUrl, OffsetDateTime createdAt) {
+    public ShortenedUrlEntity(String uniqueIdentifier, String originalUrl, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.uniqueIdentifier = uniqueIdentifier;
         this.originalUrl = originalUrl;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public String getUniqueIdentifier() {
@@ -50,5 +48,13 @@ public class ShortenedUrlEntity extends PanacheEntityBase {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -3,15 +3,17 @@ package org.acme.application.repo.eventstore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
+import org.acme.domain.events.ShortenedUrlRecordType;
 import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Singleton
+@ApplicationScoped
 public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedUrlEventEntity> {
     private final ObjectMapper mapper;
 
@@ -23,15 +25,19 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         return find("eventId = ?1", eventId).firstResultOptional().map(this::toShortenedUrlEvent);
     }
 
+    public Optional<ShortenedUrlEventEnvelop<?>> getLatestShortenedUrlEventByIdAndType(String uniqueIdentifier, ShortenedUrlRecordType recordType) {
+        return find("uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc limit 1", uniqueIdentifier, recordType).firstResultOptional().map(this::toShortenedUrlEvent);
+    }
+
     @Transactional
     public void insertEvent(ShortenedUrlEventEnvelop<?> envelop) {
         if (count("eventId = ?1", envelop.getMetadata().getEventId()) != 0) {
             throw new IllegalStateException("Event already exists!");
         }
         var embeddedMetadata = toEmbeddedMetadata(envelop.getMetadata());
-        switch (envelop.getEvent()) {
-            case V4UserCreatedShortenedUrlEvent createdEvent -> {
-                try {
+        try {
+            switch (envelop.getEvent()) {
+                case V4UserCreatedShortenedUrlEvent createdEvent -> {
                     var jsonString = mapper.writeValueAsString(createdEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -41,10 +47,22 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                                     jsonString
                             )
                     );
-                } catch (JsonProcessingException e) {
-                    throw new IllegalStateException("Incorrect json provided", e);
+
+                }
+                case V5UserUpdatedOriginalUrlEvent updatedEvent -> {
+                    var jsonString = mapper.writeValueAsString(updatedEvent);
+                    persist(
+                            new ShortenedUrlEventEntity(
+                                    envelop.getMetadata().getEventId(),
+                                    updatedEvent.uniqueIdentifier(),
+                                    embeddedMetadata,
+                                    jsonString
+                            )
+                    );
                 }
             }
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Incorrect json provided", e);
         }
     }
 
@@ -80,19 +98,27 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     private ShortenedUrlEventEnvelop<?> toShortenedUrlEvent(ShortenedUrlEventEntity dbEntity) {
         var meta = toEnvelopMetadata(dbEntity.getEventId(), dbEntity.getMetadata());
-        switch (dbEntity.getMetadata().getRecordName()) {
-            case USER_CREATED_SHORTENED_URL -> {
-                try {
+        try {
+            switch (dbEntity.getMetadata().getRecordName()) {
+                case USER_CREATED_SHORTENED_URL -> {
                     var deserialized = mapper.readValue(dbEntity.getEvent(), V4UserCreatedShortenedUrlEvent.class);
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
                             deserialized
                     );
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+
                 }
+                case USER_UPDATED_ORIGINAL_URL -> {
+                    var deserialized = mapper.readValue(dbEntity.getEvent(), V5UserUpdatedOriginalUrlEvent.class);
+                    return new ShortenedUrlEventEnvelop<>(
+                            meta,
+                            deserialized
+                    );
+                }
+                default -> throw new IllegalStateException("Unsupported event type!");
             }
-            default -> throw new IllegalStateException("Unsupported event type!");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

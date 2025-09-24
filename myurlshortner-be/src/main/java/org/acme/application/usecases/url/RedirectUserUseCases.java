@@ -3,7 +3,7 @@ package org.acme.application.usecases.url;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.domain.exceptions.url.GetUrlError;
-import org.acme.domain.exceptions.url.UrlValidationException;
+import org.acme.domain.exceptions.url.GetUrlValidationException;
 import org.acme.domain.service.UrlService;
 
 import java.net.URI;
@@ -18,12 +18,12 @@ public class RedirectUserUseCases {
     }
 
     public Either<GetUrlError, URI> getUrl(String uniqueIdentifier, String userAgent) {
-        var errors = new ArrayList<UrlValidationException>();
+        var errors = new ArrayList<GetUrlValidationException>();
         if (uniqueIdentifier == null || uniqueIdentifier.isBlank()) {
-            errors.add(new UrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
+            errors.add(new GetUrlValidationException.UniqueIdentifierCannotBeEmptyValidationException());
         }
         if (userAgent == null || userAgent.isBlank()) {
-            errors.add(new UrlValidationException.UserAgentCannotBeEmptyValidationException());
+            errors.add(new GetUrlValidationException.UserAgentCannotBeEmptyValidationException());
         }
         if (!errors.isEmpty()) {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));

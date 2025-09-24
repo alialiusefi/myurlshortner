@@ -4,6 +4,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
+import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -61,6 +62,29 @@ public class UrlShortnerController {
                             ).toList();
                     return Response.ok().entity(new UrlList(results, total)).build();
                 }
+        );
+    }
+
+    @PATCH
+    @Path("/shortened-urls/{uniqueIdentifier}")
+    @Produces(APPLICATION_JSON)
+    public Response updateOriginalUrl(UpdateOriginalUrlRequest request, @PathParam("uniqueIdentifier") String uniqueIdentifier) {
+        return shortenedUrlUseCases.updateOriginalUrl(uniqueIdentifier, request).fold(
+                fail -> {
+                    return fail.operationError().map(
+                            error -> switch (error) {
+                                case UpdateOriginalUrlException.ShortenedUrlIsNotFound notFound ->
+                                        Response.status(Response.Status.NOT_FOUND).build();
+
+                                default -> throw new IllegalStateException("Unexpected value: " + error);
+                            }
+                    ).orElseGet(() ->
+                            Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainErrors(
+                                            fail.validationErrors()
+                                    )
+                            ).build());
+                },
+                success -> Response.status(Response.Status.NO_CONTENT).build()
         );
     }
 }

@@ -19,6 +19,14 @@
           "UserCreatedShortenedUrl"
         ],
         "default": null
+      },
+      {
+        "name": "userUpdatedOriginalUrlEvent",
+        "type": [
+          "null",
+          "UserUpdatedOriginalUrl"
+        ],
+        "default": null
       }
     ]
   },
@@ -73,6 +81,26 @@
       },
       {
         "name": "created_at",
+        "type": "string",
+        "doc": "ISO 8601 Timestamp"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "UserUpdatedOriginalUrl",
+    "namespace": "com.acme.events",
+    "fields": [
+      {
+        "name": "unique_identifier",
+        "type": "string"
+      },
+      {
+        "name": "new_original_url",
+        "type": "string"
+      },
+      {
+        "name": "updated_at",
         "type": "string",
         "doc": "ISO 8601 Timestamp"
       }

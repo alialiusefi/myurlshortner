@@ -16,11 +16,14 @@ public class UrlValidatorTest {
                 "http://",
                 "www.google.com://urlpath://",
                 "www.google.com://",
-                ""
+                "",
+                "example.com/goto/abcdefjhik",
+                "https://example.com/goto/abcdefghik",
+                "https://www.example.com/goto/abcdefghik"
         );
         for (String testCase : testCases) {
-            var errors = UrlValidator.validateUrl(testCase);
-            assertThat("Should have error", !errors.isEmpty());
+            var either = UrlValidator.validateUrl("example.com", testCase);
+            assertThat("Should have error", either.isLeft());
         }
     }
 
@@ -34,8 +37,8 @@ public class UrlValidatorTest {
                 "google.com"
         );
         for (String testCase : testCases) {
-            var errors = UrlValidator.validateUrl(testCase);
-            assertThat("Should not have error", errors.isEmpty());
+            var either = UrlValidator.validateUrl("localhost", testCase);
+            assertThat("Should not have error", either.isRight());
         }
     }
 }
