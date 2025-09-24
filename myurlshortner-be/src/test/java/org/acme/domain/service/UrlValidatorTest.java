@@ -16,10 +16,13 @@ public class UrlValidatorTest {
                 "http://",
                 "www.google.com://urlpath://",
                 "www.google.com://",
-                ""
+                "",
+                "example.com/goto/abcdefjhik",
+                "https://example.com/goto/abcdefghik",
+                "https://www.example.com/goto/abcdefghik"
         );
         for (String testCase : testCases) {
-            var either = UrlValidator.validateUrl("localhost", testCase);
+            var either = UrlValidator.validateUrl("example.com", testCase);
             assertThat("Should have error", either.isLeft());
         }
     }

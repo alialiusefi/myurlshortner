@@ -50,8 +50,8 @@ public class UrlValidator {
         }
 
         URI originalUrl = URI.create(patchOriginalUrlWithHttps(url));
-        if (originalUrl.getHost().equals(hostname) && originalUrl.getPath().startsWith("/goto")) {
-            listOfErrors.add(new UrlValidationException.UrlFormatIsNotValid());
+        if (originalUrl.getHost().contains(hostname) && originalUrl.getPath().startsWith("/goto")) {
+            listOfErrors.add(new UrlValidationException.UrlCannotBeAShortenedUrlException(url));
         }
 
         if (!listOfErrors.isEmpty()) {
