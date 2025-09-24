@@ -11,7 +11,7 @@ public record UpdateOriginalUrlError(
         return new UpdateOriginalUrlError(errors, Optional.empty());
     }
 
-    public static UpdateOriginalUrlError createFromOperationError(Optional<UpdateOriginalUrlException> error) {
-        return new UpdateOriginalUrlError(List.of(), error);
+    public static UpdateOriginalUrlError createFromOperationError(UpdateOriginalUrlException error) {
+        return new UpdateOriginalUrlError(List.of(), Optional.of(error));
     }
 }

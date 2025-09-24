@@ -95,7 +95,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(@NonNull UpdateOriginalUrlCommand command) {
         var maybeShortenedUrl = repo.getShortenedUrl(command.uniqueIdentifier());
         if (maybeShortenedUrl.isEmpty()) {
-            return Either.left(UpdateOriginalUrlError.createFromOperationError(Optional.of(new UpdateOriginalUrlException.ShortenedUrlIsNotFound())));
+            return Either.left(UpdateOriginalUrlError.createFromOperationError(new UpdateOriginalUrlException.ShortenedUrlIsNotFound()));
         }
         Either<List<UrlValidationException>, URI> urlEither = UrlValidator.validateUrl(hostname, command.newOriginalUrl());
         if (urlEither.isLeft()) {
