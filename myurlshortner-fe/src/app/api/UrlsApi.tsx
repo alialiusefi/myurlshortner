@@ -29,7 +29,7 @@ export const GetAvailableUrlsSWR = (
     `http://localhost:8080/shortened-urls?page=${page}&size=${size}&order=${order}`,
     fetcher,
     { refreshInterval: refreshInterval },
-  ).data;
+  );
 };
 
 export class GetAvailableUrlsResponse {

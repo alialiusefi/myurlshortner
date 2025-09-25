@@ -1,5 +1,5 @@
 import Snackbar from "@mui/material/Snackbar";
-import { ErrorResponse } from "app/api/UrlShortnerApi";
+import { ErrorResponse } from "app/api/Errors";
 
 export const apiErrorSnackBar = (errorResponse: ErrorResponse) => {
   const error = errorResponse?.errors[0];

@@ -15,9 +15,11 @@ import ZonedDateTimeFormatter from "ts-time-format/ZonedDateTimeFormatter";
 import Link from "@mui/material/Link";
 import { LOCAL_ZONE_ID } from "ts-time/Zone";
 import ZonedDateTime from "ts-time/ZonedDateTime";
-import { useSearchParams } from "next/navigation";
+import { redirect, RedirectType, useSearchParams } from "next/navigation";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
+import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortenedUrlDialog";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -56,11 +58,10 @@ export default function ShortnetedUrlsTable() {
     1,
   );
   const orderParam = getOrderParam();
-
   const [directonState, setDirectionState] = useState<Direction>(orderParam);
   const [size, setSizeState] = useState(sizeParam);
   const [page, setPageState] = useState(pageParam - 1);
-  const result = GetAvailableUrlsSWR(page + 1, size, directonState);
+  const { data, mutate } = GetAvailableUrlsSWR(page + 1, size, directonState);
   const toggleDirection = () => {
     if (directonState == "desc") {
       setDirectionState("asc");
@@ -68,7 +69,7 @@ export default function ShortnetedUrlsTable() {
       setDirectionState("desc");
     }
   };
-
+  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState(null);
   return (
     <Box>
       <Typography>Browse Shortened Urls:</Typography>
@@ -77,8 +78,8 @@ export default function ShortnetedUrlsTable() {
           <TableHead>
             <TableRow>
               <TableCell>Shortened URL</TableCell>
-              <TableCell>Original URL</TableCell>
               <TableCell>Access Count</TableCell>
+              <TableCell>Original URL</TableCell>
               <TableCell>
                 Created At
                 <TableSortLabel
@@ -87,20 +88,21 @@ export default function ShortnetedUrlsTable() {
                   onClick={toggleDirection}
                 />
               </TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {result?.data.map((one) => (
+            {data?.data.map((one) => (
               <TableRow key={one.shortened_url}>
                 <TableCell>
                   <Link href={one.shortened_url} underline="none">
                     {one.shortened_url}
                   </Link>
                 </TableCell>
+                <TableCell>{one.access_count}</TableCell>
                 <TableCell>
                   <OriginalUrl url={one.url} />
                 </TableCell>
-                <TableCell>{one.access_count}</TableCell>
                 <TableCell>
                   {ZonedDateTimeFormatter.ofPattern(
                     "YYYY-MM-dd HH:mm:ss",
@@ -110,13 +112,37 @@ export default function ShortnetedUrlsTable() {
                     ),
                   )}
                 </TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => {
+                      setCurrentSelectedForEdit(one.shortened_url);
+                    }}
+                  >
+                    <EditIcon />
+                    {currentSelectedForEdit === one.shortened_url ? (
+                      <UpdateShortenedUrlDialog
+                        isOpen={currentSelectedForEdit === one.shortened_url}
+                        uniqueIdentifier={one.shortened_url.substring(
+                          one.shortened_url.indexOf("/goto/") + 6,
+                        )}
+                        originalUrl={one.url}
+                        onClose={() => {
+                          setCurrentSelectedForEdit(null);
+                          mutate({ ...data });
+                        }}
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
-          count={result?.total}
+          count={data?.total}
           rowsPerPage={size}
           page={page}
           onPageChange={(event, page) => {
@@ -134,11 +160,11 @@ export default function ShortnetedUrlsTable() {
 function OriginalUrl(props: { url: string }) {
   const truncate = (url: string, truncate: boolean) => {
     if (url.length > 90 && truncate) {
-      return `${url.substring(0, 90)}...`
+      return `${url.substring(0, 90)}...`;
     } else {
-      return url
+      return url;
     }
-  }
+  };
   const [doTruncateState, doTruncate] = useState<boolean>(true);
   const button = () => {
     if (props.url.length > 90) {
@@ -150,9 +176,9 @@ function OriginalUrl(props: { url: string }) {
         >
           {doTruncateState ? "Extend" : "Hide"}
         </Button>
-      )
+      );
     }
-  }
+  };
   return (
     <Box>
       <Link sx={{ p: 2 }} href={props.url} underline="none">

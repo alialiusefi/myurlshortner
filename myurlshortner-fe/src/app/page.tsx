@@ -1,4 +1,4 @@
-import ShortenUrlForm from "components/generateShortenedUrlForm/ShortenUrlForm";
+import ShortenUrlForm from "components/CreateShortenedUrl/ShortenUrlForm";
 import Grid from "@mui/material/Grid";
 
 export default function Page() {
