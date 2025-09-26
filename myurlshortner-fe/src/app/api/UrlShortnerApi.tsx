@@ -2,7 +2,7 @@
 
 import { ErrorResponse } from "./Errors";
 
-export default async function shortenUrlOperaton(
+export async function shortenUrlOperaton(
   url: string,
 ): Promise<ShortenUrlResponse | ErrorResponse> {
   const request = new ShortenUrlRequest((url = url));
@@ -32,7 +32,47 @@ export default async function shortenUrlOperaton(
   }
 }
 
-export class ShortenUrlRequest {
+export async function updateShortenedUrl(
+  uniqueIdentifier: string,
+  newOriginalUrl: string,
+): Promise<ErrorResponse | null> {
+  const request = new UpdateShortenedUrlRequest(newOriginalUrl);
+  const url = `http://localhost:8080/shortened-urls/${uniqueIdentifier}`;
+  const requestConfig = {
+    method: "PATCH",
+    body: JSON.stringify(request),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  return fetch(url, requestConfig)
+    .then((response) => {
+      if (!response.ok) {
+        console.error(`Unexpected BE response! code: ${response.status}`);
+        return response.json();
+      }
+      return null;
+    })
+    .then((json) => {
+      if (json) {
+        return json as ErrorResponse;
+      }
+      return null;
+    })
+    .catch((e) => {
+      console.error(`Unexpected error! error: ${e}`);
+      return null;
+    });
+}
+
+class UpdateShortenedUrlRequest {
+  url: string;
+  constructor(url: string) {
+    this.url = url;
+  }
+}
+
+class ShortenUrlRequest {
   url: string;
 
   constructor(url: string) {

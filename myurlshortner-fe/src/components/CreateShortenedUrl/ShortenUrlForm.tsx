@@ -1,5 +1,6 @@
 "use client";
-import shortenUrlOperaton, {
+import {
+  shortenUrlOperaton,
   ShortenUrlResponse,
 } from "../../app/api/UrlShortnerApi";
 import { ErrorResponse } from "../../app/api/Errors";
