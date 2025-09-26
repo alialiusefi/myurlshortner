@@ -1,4 +1,5 @@
 import Redirecting from "components/redirectingComponent/Redirecting";
+import { getOriginalUrl } from "app/api/UrlApi";
 
 export default async function HandleRedirect({
   params,
@@ -6,5 +7,7 @@ export default async function HandleRedirect({
   params: Promise<{ uniqueId: string }>;
 }) {
   const { uniqueId } = await params;
-  return <Redirecting uniqueId={uniqueId}></Redirecting>;
+  const response = await getOriginalUrl(uniqueId);
+
+  return <Redirecting original_url={response.original_url}></Redirecting>;
 }

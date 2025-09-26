@@ -7,7 +7,7 @@ When the user presses the edit button, a dialog opens that allows the user to up
 - Title
 - URL Input
   - Label: Target URL
-  - Placeholder: *existing url*
+  - Placeholder: _existing url_
   - Validation:
     - Must be a valid http url.
 - Apply Button

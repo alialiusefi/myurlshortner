@@ -1,10 +1,9 @@
-import { getOriginalUrl } from "app/api/UrlApi";
+"use client";
 import { notFound, redirect } from "next/navigation";
 import Grid from "@mui/material/Grid";
 
-export default async function Redirecting(props: { uniqueId: string }) {
-  const originalUrl = await getOriginalUrl(props.uniqueId);
-  if (originalUrl != null) {
+export default function Redirecting(props: { original_url: string | null }) {
+  if (props.original_url != null) {
     return (
       <Grid
         container
@@ -13,8 +12,8 @@ export default async function Redirecting(props: { uniqueId: string }) {
       >
         <Grid size={2}>
           <div>
-            <p>Redirecting you to {originalUrl.original_url}</p>
-            {redirect(originalUrl.original_url)}
+            <p>Redirecting you to {props.original_url}</p>
+            {redirect(props.original_url)}
           </div>
         </Grid>
       </Grid>

@@ -15,7 +15,7 @@ import ZonedDateTimeFormatter from "ts-time-format/ZonedDateTimeFormatter";
 import Link from "@mui/material/Link";
 import { LOCAL_ZONE_ID } from "ts-time/Zone";
 import ZonedDateTime from "ts-time/ZonedDateTime";
-import { redirect, RedirectType, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -23,12 +23,13 @@ import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortene
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
+  const searchParams = useSearchParams()
   const getIntParam = (
     key: string,
-    validator: (string: string) => Boolean,
+    validator: (string: string) => boolean,
     def: number,
   ) => {
-    const value = useSearchParams().get(key);
+    const value = searchParams.get(key);
     if (value && validator(value)) {
       return parseInt(value);
     } else {
@@ -36,7 +37,7 @@ export default function ShortnetedUrlsTable() {
     }
   };
   const getOrderParam = () => {
-    const value = useSearchParams().get("order");
+    const value = searchParams.get("order");
     if (value == "desc" || value == "asc") {
       return value;
     } else {
