@@ -11,7 +11,8 @@ public record UrlList(
             String url,
             String shortenedUrl,
             Long accessCount,
-            OffsetDateTime createdAt
+            OffsetDateTime createdAt,
+            Boolean isEnabled
     ) {
     }
 }

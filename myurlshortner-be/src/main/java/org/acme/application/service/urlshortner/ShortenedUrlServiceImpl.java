@@ -103,20 +103,19 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
         return Either.right(maybeShortenedUrl.map(url -> {
             OffsetDateTime existingVersion = url.getUpdatedAt();
-            ShortenedUrl updated = url.updateOriginalUrl(urlEither.get());
-            repo.updateShortenedUrl(updated, existingVersion);
-            return updated;
-        }).map(
-                shortenedUrl -> {
-                    ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV5UpdatedOriginalUrlEvent(
-                            shortenedUrl.getPublicIdentifier(),
-                            shortenedUrl.getOriginalUrl(),
-                            shortenedUrl.getUpdatedAt()
-                    );
-                    eventStore.insertEvent(event);
-                    publisher.publishUserUpdatedOriginalUrl(event.getEvent());
-                    return shortenedUrl;
-                }
-        ).get());
+            boolean originalUrlHasChanged = !url.getOriginalUrl().equals(urlEither.get());
+            url.updateOriginalUrl(urlEither.get(), command.isEnabled());
+            repo.updateShortenedUrl(url, existingVersion);
+            if (originalUrlHasChanged) {
+                ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV5UpdatedOriginalUrlEvent(
+                        url.getPublicIdentifier(),
+                        url.getOriginalUrl(),
+                        url.getUpdatedAt()
+                );
+                eventStore.insertEvent(event);
+                publisher.publishUserUpdatedOriginalUrl(event.getEvent());
+            }
+            return url;
+        }).get());
     }
 }

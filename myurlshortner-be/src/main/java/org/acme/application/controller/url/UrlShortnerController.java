@@ -57,7 +57,8 @@ public class UrlShortnerController {
                                             row.shortenedUrl().getOriginalUrl().toString(),
                                             row.shortenedUrl().shortenedUrl(hostname),
                                             row.accessCount(),
-                                            row.shortenedUrl().getCreatedAt()
+                                            row.shortenedUrl().getCreatedAt(),
+                                            row.shortenedUrl().isEnabled()
                                     )
                             ).toList();
                     return Response.ok().entity(new UrlList(results, total)).build();

@@ -27,6 +27,7 @@ import java.time.OffsetDateTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.times;
 
 @QuarkusTest
 class UrlShortnerControllerIT {
@@ -60,16 +61,18 @@ class UrlShortnerControllerIT {
     @Test
     void testGetUrlsEndpoint() throws SaveShortenedUrlError {
         var datetime = OffsetDateTime.now();
-        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime, datetime, false));
         var result = given()
                 .when().get("/shortened-urls?page=1&size=10")
                 .then()
                 .statusCode(200)
-                .body("total", Matchers.equalTo(1));
+                .body("total", Matchers.equalTo(2));
         var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
         assertThat(data, Matchers.not(Matchers.empty()));
         assertThat(data, Matchers.contains(
-                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime)
+                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true),
+                new UrlList.UrlRow("https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime, false)
         ));
     }
 
@@ -96,6 +99,7 @@ class UrlShortnerControllerIT {
         assertThat("Shortened url exists", maybeShortenedUrl.isPresent());
         assertThat("Event exists", event.isPresent());
         assertThat("Starts with https", maybeShortenedUrl.get().getOriginalUrl().toString().startsWith("https"));
+        assertThat("Enabled", maybeShortenedUrl.get().isEnabled());
         Mockito.verify(publisher).publishUserCreatedShortenedUrl(Mockito.any(V4UserCreatedShortenedUrlEvent.class));
     }
 
@@ -108,7 +112,8 @@ class UrlShortnerControllerIT {
 
         var body = """
                 {
-                    "url": "google.com"
+                    "url": "google.com",
+                    "is_enabled": true
                 }
                 """.stripIndent();
         given()
@@ -127,7 +132,41 @@ class UrlShortnerControllerIT {
         assertThat("Event exists", event.isPresent());
         assertThat("Updated at has changed", foundShortenedUrl.getUpdatedAt().isAfter(entity.getUpdatedAt()));
         assertThat("Created at didn't change", foundShortenedUrl.getCreatedAt().isEqual(entity.getCreatedAt()));
+        assertThat("Enabled", foundShortenedUrl.isEnabled());
         Mockito.verify(publisher).publishUserUpdatedOriginalUrl(Mockito.any(V5UserUpdatedOriginalUrlEvent.class));
+    }
+
+    @Test
+    void testDisableShortenedUrl() throws SaveShortenedUrlError {
+        var url = "https://www.google.com";
+        var uid = "abcdefghik";
+        var entity = new ShortenedUrl(URI.create(url), uid);
+        repo.insertShortenedUrl(entity);
+
+        var body = """
+                {
+                    "url": "google.com",
+                    "is_enabled": false
+                }
+                """.stripIndent();
+        given()
+                .body(body)
+                .contentType(ContentType.JSON)
+                .when()
+                .patch(String.format("/shortened-urls/%s", uid))
+                .then()
+                .statusCode(204);
+
+        var found = repo.getShortenedUrl(uid);
+        var event = eventStore.getLatestShortenedUrlEventByIdAndType(uid, ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL);
+        assertThat("Shortened url exists", found.isPresent());
+        var foundShortenedUrl = found.get();
+        assertThat("Url has not changed", foundShortenedUrl.getOriginalUrl().equals(URI.create("https://www.google.com")));
+        assertThat("Event doesnt exists", event.isEmpty());
+        assertThat("Updated at has changed", foundShortenedUrl.getUpdatedAt().isAfter(entity.getUpdatedAt()));
+        assertThat("Created at didn't change", foundShortenedUrl.getCreatedAt().isEqual(entity.getCreatedAt()));
+        assertThat("Disabled", !foundShortenedUrl.isEnabled());
+        Mockito.verify(publisher, times(0)).publishUserUpdatedOriginalUrl(Mockito.any(V5UserUpdatedOriginalUrlEvent.class));
     }
 
     @Test

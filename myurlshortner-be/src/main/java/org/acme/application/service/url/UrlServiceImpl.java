@@ -45,12 +45,16 @@ public class UrlServiceImpl implements UrlService {
         var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
         var accessedAt = OffsetDateTime.now();
 
-        if (maybeShortenedUrl.isPresent()) {
-            var shortenedUrl = maybeShortenedUrl.get();
-            publisher.publishUserAccessedShortenedUrl(shortenedUrl, userAgent, accessedAt);
-            return Either.right(shortenedUrl.getOriginalUrl());
-        } else {
+        if (maybeShortenedUrl.isEmpty()) {
             return Either.left(GetUrlError.createFromOperationErrors(new GetUrlException.ShortenedUrlIsNotFound()));
+        } else {
+            var shortenedUrl = maybeShortenedUrl.get();
+            if (shortenedUrl.canRedirect()) {
+                publisher.publishUserAccessedShortenedUrl(shortenedUrl, userAgent, accessedAt);
+                return Either.right(shortenedUrl.getOriginalUrl());
+            } else {
+                return Either.left(GetUrlError.createFromOperationErrors(new GetUrlException.ShortenedUrlIsNotFound()));
+            }
         }
     }
 }

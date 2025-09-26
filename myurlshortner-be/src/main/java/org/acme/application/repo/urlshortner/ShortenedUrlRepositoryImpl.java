@@ -43,8 +43,9 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
                         result.getOriginalUrl(),
                         result.getUniqueIdentifier(),
                         result.getCreatedAt(),
-                        result.getUpdatedAt()
-                )
+                        result.getUpdatedAt(),
+                        result.getEnabled()
+                        )
         );
     }
 
@@ -57,7 +58,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         var query = find("", Sort.by("createdAt"));
         var count = query.count();
         var list = query.page(page - 1, size).list().stream().map(ent ->
-                new ShortenedUrl(ent.getOriginalUrl(), ent.getUniqueIdentifier(), ent.getCreatedAt(), ent.getUpdatedAt())
+                new ShortenedUrl(ent.getOriginalUrl(), ent.getUniqueIdentifier(), ent.getCreatedAt(), ent.getUpdatedAt(), ent.getEnabled())
         ).toList();
         return new Tuple2<>(count, list);
     }
@@ -78,9 +79,9 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
                 );
                 """;
         var query = String.format("""
-                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.updated_at from shortened_urls us1 \s
+                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.updated_at, us1.is_enabled from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
-                group by us1.unique_identifier, us1.original_url, us1.created_at, us1.updated_at \s
+                group by us1.unique_identifier, us1.original_url, us1.is_enabled, us1.created_at, us1.updated_at \s
                 order by us1.created_at %s limit ?1 offset ?2
                 """, order);
         var count = (Long) getEntityManager().createNativeQuery(queryForCount).getSingleResult();
@@ -93,7 +94,8 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
                                 (String) array[1],
                                 (String) array[0],
                                 OffsetDateTime.ofInstant((Instant) array[3], ZoneId.systemDefault()),
-                                OffsetDateTime.ofInstant((Instant) array[4], ZoneId.systemDefault())
+                                OffsetDateTime.ofInstant((Instant) array[4], ZoneId.systemDefault()),
+                                (Boolean) array[5]
                         ),
                         (Long) array[2]
                 )
@@ -104,9 +106,10 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     @Override
     @Transactional
     public @NotNull void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
-        var count = update("set originalUrl = ?1, updatedAt = ?2 where uniqueIdentifier = ?3 and updatedAt = ?4",
+        var count = update("set originalUrl = ?1, updatedAt = ?2, isEnabled = ?3 where uniqueIdentifier = ?4 and updatedAt = ?5",
                 shortenedUrl.getOriginalUrl().toString(),
                 shortenedUrl.getUpdatedAt(),
+                shortenedUrl.isEnabled(),
                 shortenedUrl.getPublicIdentifier(),
                 existingUpdatedAt
         );
@@ -116,6 +119,6 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     }
 
     private ShortenedUrlEntity toEntity(ShortenedUrl from) {
-        return new ShortenedUrlEntity(from.getPublicIdentifier(), from.getOriginalUrl().toString(), from.getCreatedAt(), from.getUpdatedAt());
+        return new ShortenedUrlEntity(from.getPublicIdentifier(), from.getOriginalUrl().toString(), from.getCreatedAt(), from.getUpdatedAt(), from.isEnabled());
     }
 }
