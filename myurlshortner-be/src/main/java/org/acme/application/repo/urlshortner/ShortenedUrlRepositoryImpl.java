@@ -45,7 +45,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
                         result.getCreatedAt(),
                         result.getUpdatedAt(),
                         result.getEnabled()
-                        )
+                )
         );
     }
 
