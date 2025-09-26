@@ -78,6 +78,8 @@ export default function ShortenUrlForm() {
               <Link
                 data-testid="shortened-url-link"
                 sx={{ padding: 0.5 }}
+                target="_blank"
+                rel="noopener noreferrer"
                 href={shortenedUrlState.shortenedUrl}
                 underline="hover"
               >

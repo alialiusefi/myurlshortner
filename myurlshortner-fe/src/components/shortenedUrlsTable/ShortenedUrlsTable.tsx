@@ -105,7 +105,7 @@ export default function ShortnetedUrlsTable() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Link href={one.shortened_url} underline="none">
+                  <Link target="_blank" rel="noopener noreferrer" href={one.shortened_url} underline="none">
                     {one.shortened_url}
                   </Link>
                 </TableCell>
