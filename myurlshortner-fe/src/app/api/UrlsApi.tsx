@@ -38,6 +38,7 @@ export class GetAvailableUrlsResponse {
       shortened_url: string;
       created_at: string;
       access_count: number;
+      is_enabled: boolean;
     },
   ];
   total: number;

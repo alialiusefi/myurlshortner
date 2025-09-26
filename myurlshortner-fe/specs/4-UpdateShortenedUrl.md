@@ -10,6 +10,8 @@ When the user presses the edit button, a dialog opens that allows the user to up
   - Placeholder: _existing url_
   - Validation:
     - Must be a valid http url.
+- Enabled Switch
+  - Label: Enabled
 - Apply Button
 - Cancel Button
 

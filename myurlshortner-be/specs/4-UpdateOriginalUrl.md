@@ -11,7 +11,8 @@ POST https://{hostname}/shortened-urls/{uniqueIdentifier}
 Content-Type: application/json
 Authorization: 
 {
-  "url": "https://www.newurl.com"
+  "url": "https://www.newurl.com",
+  "is_enabled": false
 }
 ```
 

@@ -1,8 +1,14 @@
-import { Button, Dialog } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  Switch,
+  TextField,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
-import Input from "@mui/material/Input";
-import InputLabel from "@mui/material/InputLabel";
 import { useState } from "react";
 import { updateShortenedUrl } from "app/api/UrlShortnerApi";
 import { apiErrorSnackBar } from "../utility/ApiErrorSnackBar";
@@ -12,6 +18,7 @@ type Properties = {
   isOpen: boolean;
   uniqueIdentifier: string;
   originalUrl: string;
+  isEnabled: boolean;
   onClose: () => void;
 };
 
@@ -19,12 +26,14 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
   const [newTargetUrl, setNewTargetUrl] = useState<string>(props.originalUrl);
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isValid, setIsValid] = useState(true);
+  const [isEnabled, setIsEnabled] = useState<boolean>(props.isEnabled);
   const onCloseCallback = props.onClose;
   const [error, setError] = useState<ErrorResponse>(null);
   const handleApply = async () => {
     const response = await updateShortenedUrl(
       props.uniqueIdentifier,
       newTargetUrl,
+      isEnabled,
     );
     if (response) {
       setError(response);
@@ -51,42 +60,65 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
       }}
     >
       <Grid padding={2} container>
-        <Grid>
-          <Typography
-            data-testid="title-text"
-            id="modal-modal-title"
-            variant="h6"
-            component="h2"
-          >
-            Update Shortened URL:
-          </Typography>
-        </Grid>
-        <Grid size={10} padding={2}>
-          <InputLabel>Target URL</InputLabel>
-          <Input
-            fullWidth
-            value={newTargetUrl}
-            onChange={(e) => {
-              handleTargetUrlChange(e.target.value);
-            }}
-            error={!isValid}
-          />
-        </Grid>
-        <Grid container spacing={2} padding={1}>
-          <Button variant="contained" onClick={handleApply} disabled={!isValid}>
-            Apply
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setIsOpen(false);
-              onCloseCallback();
-            }}
-          >
-            Cancel
-          </Button>
-        </Grid>
-        <Grid>{apiErrorSnackBar(error)}</Grid>
+        <FormGroup sx={{ width: 400 }}>
+          <Grid>
+            <Typography
+              data-testid="title-text"
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+            >
+              Update Shortened URL:
+            </Typography>
+          </Grid>
+          <Grid padding={2}>
+            <FormControl fullWidth>
+              <TextField
+                label="Target URL"
+                fullWidth
+                value={newTargetUrl}
+                onChange={(e) => {
+                  handleTargetUrlChange(e.target.value);
+                }}
+                error={!isValid}
+              />
+            </FormControl>
+          </Grid>
+          <Grid container spacing={2} padding={1}>
+            <FormControl>
+              <Button
+                variant="contained"
+                onClick={handleApply}
+                disabled={!isValid}
+              >
+                Apply
+              </Button>
+            </FormControl>
+            <FormControl>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setIsOpen(false);
+                  onCloseCallback();
+                }}
+              >
+                Cancel
+              </Button>
+            </FormControl>
+          </Grid>
+          <Grid padding={2}>
+            <FormControlLabel
+              label="Enabled"
+              control={
+                <Switch
+                  checked={isEnabled}
+                  onChange={(e) => setIsEnabled(e.target.checked)}
+                />
+              }
+            />
+          </Grid>
+          <Grid>{apiErrorSnackBar(error)}</Grid>
+        </FormGroup>
       </Grid>
     </Dialog>
   );
