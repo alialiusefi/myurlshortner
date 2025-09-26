@@ -70,6 +70,9 @@ public class UrlShortnerController {
     @Path("/shortened-urls/{uniqueIdentifier}")
     @Produces(APPLICATION_JSON)
     public Response updateOriginalUrl(UpdateOriginalUrlRequest request, @PathParam("uniqueIdentifier") String uniqueIdentifier) {
+        if (request.isEnabled() == null) {
+            request = new UpdateOriginalUrlRequest(request.url(), true);
+        }
         return shortenedUrlUseCases.updateOriginalUrl(uniqueIdentifier, request).fold(
                 fail -> {
                     return fail.operationError().map(
