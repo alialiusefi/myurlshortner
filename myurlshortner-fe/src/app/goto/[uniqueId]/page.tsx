@@ -9,5 +9,5 @@ export default async function HandleRedirect({
   const { uniqueId } = await params;
   const response = await getOriginalUrl(uniqueId);
 
-  return <Redirecting original_url={response.original_url}></Redirecting>;
+  return <Redirecting original_url={response?.original_url}></Redirecting>;
 }

@@ -57,7 +57,8 @@ public class UrlShortnerController {
                                             row.shortenedUrl().getOriginalUrl().toString(),
                                             row.shortenedUrl().shortenedUrl(hostname),
                                             row.accessCount(),
-                                            row.shortenedUrl().getCreatedAt()
+                                            row.shortenedUrl().getCreatedAt(),
+                                            row.shortenedUrl().isEnabled()
                                     )
                             ).toList();
                     return Response.ok().entity(new UrlList(results, total)).build();
@@ -69,6 +70,9 @@ public class UrlShortnerController {
     @Path("/shortened-urls/{uniqueIdentifier}")
     @Produces(APPLICATION_JSON)
     public Response updateOriginalUrl(UpdateOriginalUrlRequest request, @PathParam("uniqueIdentifier") String uniqueIdentifier) {
+        if (request.isEnabled() == null) {
+            request = new UpdateOriginalUrlRequest(request.url(), true);
+        }
         return shortenedUrlUseCases.updateOriginalUrl(uniqueIdentifier, request).fold(
                 fail -> {
                     return fail.operationError().map(

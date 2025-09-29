@@ -73,7 +73,7 @@ public class ShortenedUrlUseCases {
 
     public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(String uniqueIdentifier, UpdateOriginalUrlRequest request) {
         return service.updateOriginalUrl(
-                new UpdateOriginalUrlCommand(uniqueIdentifier, request.url())
+                new UpdateOriginalUrlCommand(uniqueIdentifier, request.url(), request.isEnabled())
         );
     }
 }

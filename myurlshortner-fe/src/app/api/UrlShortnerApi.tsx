@@ -36,9 +36,10 @@ export async function shortenUrlOperaton(
 export async function updateShortenedUrl(
   uniqueIdentifier: string,
   newOriginalUrl: string,
+  isEnabled: boolean,
 ): Promise<ErrorResponse | null> {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  const request = new UpdateShortenedUrlRequest(newOriginalUrl);
+  const request = new UpdateShortenedUrlRequest(newOriginalUrl, isEnabled);
   const url = `${serverUrl}/shortened-urls/${uniqueIdentifier}`;
   const requestConfig = {
     method: "PATCH",
@@ -69,8 +70,10 @@ export async function updateShortenedUrl(
 
 class UpdateShortenedUrlRequest {
   url: string;
-  constructor(url: string) {
+  is_enabled: boolean;
+  constructor(url: string, is_enabled: boolean) {
     this.url = url;
+    this.is_enabled = is_enabled;
   }
 }
 

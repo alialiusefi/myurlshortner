@@ -8,19 +8,22 @@ public class ShortenedUrl {
     private final String publicIdentifier;
     private final OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private boolean isEnabled;
 
     public ShortenedUrl(URI originalUrl, String publicIdentifier) {
         this.originalUrl = originalUrl;
         this.publicIdentifier = publicIdentifier;
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = this.createdAt;
+        this.isEnabled = true;
     }
 
-    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt) {
+    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt, Boolean isEnabled) {
         this.originalUrl = URI.create(originalUrl);
         this.publicIdentifier = publicIdentifier;
         this.createdAt = datetime;
         this.updatedAt = updatedAt;
+        this.isEnabled = isEnabled;
     }
 
     public String shortenedUrl(String serviceHostname) {
@@ -28,10 +31,15 @@ public class ShortenedUrl {
         return String.format(format, serviceHostname, this.publicIdentifier);
     }
 
-    public ShortenedUrl updateOriginalUrl(URI newOriginalUrl) {
+    public ShortenedUrl updateOriginalUrl(URI newOriginalUrl, Boolean isEnabled) {
         this.originalUrl = newOriginalUrl;
         this.updatedAt = OffsetDateTime.now();
+        this.isEnabled = isEnabled;
         return this;
+    }
+
+    public boolean canRedirect() {
+        return isEnabled;
     }
 
     public URI getOriginalUrl() {
@@ -56,5 +64,9 @@ public class ShortenedUrl {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean isEnabled() {
+        return isEnabled;
     }
 }

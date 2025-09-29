@@ -20,6 +20,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortenedUrlDialog";
+import CircleIcon from "@mui/icons-material/Circle";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -78,6 +79,7 @@ export default function ShortnetedUrlsTable() {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>Status</TableCell>
               <TableCell>Shortened URL</TableCell>
               <TableCell>Access Count</TableCell>
               <TableCell>Original URL</TableCell>
@@ -96,7 +98,14 @@ export default function ShortnetedUrlsTable() {
             {data?.data.map((one) => (
               <TableRow key={one.shortened_url}>
                 <TableCell>
-                  <Link href={one.shortened_url} underline="none">
+                  {one.is_enabled ? (
+                    <CircleIcon sx={{ p: 1, fontSize: 30 }} color="success" />
+                  ) : (
+                    <CircleIcon sx={{ p: 1, fontSize: 30 }} color="error" />
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Link target="_blank" rel="noopener noreferrer" href={one.shortened_url} underline="none">
                     {one.shortened_url}
                   </Link>
                 </TableCell>
@@ -127,6 +136,7 @@ export default function ShortnetedUrlsTable() {
                           one.shortened_url.indexOf("/goto/") + 6,
                         )}
                         originalUrl={one.url}
+                        isEnabled={one.is_enabled}
                         onClose={() => {
                           setCurrentSelectedForEdit(null);
                           mutate({ ...data });
