@@ -13,9 +13,10 @@ export async function shortenUrlOperaton(
       "Content-Type": "application/json",
     },
   };
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   try {
     const rawResponse = await fetch(
-      "http://localhost:8080/shorten",
+      `${serverUrl}/shorten`,
       requestConfig,
     );
     if (!rawResponse.ok) {
@@ -36,8 +37,9 @@ export async function updateShortenedUrl(
   uniqueIdentifier: string,
   newOriginalUrl: string,
 ): Promise<ErrorResponse | null> {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const request = new UpdateShortenedUrlRequest(newOriginalUrl);
-  const url = `http://localhost:8080/shortened-urls/${uniqueIdentifier}`;
+  const url = `${serverUrl}/shortened-urls/${uniqueIdentifier}`;
   const requestConfig = {
     method: "PATCH",
     body: JSON.stringify(request),

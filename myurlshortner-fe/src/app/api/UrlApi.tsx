@@ -1,7 +1,8 @@
 export async function getOriginalUrl(
   uniqueId: string,
 ): Promise<GetOriginalUrlResponse | null> {
-  return fetch(`http://localhost:8080/urls/${uniqueId}`, {
+  const serverUrl = process.env.INTERNAL_SERVER_URL;
+  return fetch(`${serverUrl}/urls/${uniqueId}`, {
     redirect: "manual",
   })
     .then((response) => {

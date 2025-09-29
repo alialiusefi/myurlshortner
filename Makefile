@@ -5,7 +5,7 @@
 
 BE_PATH = myurlshortner-be
 CONSUMER_PATH = myurlshortner-consumer
-
+FE_PATH = myurlshortner-fe
 
 be-artifact: 
 	cd $(BE_PATH); ./gradlew imageBuild
@@ -15,14 +15,18 @@ consumer-artifact:
 	cd $(CONSUMER_PATH); ./gradlew bootBuildImage
 	cd $(CONSUMER_PATH); git tag myurlshortner-consumer/$$(./gradlew printVersion -q) -f
 
-all-artifact: be-artifact consumer-artifact
+fe-artifact:
+	cd $(FE_PATH); docker build -t alialiusefi/myurlshortner-fe:$$(npm pkg get version | tr -d '"') .
+	cd $(FE_PATH); git tag myurlshortner-fe/$$(npm pkg get version | tr -d '"') -f
+
+all-artifact: be-artifact consumer-artifact fe-artifact
 
 # docker
 docker-compose:
 	docker compose -f docker-compose.yml -f docker-compose.all.yml up
 docker-compose-clean:
 	docker compose -f docker-compose.yml -f docker-compose.all.yml down -v
-dev: be-artifact consumer-artifact
+dev: be-artifact consumer-artifact fe-artifact
 	docker compose -f docker-compose.yml -f docker-compose.all.yml up
 
 # kubernetes

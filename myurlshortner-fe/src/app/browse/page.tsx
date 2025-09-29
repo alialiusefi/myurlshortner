@@ -9,8 +9,10 @@ export default async function Browse() {
       direction="row"
       size={7}
       sx={{ justifyContent: "center", alignItems: "center", p: 3 }}
-    >
-      <ShortnetedUrlsTable />
+    > 
+      <Suspense>
+        <ShortnetedUrlsTable />
+      </Suspense>
     </Grid>
   );
 }

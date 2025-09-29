@@ -13,9 +13,9 @@ afterAll(() => server.close());
 
 it("renders default children when accessed", () => {
   render(<ShortenUrlForm />);
-  expect(screen.getByText("URL")).toBeDefined;
-  expect(screen.getByTestId("url-input")).toBeDefined;
-  expect(screen.getByTestId("shorten-button-input")).toBeDefined;
+  expect(screen.getByText("URL")).toBeDefined();
+  expect(screen.getByTestId("url-input")).toBeDefined();
+  expect(screen.getByTestId("shorten-button-input")).toBeDefined();
 });
 
 it("it validates url input by disabling the button", async () => {
@@ -51,7 +51,7 @@ it("show success dialog with shortened url when button is pressed", async () => 
   const user = userEvent.setup();
   render(<ShortenUrlForm />);
   server.use(
-    http.post("/shorten", (ctx) => {
+    http.post("http://localhost:8080/shorten", () => {
       return HttpResponse.json({
         shortened_url: "http://www.example.com/goto/jsjsjsj",
       });
@@ -63,5 +63,5 @@ it("show success dialog with shortened url when button is pressed", async () => 
   await user.type(urlInput, "www.example.com");
 
   await user.click(shortenButton);
-  expect(await screen.findByTestId("success-dialog")).toBeDefined;
+  expect(await screen.findByTestId("success-dialog")).toBeDefined();
 });
