@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myurlshortner-be-service
+  labels:
+    tier: backend
+    namespace: default
+spec:
+  selector:
+    name: myurlshortner-be
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080

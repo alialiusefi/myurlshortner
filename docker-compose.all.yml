@@ -33,13 +33,9 @@ services:
     networks:
       - docker-network
   fe:
-    image: alialiusefi/myurlshortner-fe:1.0.0
+    image: alialiusefi/myurlshortner-fe-docker:1.0.0
     ports:
       - "3000:3000"
-    environment:
-      #NODE_ENV: development
-      INTERNAL_SERVER_URL: http://be:8080
-      NEXT_PUBLIC_EXTERNAL_SERVER_URL: http://localhost:8080
     depends_on:
       - be
     networks:

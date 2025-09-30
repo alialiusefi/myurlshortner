@@ -3,17 +3,17 @@ kind: Deployment
 metadata:
   name: myurlshortner-be
   labels:
-    app: myurlshortner-be
+    name: myurlshortner-be
     tier: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myurlshortner-be
+      name: myurlshortner-be
   template:
     metadata:
       labels:
-        app: myurlshortner-be
+        name: myurlshortner-be
     spec:
       containers:
         - name: myurlshortner-be
@@ -22,9 +22,21 @@ spec:
             - containerPort: 8080
           env:
             - name: REGISTRY_URL
-              value: "http://apicurio-service:8888/apis/registry/v3"
+              value: http://apicurio-service:8888/apis/registry/v3
             - name: KAFKA_SERVERS
-              value: "to-be-defined:9094"
+              value: to-be-defined:9094
+            - name: POSTGRES_URL
+              value: jdbc:postgresql://postgres-rw:5432/myurlshortner
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
             - name: JAVA_OPTS_APPEND
               value: "-Dquarkus.profile=prod -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
           livenessProbe:

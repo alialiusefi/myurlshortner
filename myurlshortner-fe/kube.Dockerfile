@@ -27,6 +27,10 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
+# Setting environment variables
+ENV INTERNAL_SERVER_URL=http://myurlshortner-be-service
+ENV NEXT_PUBLIC_EXTERNAL_SERVER_URL=http://localhost/api
+
 RUN \
   if [ -f package-lock.json ]; then npm run build; \
   else echo "Lockfile not found." && exit 1; \
@@ -36,6 +40,7 @@ RUN \
 FROM base AS runner
 WORKDIR /app
 
+ENV INTERNAL_SERVER_URL=http://myurlshortner-be-service
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED=1
