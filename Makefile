@@ -37,27 +37,31 @@ dev: be-artifact consumer-artifact fe-docker-artifact
 
 # kubernetes
 kubernetes-secrets:
-	kubectl apply -f k8s/postgres/prod/secrets.yaml
+	kubectl apply -f k8s/postgres/secrets.yaml
 kubernetes-be: 
-	kubectl apply -f k8s/myurlshortner-be/prod/deployment.yaml
-	kubectl apply -f k8s/myurlshortner-be/prod/service.yaml
+	kubectl apply -f k8s/myurlshortner-be/deployment.yaml
+	kubectl apply -f k8s/myurlshortner-be/service.yaml
 kubernetes-consumer: 
-	kubectl apply -f k8s/myurlshortner-consumer/prod/deployment.yaml
+	kubectl apply -f k8s/myurlshortner-consumer/deployment.yaml
 kubernetes-postgres:
 	kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.0.yaml
-	kubectl apply -f k8s/postgres/prod/cluster.yaml
+	kubectl apply -f k8s/postgres/cluster.yaml
 kubernetes-apicurio:
-	kubectl apply -f k8s/apicurio-registry/prod/pod.yaml
-	kubectl apply -f k8s/apicurio-registry/prod/service.yaml
+	kubectl apply -f k8s/apicurio-registry/pod.yaml
+	kubectl apply -f k8s/apicurio-registry/service.yaml
 kubernetes-fe:
-	kubectl apply -f k8s/myurlshortner-fe/prod/deployment.yaml
-	kubectl apply -f k8s/myurlshortner-fe/prod/service.yaml
+	kubectl apply -f k8s/myurlshortner-fe/deployment.yaml
+	kubectl apply -f k8s/myurlshortner-fe/service.yaml
 kubernetes-apigateway:
 	kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
 	kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.1.2" | kubectl apply -f -
 	kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.1.2/deploy/default/deploy.yaml
-	kubectl apply -f k8s/apigateway/prod/apigateway.yaml
-kubernetes: kubernetes-secrets kubernetes-be kubernetes-consumer kubernetes-postgres kubernetes-apicurio kubernetes-fe kubernetes-apigateway
+	kubectl apply -f k8s/apigateway/apigateway.yaml
+kubernetes-kafka:
+	kubectl apply -f k8s/kafka/kafka.yaml
+	kubectl apply -f k8s/kafka/volume.yaml
+	kubectl apply -f k8s/kafka/service.yaml
+kubernetes: kubernetes-secrets kubernetes-postgres kubernetes-kafka kubernetes-be kubernetes-consumer kubernetes-apicurio kubernetes-fe kubernetes-apigateway
 
 prod: be-artifact consumer-artifact fe-kube-artifact kubernetes
 
@@ -67,4 +71,9 @@ prod-stop:
 	kubectl scale deployments --all --replicas=0 -n default
 	kubectl delete pod apicurio-registry
 	kubectl delete pod postgres-1
+	kubectl delete pod kafka
 
+prod-clean:
+	kubectl delete PersistentVolumeClaim kafka-pvc
+	kubectl delete PersistentVolume kafka-pv
+	kubectl delete cluster.postgresql.cnpg.io/postgres

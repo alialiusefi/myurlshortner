@@ -22,9 +22,9 @@ spec:
             - containerPort: 8080
           env:
             - name: REGISTRY_URL
-              value: http://apicurio-service:8888/apis/registry/v3
+              value: http://apicurio-service:8888
             - name: KAFKA_SERVERS
-              value: to-be-defined:9094
+              value: kafka-service:9094
             - name: POSTGRES_URL
               value: jdbc:postgresql://postgres-rw:5432/myurlshortner
             - name: POSTGRES_USERNAME

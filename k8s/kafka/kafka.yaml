@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka
+  namespace: default
+  labels:
+    name: kafka
+spec:
+  containers:
+    - name: kafka
+      image: apache/kafka:4.0.0
+      readinessProbe:
+        tcpSocket:
+          port: 9094
+        initialDelaySeconds: 60
+        periodSeconds: 5
+      env:
+        - name: CLUSTER_ID
+          value: 't5s3216_SCeef-9N33O12g'
+        - name: KAFKA_PROCESS_ROLES
+          value: 'broker,controller'
+        - name: KAFKA_NODE_ID
+          value: '1'
+        - name: KAFKA_LISTENERS
+          value: 'CONTROLLER://:9093,IN_DOCKER://:9094,CLI://:9095,OUT_DOCKER://:9092'
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: 'IN_DOCKER://kafka-service:9094,OUT_DOCKER://localhost:9092,CLI://localhost:9095'
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: 'CONTROLLER'
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: 'CONTROLLER:PLAINTEXT,IN_DOCKER:PLAINTEXT,OUT_DOCKER:PLAINTEXT,CLI:PLAINTEXT'
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: '1@localhost:9093'
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: 'IN_DOCKER'
+        - name: KAFKA_LOG_DIRS
+          value: '/var/lib/kafka/data'
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: '1'
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: '1'
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: '1'
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: '0'
+      ports:
+      - containerPort: 9094
+      - containerPort: 9092
+      volumeMounts:
+      - name: kafka-v
+        mountPath: /var/lib/kafka/data
+  volumes:
+    - name: kafka-v
+      persistentVolumeClaim:
+        claimName: kafka-pvc

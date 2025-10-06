@@ -9,4 +9,4 @@ spec:
     command: [ "sh", "-c" ]
     args: [ "sleep infinity" ]
 
-# kubectl exec debugging-pod -it -- "/bin/bash" 
+# kubectl exec debugging-pod -it -- "/bin/bash"
