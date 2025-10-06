@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myurlshortner-fe
+  namespace: default
+  labels:
+    tier: frontend
+    name: myurlshortner-fe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: myurlshortner-fe
+  template:
+    metadata:
+      labels:
+        name: myurlshortner-fe
+    spec:
+      containers:
+        - name: myurlshortner-fe
+          image: alialiusefi/myurlshortner-fe-kube:1.0.0
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /
+              port: 3000
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /
+              port: 3000

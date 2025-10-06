@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debugging-pod
+spec:
+  containers:
+  - name: busybox
+    image: busybox:1.37.0
+    command: [ "sh", "-c" ]
+    args: [ "sleep infinity" ]
+
+# kubectl exec debugging-pod -it -- "/bin/bash" 

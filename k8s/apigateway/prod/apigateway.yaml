@@ -1,0 +1,54 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: api-gateway
+  namespace: default
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "localhost"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api-gateway-fe-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: api-gateway
+    sectionName: http
+  hostnames:
+  - "localhost"
+  rules:
+  - backendRefs:
+    - name: myurlshortner-fe-service
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api-gateway-be-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: api-gateway
+    sectionName: http
+  hostnames:
+  - "localhost"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch # replaces the path with /, keeping the suffix path entact
+          replacePrefixMatch: /
+    backendRefs:
+    - name: myurlshortner-be-service
+      port: 80
