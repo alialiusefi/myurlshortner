@@ -4,7 +4,7 @@ metadata:
   name: apicurio-service
 spec:
   selector:
-    app.kubernetes.io/name: apicurio-registry
+    name: apicurio-registry
   ports:
     - protocol: TCP
       port: 8888
