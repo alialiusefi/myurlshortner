@@ -92,6 +92,9 @@ make dev
 ```bash
 make prod
 ```
+
+It may take a while to build images, also kafka and postgres may take a while to be ready.
+
 > The schema registry is also available in dev:8901 prod:8888
 
 ```bash
