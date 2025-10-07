@@ -11,6 +11,8 @@ This repo consists of multiple applications:
   - [Api Gateway](#api-gateway)
 - [Environments](#environments)
 - [Setup](#setup)
+- [Architecture](#architecture)
+- [Demo](#demo)
 
 
 ## BE
@@ -18,7 +20,7 @@ This repo consists of multiple applications:
 This app handles user redirect requests and the management of short links.
 
 - BuildTool: Gradle
-- Language: Java
+- Language: Java 21
 - Framework: Quarkus
 
 ## Consumer
@@ -26,30 +28,37 @@ This app handles user redirect requests and the management of short links.
 This app handles user events that BE produces. 
 
 - BuildTool: Gradle
-- Language: Kotlin
+- Language: Kotlin (Java 21)
 - Framework: Spring
 
 ## FE
 
 This is the FE of the application.
 
-- Build tool: NPM
+- Build tool: NPM 
 - Language: Typescript
-- Framework: Next.JS
+- Framework: Next.JS (Next 15, React 19)
 
 ## Postgres
 
 This is the database that is shared between backend applications.
-- Instance: CloudNativePG
+- Instance: CloudNativePG (Postgres 17.5)
 - Manifest: kubectl apply --server-side -f \
   https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.0.yaml
+
 ## Kafka
 
-This is the event platform used to handle events in current system. 
+This is the event platform used to transport events in current system.
+
+1 topic is expected:
+  - shortened-url-events
 
 ## Schema Registry
 
-This is the schema registry that store the schemas of the events used in the project
+This is the schema registry that store the schemas of the events used in the project. Apicurio is the implementation.
+
+The schema has to be added to the registry.
+
 
 ## Api Gateway
 
@@ -71,8 +80,46 @@ This is the gateway / reverse proxy used for our implementation.
   - Dependencies run as docker containers.
 - prod
   - This is for kubernetes deployment.
-  - Dependencies run as kubernetes objects, to mimic production as much as possible.
+  - Dependencies run as kubernetes objects, or docker images.
 
 # Setup
 
 Makefile is available to run and setup the environment needed.
+
+```bash
+make dev
+```
+
+```bash
+make prod
+```
+
+It may take a while to build images, also kafka and postgres may take a while to be ready.
+
+> The schema registry is also available in dev:8901 prod:8888
+
+```bash
+kubectl port-forward apicurio-registry 8888:8888
+curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artifacts \
+  -H "Content-Type: application/json" \
+  --data-raw '{
+    "artifactId": "ShortenedUrlUserEvents",
+    "artifactType": "AVRO",
+    "name": "ShortenedUrlUserEvents",
+    "firstVersion": {
+        "content": {
+            "content": "[{\"type\":\"record\",\"name\":\"ShortenedUrlUserEvents\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"userAccessedShortenedUrlEvent\",\"type\":[\"null\",\"UserAccessedShortenedUrl\"],\"default\":null},{\"name\":\"userCreatedShortenedUrlEvent\",\"type\":[\"null\",\"UserCreatedShortenedUrl\"],\"default\":null},{\"name\":\"userUpdatedOriginalUrlEvent\",\"type\":[\"null\",\"UserUpdatedOriginalUrl\"],\"default\":null}]},{\"type\":\"record\",\"name\":\"UserAccessedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":[\"null\",\"string\"],\"default\":\"null\"},{\"name\":\"shortened_url\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"user_agent\",\"type\":\"string\"},{\"name\":\"accessed_at\",\"type\":[\"null\",\"string\"],\"doc\":\"ISO 8601 Timestamp\",\"default\":\"null\"}]},{\"type\":\"record\",\"name\":\"UserCreatedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"string\",\"doc\":\"ISO 8601 Timestamp\"}]},{\"type\":\"record\",\"name\":\"UserUpdatedOriginalUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"new_original_url\",\"type\":\"string\"},{\"name\":\"updated_at\",\"type\":\"string\",\"doc\":\"ISO 8601 Timestamp\"}]}]",
+            "contentType": "application/json",
+            "references": [ ]
+        }
+    }
+}'
+```
+> The ui is also available instead. (dev:8888, prod:8080)
+
+# Architecture
+
+![data flow architecture](myurlshortner.png)
+
+# Demo
+[Available video demo](demo.mov)
