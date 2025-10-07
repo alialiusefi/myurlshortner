@@ -122,4 +122,4 @@ curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artif
 ![data flow architecture](myurlshortner.png)
 
 # Demo
-![demo](demo.mov)
+[Available video demo](demo.mov)
