@@ -12,6 +12,7 @@ This repo consists of multiple applications:
 - [Environments](#environments)
 - [Setup](#setup)
 - [Architecture](#architecture)
+- [Demo](#demo)
 
 
 ## BE
@@ -119,3 +120,6 @@ curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artif
 # Architecture
 
 ![data flow architecture](myurlshortner.png)
+
+# Demo
+![demo](demo.mov)
