@@ -9,8 +9,8 @@ spec:
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
-  local:
-    path: /mnt/kafka # mounted in docker 
+  hostPath:
+    path: /tmp
   capacity:
     storage: 2Gi
   claimRef:
