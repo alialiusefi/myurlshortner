@@ -58,8 +58,8 @@ kubernetes-apigateway:
 	kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.1.2/deploy/default/deploy.yaml
 	kubectl apply -f k8s/apigateway/apigateway.yaml
 kubernetes-kafka:
-	kubectl apply -f k8s/kafka/kafka.yaml
 	kubectl apply -f k8s/kafka/volume.yaml
+	kubectl apply -f k8s/kafka/kafka.yaml
 	kubectl apply -f k8s/kafka/service.yaml
 kubernetes: kubernetes-secrets kubernetes-postgres kubernetes-kafka kubernetes-be kubernetes-consumer kubernetes-apicurio kubernetes-fe kubernetes-apigateway
 
