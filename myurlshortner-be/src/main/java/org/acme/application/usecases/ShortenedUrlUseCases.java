@@ -14,7 +14,7 @@ import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
-import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
+import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.service.ShortenedUrlService;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class ShortenedUrlUseCases {
         throw new IllegalStateException(message);
     }
 
-    public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrlWithAccessCount>>> listAvailableUrls(Integer page, Integer size, String order) {
+    public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrl>>> listAvailableUrls(Integer page, Integer size, String order) {
         List<ApplicationException> errors = new ArrayList<>();
         if (page == null || page < 1) {
             errors.add(new PageNumberIsNotCorrectException(page));

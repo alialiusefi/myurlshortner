@@ -7,7 +7,7 @@ import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
-import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
+import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.jspecify.annotations.NonNull;
 
@@ -16,7 +16,7 @@ import java.util.List;
 public interface ShortenedUrlService {
     Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(@NonNull CreateShortenedUrlCommand command) throws SaveShortenedUrlError;
 
-    Tuple2<Long, List<AvailableShortenedUrlWithAccessCount>> listOfAvailableUrls(
+    Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(
             @NonNull Integer page,
             @NonNull Integer size,
             boolean isAscending

@@ -54,11 +54,11 @@ public class UrlShortnerController {
                     var results = success._2.stream()
                             .map(
                                     row -> new UrlList.UrlRow(
-                                            row.shortenedUrl().getOriginalUrl().toString(),
-                                            row.shortenedUrl().shortenedUrl(hostname),
+                                            row.originalUrl().toString(),
+                                            row.shortenedUrl(hostname),
                                             row.accessCount(),
-                                            row.shortenedUrl().getCreatedAt(),
-                                            row.shortenedUrl().isEnabled()
+                                            row.createdAt(),
+                                            row.isEnabled()
                                     )
                             ).toList();
                     return Response.ok().entity(new UrlList(results, total)).build();

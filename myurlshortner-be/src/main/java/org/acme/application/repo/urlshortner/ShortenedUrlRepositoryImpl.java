@@ -1,7 +1,6 @@
 package org.acme.application.repo.urlshortner;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.quarkus.panache.common.Sort;
 import io.smallrye.common.constraint.NotNull;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -9,11 +8,12 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import org.acme.application.repo.exception.ShortenedUrlOptimisticLockException;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
+import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.jspecify.annotations.NonNull;
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -54,18 +54,8 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         deleteAll();
     }
 
-    public Tuple2<Long, List<ShortenedUrl>> listAvailableShortenedUrls(@NonNull Integer page, @NonNull Integer size) {
-        var query = find("", Sort.by("createdAt"));
-        var count = query.count();
-        var list = query.page(page - 1, size).list().stream().map(ent ->
-                new ShortenedUrl(ent.getOriginalUrl(), ent.getUniqueIdentifier(), ent.getCreatedAt(), ent.getUpdatedAt(), ent.getEnabled())
-        ).toList();
-        return new Tuple2<>(count, list);
-    }
-
-    //todo: create a separate projection object instead of using the ShortenedUrl entity.
     @Override
-    public Tuple2<Long, List<AvailableShortenedUrlWithAccessCount>> listAvailableShortenedUrls(
+    public Tuple2<Long, List<AvailableShortenedUrl>> listAvailableShortenedUrls(
             @NonNull Integer page,
             @NonNull Integer size,
             boolean isAscending
@@ -73,15 +63,15 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         var order = isAscending ? "asc" : "desc";
         var queryForCount = """
                 select count(*) from (
-                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.updated_at from shortened_urls us1 \s
+                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
-                group by us1.unique_identifier, us1.original_url, us1.created_at, us1.updated_at \s
+                group by us1.unique_identifier, us1.original_url, us1.created_at, us1.is_enabled \s
                 );
                 """;
         var query = String.format("""
-                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.updated_at, us1.is_enabled from shortened_urls us1 \s
+                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
-                group by us1.unique_identifier, us1.original_url, us1.is_enabled, us1.created_at, us1.updated_at \s
+                group by us1.unique_identifier, us1.original_url, us1.created_at, us1.is_enabled \s
                 order by us1.created_at %s limit ?1 offset ?2
                 """, order);
         var count = (Long) getEntityManager().createNativeQuery(queryForCount).getSingleResult();
@@ -89,15 +79,12 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         preparedStatement.setParameter(1, size);
         preparedStatement.setParameter(2, (page - 1) * size);
         var result = ((List<Object[]>) preparedStatement.getResultList()).stream().map(
-                array -> new AvailableShortenedUrlWithAccessCount(
-                        new ShortenedUrl(
-                                (String) array[1],
+                array -> new AvailableShortenedUrl(
                                 (String) array[0],
+                                URI.create((String) array[1]),
                                 OffsetDateTime.ofInstant((Instant) array[3], ZoneId.systemDefault()),
-                                OffsetDateTime.ofInstant((Instant) array[4], ZoneId.systemDefault()),
-                                (Boolean) array[5]
-                        ),
-                        (Long) array[2]
+                                (Long) array[2],
+                                (Boolean) array[4]
                 )
         ).toList();
         return Tuple.of(count, result);
