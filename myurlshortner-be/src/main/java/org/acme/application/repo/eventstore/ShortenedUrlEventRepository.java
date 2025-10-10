@@ -7,8 +7,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlRecordType;
-import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +37,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         var embeddedMetadata = toEmbeddedMetadata(envelop.getMetadata());
         try {
             switch (envelop.getEvent()) {
-                case V4UserCreatedShortenedUrlEvent createdEvent -> {
+                case V1UserCreatedShortenedUrlEvent createdEvent -> {
                     var jsonString = mapper.writeValueAsString(createdEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -49,7 +49,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                     );
 
                 }
-                case V5UserUpdatedOriginalUrlEvent updatedEvent -> {
+                case V1UserUpdatedOriginalUrlEvent updatedEvent -> {
                     var jsonString = mapper.writeValueAsString(updatedEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -72,12 +72,9 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     private ShortenedUrlEventMetadata toEmbeddedMetadata(ShortenedUrlEventEnvelop.Metadata metadata) {
         return new ShortenedUrlEventMetadata(
-                metadata.getArtifactId(),
                 metadata.getVersion(),
                 metadata.getRecordName(),
-                metadata.getEventDateTime(),
-                metadata.getPublishedAt(),
-                metadata.getProcessedAt()
+                metadata.getEventDateTime()
         );
     }
 
@@ -87,12 +84,9 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
     ) {
         return new ShortenedUrlEventEnvelop.Metadata(
                 eventId,
-                embedded.getArtifactId(),
                 embedded.getVersion(),
                 embedded.getRecordName(),
-                embedded.getEventDateTime(),
-                embedded.getProcessedAt(),
-                embedded.getPublishedAt()
+                embedded.getEventDateTime()
         );
     }
 
@@ -101,18 +95,16 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         try {
             switch (dbEntity.getMetadata().getRecordName()) {
                 case USER_CREATED_SHORTENED_URL -> {
-                    var deserialized = mapper.readValue(dbEntity.getEvent(), V4UserCreatedShortenedUrlEvent.class);
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
-                            deserialized
+                            mapper.readValue(dbEntity.getEvent(), V1UserCreatedShortenedUrlEvent.class)
                     );
 
                 }
                 case USER_UPDATED_ORIGINAL_URL -> {
-                    var deserialized = mapper.readValue(dbEntity.getEvent(), V5UserUpdatedOriginalUrlEvent.class);
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
-                            deserialized
+                            mapper.readValue(dbEntity.getEvent(), V1UserUpdatedOriginalUrlEvent.class)
                     );
                 }
                 default -> throw new IllegalStateException("Unsupported event type!");

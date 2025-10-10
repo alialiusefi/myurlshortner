@@ -11,7 +11,7 @@ import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
-import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
@@ -73,13 +73,9 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         ShortenedUrl shortUrl = new ShortenedUrl(either.get(), uniqueIdentifier);
         repo.insertShortenedUrl(shortUrl);
 
-        var event = ShortenedUrlEventEnvelopFactory.createV4CreatedShortenUrlEvent(
-                shortUrl.getPublicIdentifier(),
-                shortUrl.getCreatedAt(),
-                shortUrl.getOriginalUrl()
-        );
+        var event = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortUrl);
         eventStore.insertEvent(event);
-        publisher.publishUserCreatedShortenedUrl(event.getEvent());
+        publisher.publishUserCreatedShortenedUrl(shortUrl.getCreatedAt(), shortUrl.getOriginalUrl(), shortUrl.getPublicIdentifier());
         logger.debug("Successfully generated a short url!");
         return Either.right(shortUrl);
     }
@@ -107,13 +103,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             url.updateOriginalUrl(urlEither.get(), command.isEnabled());
             repo.updateShortenedUrl(url, existingVersion);
             if (originalUrlHasChanged) {
-                ShortenedUrlEventEnvelop<V5UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV5UpdatedOriginalUrlEvent(
-                        url.getPublicIdentifier(),
-                        url.getOriginalUrl(),
-                        url.getUpdatedAt()
-                );
+                ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(url);
                 eventStore.insertEvent(event);
-                publisher.publishUserUpdatedOriginalUrl(event.getEvent());
             }
             return url;
         }).get());

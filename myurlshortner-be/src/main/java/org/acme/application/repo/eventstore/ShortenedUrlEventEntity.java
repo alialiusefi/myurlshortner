@@ -10,7 +10,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
-@Table(name = "shortened_url_event_store")
+@Table(name = "shortened_url_events")
 public class ShortenedUrlEventEntity {
     @Id
     private UUID eventId;

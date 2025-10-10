@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: myurlshortner-be
-          image: alialiusefi/myurlshortner-be:1.0.1
+          image: alialiusefi/myurlshortner-be:1.0.2
           ports:
             - containerPort: 8080
           env:

@@ -3,17 +3,15 @@ package org.acme.application.kafka;
 import com.acme.events.ShortenedUrlUserEvents;
 import com.acme.events.UserAccessedShortenedUrl;
 import com.acme.events.UserCreatedShortenedUrl;
-import com.acme.events.UserUpdatedOriginalUrl;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.inject.Singleton;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
 
+import java.net.URI;
 import java.time.OffsetDateTime;
 
 @IfBuildProfile(anyOf = {"dev", "prod"})
@@ -48,32 +46,20 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
     }
 
     public void publishUserCreatedShortenedUrl(
-            @NonNull V4UserCreatedShortenedUrlEvent event
+            @NonNull OffsetDateTime createdAt,
+            @NonNull URI originalUrl,
+            @NonNull String uniqueIdentifier
     ) {
         emitter.sendAndAwait(
                 ShortenedUrlUserEvents.newBuilder()
                         .setUserCreatedShortenedUrlEvent(
                                 UserCreatedShortenedUrl.newBuilder()
-                                        .setCreatedAt(event.createdAt().toString())
-                                        .setOriginalUrl(event.originalUrl().toString())
-                                        .setUniqueIdentifier(event.uniqueIdentifier())
+                                        .setCreatedAt(createdAt.toString())
+                                        .setOriginalUrl(originalUrl.toString())
+                                        .setUniqueIdentifier(uniqueIdentifier)
                                         .build()
                         )
                         .build()
-        );
-    }
-
-    @Override
-    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrlEvent event) {
-        emitter.sendAndAwait(
-                ShortenedUrlUserEvents.newBuilder()
-                        .setUserUpdatedOriginalUrlEvent(
-                                UserUpdatedOriginalUrl.newBuilder()
-                                        .setUniqueIdentifier(event.uniqueIdentifier())
-                                        .setNewOriginalUrl(event.newOriginalUrl().toString())
-                                        .setUpdatedAt(event.updatedAt().toString())
-                                        .build()
-                        ).build()
         );
     }
 }

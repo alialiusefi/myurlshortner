@@ -1,6 +1,6 @@
 services:
   be:
-    image: alialiusefi/myurlshortner-be:1.0.1
+    image: alialiusefi/myurlshortner-be:1.0.2
     environment:
       REGISTRY_URL: "http://schema-registry:8080"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"
@@ -18,7 +18,7 @@ services:
     networks:
       - docker-network
   consumer:
-    image: alialiusefi/myurlshortner-consumer:1.0.0
+    image: alialiusefi/myurlshortner-consumer:1.0.1
     environment:
       REGISTRY_URL: "http://schema-registry:8080/apis/registry/v3"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"

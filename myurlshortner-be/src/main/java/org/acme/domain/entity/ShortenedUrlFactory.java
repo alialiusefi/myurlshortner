@@ -1,8 +1,8 @@
 package org.acme.domain.entity;
 
 import org.acme.domain.events.ShortenedUrlEvent;
-import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 
 import java.util.List;
 
@@ -11,10 +11,10 @@ public class ShortenedUrlFactory {
         ShortenedUrl state = null;
         for (ShortenedUrlEvent event : events) {
             switch (event) {
-                case V4UserCreatedShortenedUrlEvent created -> {
+                case V1UserCreatedShortenedUrlEvent created -> {
                     state = new ShortenedUrl(created.originalUrl(), created.uniqueIdentifier());
                 }
-                case V5UserUpdatedOriginalUrlEvent updated -> {
+                case V1UserUpdatedOriginalUrlEvent updated -> {
                     if (state != null) {
                         state.setOriginalUrl(updated.newOriginalUrl());
                     }

@@ -19,14 +19,6 @@
           "UserCreatedShortenedUrl"
         ],
         "default": null
-      },
-      {
-        "name": "userUpdatedOriginalUrlEvent",
-        "type": [
-          "null",
-          "UserUpdatedOriginalUrl"
-        ],
-        "default": null
       }
     ]
   },

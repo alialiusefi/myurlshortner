@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 
 @Embeddable
 public class ShortenedUrlEventMetadata {
-    private String artifactId;
     private Integer version;
 
     @Enumerated(EnumType.STRING)
@@ -17,28 +16,14 @@ public class ShortenedUrlEventMetadata {
 
     private OffsetDateTime eventDateTime;
 
-    private OffsetDateTime publishedAt;
-
-    private OffsetDateTime processedAt;
 
     public ShortenedUrlEventMetadata() {
     }
 
-    public ShortenedUrlEventMetadata(String artifactId, Integer version, ShortenedUrlRecordType recordName, OffsetDateTime eventDateTime, OffsetDateTime publishedAt, OffsetDateTime processedAt) {
-        this.artifactId = artifactId;
+    public ShortenedUrlEventMetadata(Integer version, ShortenedUrlRecordType recordName, OffsetDateTime eventDateTime) {
         this.version = version;
         this.recordName = recordName;
         this.eventDateTime = eventDateTime;
-        this.publishedAt = publishedAt;
-        this.processedAt = processedAt;
-    }
-
-    public String getArtifactId() {
-        return artifactId;
-    }
-
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
     }
 
     public Integer getVersion() {
@@ -63,21 +48,5 @@ public class ShortenedUrlEventMetadata {
 
     public void setEventDateTime(OffsetDateTime eventDateTime) {
         this.eventDateTime = eventDateTime;
-    }
-
-    public OffsetDateTime getPublishedAt() {
-        return publishedAt;
-    }
-
-    public void setPublishedAt(OffsetDateTime publishedAt) {
-        this.publishedAt = publishedAt;
-    }
-
-    public OffsetDateTime getProcessedAt() {
-        return processedAt;
-    }
-
-    public void setProcessedAt(OffsetDateTime processedAt) {
-        this.processedAt = processedAt;
     }
 }

@@ -3,12 +3,11 @@ package org.acme.application.kafka;
 import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.events.V4UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V5UserUpdatedOriginalUrlEvent;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.time.OffsetDateTime;
 
 @ApplicationScoped
@@ -22,12 +21,11 @@ public class KafkaUrlPublisherLocal implements KafkaUrlPublisher {
     }
 
     @Override
-    public void publishUserCreatedShortenedUrl(@NonNull V4UserCreatedShortenedUrlEvent event) {
-        logger.info("Message sent successfully!");
-    }
-
-    @Override
-    public void publishUserUpdatedOriginalUrl(@NonNull V5UserUpdatedOriginalUrlEvent event) {
+    public void publishUserCreatedShortenedUrl(
+            @NonNull OffsetDateTime createdAt,
+            @NonNull URI originalUrl,
+            @NonNull String uniqueIdentifier
+    ) {
         logger.info("Message sent successfully!");
     }
 }
