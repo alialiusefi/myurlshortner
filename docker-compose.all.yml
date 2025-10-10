@@ -33,7 +33,7 @@ services:
     networks:
       - docker-network
   fe:
-    image: alialiusefi/myurlshortner-fe-docker:1.0.1
+    image: alialiusefi/myurlshortner-fe-docker:1.0.0
     ports:
       - "3000:3000"
     depends_on:
