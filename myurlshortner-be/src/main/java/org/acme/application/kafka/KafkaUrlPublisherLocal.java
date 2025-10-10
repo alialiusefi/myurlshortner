@@ -3,13 +3,11 @@ package org.acme.application.kafka;
 import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.net.URL;
 import java.time.OffsetDateTime;
 
 @ApplicationScoped

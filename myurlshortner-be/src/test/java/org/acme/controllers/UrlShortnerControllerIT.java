@@ -13,7 +13,6 @@ import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlRecordType;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;

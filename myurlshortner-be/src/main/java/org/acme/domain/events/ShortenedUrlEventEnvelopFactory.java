@@ -5,7 +5,7 @@ import org.acme.domain.entity.ShortenedUrl;
 import java.util.UUID;
 
 public class ShortenedUrlEventEnvelopFactory {
-    public static ShortenedUrlEventEnvelop<V1UserCreatedShortenedUrlEvent> createV4CreatedShortenUrlEvent(
+    public static ShortenedUrlEventEnvelop<V1UserCreatedShortenedUrlEvent> createV1CreatedShortenUrlEvent(
             ShortenedUrl shortenedUrl
     ) {
         return new ShortenedUrlEventEnvelop<>(
@@ -17,7 +17,7 @@ public class ShortenedUrlEventEnvelopFactory {
         );
     }
 
-    public static ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> createV5UpdatedOriginalUrlEvent(
+    public static ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> createV1UpdatedOriginalUrlEvent(
             ShortenedUrl url
     ) {
         return new ShortenedUrlEventEnvelop<>(

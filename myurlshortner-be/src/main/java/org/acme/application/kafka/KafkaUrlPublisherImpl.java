@@ -7,13 +7,11 @@ import io.quarkus.arc.profile.IfBuildProfile;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.inject.Singleton;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jspecify.annotations.NonNull;
 
 import java.net.URI;
-import java.net.URL;
 import java.time.OffsetDateTime;
 
 @IfBuildProfile(anyOf = {"dev", "prod"})
