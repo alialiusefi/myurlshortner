@@ -16,7 +16,7 @@ import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
 import org.acme.domain.exceptions.url.UrlValidationException;
-import org.acme.domain.query.AvailableShortenedUrlWithAccessCount;
+import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
@@ -85,7 +85,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Tuple2<Long, List<AvailableShortenedUrlWithAccessCount>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending) {
+    public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending) {
         return repo.listAvailableShortenedUrls(page, size, isAscending);
     }
 
