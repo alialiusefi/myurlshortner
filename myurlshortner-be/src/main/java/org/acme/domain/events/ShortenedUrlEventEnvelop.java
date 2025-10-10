@@ -6,21 +6,15 @@ import java.util.UUID;
 public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
     public static class Metadata {
         UUID eventId;
-        String artifactId;
         Integer version;
         ShortenedUrlRecordType recordName;
         OffsetDateTime eventDateTime;
-        OffsetDateTime processedAt;
-        OffsetDateTime publishedAt;
 
-        public Metadata(UUID eventId, String artifactId, Integer version, ShortenedUrlRecordType recordName, OffsetDateTime eventDateTime, OffsetDateTime processedAt, OffsetDateTime publishedAt) {
+        public Metadata(UUID eventId, Integer version, ShortenedUrlRecordType recordName, OffsetDateTime eventDateTime) {
             this.eventId = eventId;
-            this.artifactId = artifactId;
             this.version = version;
             this.recordName = recordName;
             this.eventDateTime = eventDateTime;
-            this.processedAt = processedAt;
-            this.publishedAt = publishedAt;
         }
 
         public UUID getEventId() {
@@ -29,14 +23,6 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
 
         public void setEventId(UUID eventId) {
             this.eventId = eventId;
-        }
-
-        public String getArtifactId() {
-            return artifactId;
-        }
-
-        public void setArtifactId(String artifactId) {
-            this.artifactId = artifactId;
         }
 
         public Integer getVersion() {
@@ -62,22 +48,6 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
         public void setEventDateTime(OffsetDateTime eventDateTime) {
             this.eventDateTime = eventDateTime;
         }
-
-        public OffsetDateTime getProcessedAt() {
-            return processedAt;
-        }
-
-        public void setProcessedAt(OffsetDateTime processedAt) {
-            this.processedAt = processedAt;
-        }
-
-        public OffsetDateTime getPublishedAt() {
-            return publishedAt;
-        }
-
-        public void setPublishedAt(OffsetDateTime publishedAt) {
-            this.publishedAt = publishedAt;
-        }
     }
 
     private final Metadata metadata;
@@ -90,22 +60,16 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
 
     ShortenedUrlEventEnvelop(
             UUID eventId,
-            String artifactId,
             Integer version,
             ShortenedUrlRecordType recordName,
-            OffsetDateTime receivedAt,
-            OffsetDateTime publishedAt,
             OffsetDateTime eventDateTime,
             T event
     ) {
         this.metadata = new Metadata(
                 eventId,
-                artifactId,
                 version,
                 recordName,
-                eventDateTime,
-                receivedAt,
-                publishedAt
+                eventDateTime
         );
         this.event = event;
     }

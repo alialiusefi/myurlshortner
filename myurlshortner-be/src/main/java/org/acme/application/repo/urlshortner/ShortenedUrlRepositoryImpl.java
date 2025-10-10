@@ -80,11 +80,11 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         preparedStatement.setParameter(2, (page - 1) * size);
         var result = ((List<Object[]>) preparedStatement.getResultList()).stream().map(
                 array -> new AvailableShortenedUrl(
-                                (String) array[0],
-                                URI.create((String) array[1]),
-                                OffsetDateTime.ofInstant((Instant) array[3], ZoneId.systemDefault()),
-                                (Long) array[2],
-                                (Boolean) array[4]
+                        (String) array[0],
+                        URI.create((String) array[1]),
+                        OffsetDateTime.ofInstant((Instant) array[3], ZoneId.systemDefault()),
+                        (Long) array[2],
+                        (Boolean) array[4]
                 )
         ).toList();
         return Tuple.of(count, result);
