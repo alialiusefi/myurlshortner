@@ -100,17 +100,15 @@ It may take a while to build images, also kafka and postgres may take a while to
 
 ```bash
 kubectl port-forward apicurio-registry 8888:8888
-curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artifacts \
-  -H "Content-Type: application/json" \
-  --data-raw '{
+curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artifacts -H "Content-Type: application/json" \
+--data-raw '{
     "artifactId": "ShortenedUrlUserEvents",
     "artifactType": "AVRO",
     "name": "ShortenedUrlUserEvents",
     "firstVersion": {
         "content": {
-            "content": "[{\"type\":\"record\",\"name\":\"ShortenedUrlUserEvents\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"userAccessedShortenedUrlEvent\",\"type\":[\"null\",\"UserAccessedShortenedUrl\"],\"default\":null},{\"name\":\"userCreatedShortenedUrlEvent\",\"type\":[\"null\",\"UserCreatedShortenedUrl\"],\"default\":null},{\"name\":\"userUpdatedOriginalUrlEvent\",\"type\":[\"null\",\"UserUpdatedOriginalUrl\"],\"default\":null}]},{\"type\":\"record\",\"name\":\"UserAccessedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":[\"null\",\"string\"],\"default\":\"null\"},{\"name\":\"shortened_url\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"user_agent\",\"type\":\"string\"},{\"name\":\"accessed_at\",\"type\":[\"null\",\"string\"],\"doc\":\"ISO 8601 Timestamp\",\"default\":\"null\"}]},{\"type\":\"record\",\"name\":\"UserCreatedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"string\",\"doc\":\"ISO 8601 Timestamp\"}]},{\"type\":\"record\",\"name\":\"UserUpdatedOriginalUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"new_original_url\",\"type\":\"string\"},{\"name\":\"updated_at\",\"type\":\"string\",\"doc\":\"ISO 8601 Timestamp\"}]}]",
-            "contentType": "application/json",
-            "references": [ ]
+            "content": "[{\"type\":\"record\",\"name\":\"ShortenedUrlUserEvents\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"userAccessedShortenedUrlEvent\",\"type\":[\"null\",\"UserAccessedShortenedUrl\"],\"default\":null},{\"name\":\"userCreatedShortenedUrlEvent\",\"type\":[\"null\",\"UserCreatedShortenedUrl\"],\"default\":null}]},{\"type\":\"record\",\"name\":\"UserAccessedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":[\"null\",\"string\"],\"default\":\"null\"},{\"name\":\"shortened_url\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"user_agent\",\"type\":\"string\"},{\"name\":\"accessed_at\",\"type\":[\"null\",\"string\"],\"doc\":\"ISO 8601 Timestamp\",\"default\":\"null\"}]},{\"type\":\"record\",\"name\":\"UserCreatedShortenedUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"original_url\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"string\",\"doc\":\"ISO 8601 Timestamp\"}]},{\"type\":\"record\",\"name\":\"UserUpdatedOriginalUrl\",\"namespace\":\"com.acme.events\",\"fields\":[{\"name\":\"unique_identifier\",\"type\":\"string\"},{\"name\":\"new_original_url\",\"type\":\"string\"},{\"name\":\"updated_at\",\"type\":\"string\",\"doc\":\"ISO 8601 Timestamp\"}]}]",
+            "contentType": "application/json"
         }
     }
 }'
