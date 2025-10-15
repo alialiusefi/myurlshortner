@@ -4,14 +4,14 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
 import org.acme.application.controller.url.UpdateOriginalUrlRequest;
-import org.acme.application.exception.ApplicationException;
-import org.acme.application.exception.OrderParamIsNotCorrectException;
-import org.acme.application.exception.PageNumberIsNotCorrectException;
-import org.acme.application.exception.PageSizeIsNotCorrectException;
+import org.acme.application.exception.*;
 import org.acme.application.exception.url.GetAvailableUrlsError;
+import org.acme.application.exception.url.GetShortenedUrlHistoryError;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.events.ShortenedUrlEvent;
+import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
@@ -20,6 +20,7 @@ import org.acme.domain.service.ShortenedUrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,5 +76,35 @@ public class ShortenedUrlUseCases {
         return service.updateOriginalUrl(
                 new UpdateOriginalUrlCommand(uniqueIdentifier, request.url(), request.isEnabled())
         );
+    }
+
+    public Either<GetShortenedUrlHistoryError, List<? extends ShortenedUrlEvent>> getShortenedUrlHistory(
+            String uniqueIdentifier,
+            Integer offset,
+            Integer size,
+            String fromDateTime
+    ) {
+        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier);
+        if (maybeShortenedUrl.isEmpty()) {
+            return Either.left(new GetShortenedUrlHistoryError(new ShortenedUrlIsNotFoundException()));
+        }
+        List<ApplicationException> errors = new ArrayList<>();
+        if (offset == null || offset < 0) {
+            errors.add(new OffsetIsNotCorrectException(offset));
+        }
+        if (size == null || size <= 0 || size > 100) {
+            errors.add(new PageSizeIsNotCorrectException(size));
+        }
+        OffsetDateTime parsed = null;
+        try {
+            parsed = OffsetDateTime.parse(fromDateTime.replace(" ","+"));
+        } catch (Throwable e) {
+            errors.add(new DateTimeIsNotCorrectException(fromDateTime));
+        }
+        if (errors.isEmpty()) {
+            return Either.right(service.getShortenedUrlHistory(uniqueIdentifier, offset, size, parsed));
+        } else {
+            return Either.left(new GetShortenedUrlHistoryError(errors));
+        }
     }
 }

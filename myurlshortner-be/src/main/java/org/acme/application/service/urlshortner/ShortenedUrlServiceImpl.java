@@ -9,13 +9,11 @@ import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
-import org.acme.domain.exceptions.url.ShortenUrlError;
-import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
-import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
-import org.acme.domain.exceptions.url.UrlValidationException;
+import org.acme.domain.exceptions.url.*;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
@@ -29,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -59,6 +58,11 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             builder.append(i);
         }
         return builder.toString();
+    }
+
+    @Override
+    public Optional<ShortenedUrl> getShortenedUrl(String uniqueIdentifier) {
+        return repo.getShortenedUrl(uniqueIdentifier);
     }
 
     @Override
@@ -108,5 +112,15 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             }
             return url;
         }).get());
+    }
+
+    @Override
+    public List<? extends ShortenedUrlEvent> getShortenedUrlHistory(
+            @NonNull String uniqueIdentifier,
+            @NonNull Integer offset,
+            @NonNull Integer size,
+            @NonNull OffsetDateTime from
+    ) {
+        return eventStore.getShortenedUrlEvents(uniqueIdentifier, offset, size, from);
     }
 }

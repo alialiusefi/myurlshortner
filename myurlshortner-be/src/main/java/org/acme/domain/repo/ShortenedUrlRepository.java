@@ -22,6 +22,5 @@ public interface ShortenedUrlRepository {
             boolean isAscending
     );
 
-    @NotNull
     void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException;
 }
