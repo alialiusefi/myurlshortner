@@ -121,6 +121,6 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             @NonNull Integer size,
             @NonNull OffsetDateTime from
     ) {
-        return eventStore.getShortenedUrlEvents(uniqueIdentifier, offset, size, from);
+        return eventStore.getShortenedUrlEventsOrderedByDateTimeDesc(uniqueIdentifier, offset, size, from);
     }
 }

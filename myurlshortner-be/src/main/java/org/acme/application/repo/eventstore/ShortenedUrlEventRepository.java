@@ -71,7 +71,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         }
     }
 
-    public List<? extends ShortenedUrlEvent> getShortenedUrlEvents(
+    public List<? extends ShortenedUrlEvent> getShortenedUrlEventsOrderedByDateTimeDesc(
             @NonNull String uniqueIdentifier,
             @NonNull Integer offset,
             @NonNull Integer size,
