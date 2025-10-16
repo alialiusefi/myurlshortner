@@ -7,7 +7,7 @@ Get shortened url history.
 ### Requests
 
 ```http
-GET https://{hostname}/shortened-urls/{uniqueIdentifier}/history?offset=0&size=2&from=2025-10-15T15:12:42.978495+09:00
+GET http://{hostname}/shortened-urls/{uniqueIdentifier}/history?offset=0&size=2&from=2025-10-15T15:12:42.978495+09:00
 Content-Type: application/json
 Authorization: 
 ```
