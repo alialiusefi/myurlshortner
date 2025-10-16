@@ -27,8 +27,12 @@ public class ShortenedUrl {
     }
 
     public String shortenedUrl(String serviceHostname) {
+        return ShortenedUrl.toShortenedUrl(serviceHostname, this.publicIdentifier);
+    }
+
+    public static String toShortenedUrl(String serviceHostname, String publicIdentifier) {
         String format = "http://%s/goto/%s";
-        return String.format(format, serviceHostname, this.publicIdentifier);
+        return String.format(format, serviceHostname, publicIdentifier);
     }
 
     public ShortenedUrl updateOriginalUrl(URI newOriginalUrl, Boolean isEnabled) {

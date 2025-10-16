@@ -92,7 +92,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
 
     @Override
     @Transactional
-    public @NotNull void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
+    public void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
         var count = update("set originalUrl = ?1, updatedAt = ?2, isEnabled = ?3 where uniqueIdentifier = ?4 and updatedAt = ?5",
                 shortenedUrl.getOriginalUrl().toString(),
                 shortenedUrl.getUpdatedAt(),

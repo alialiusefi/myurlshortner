@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import org.acme.domain.events.ShortenedUrlEventEnvelop;
-import org.acme.domain.events.ShortenedUrlRecordType;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.*;
+import org.jspecify.annotations.NonNull;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,6 +19,11 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     ShortenedUrlEventRepository(ObjectMapper mapper) {
         this.mapper = mapper;
+    }
+
+    @Transactional
+    public void cleanup() {
+        deleteAll();
     }
 
     public Optional<ShortenedUrlEventEnvelop<?>> getShortenedUrlEventByEventId(UUID eventId) {
@@ -64,6 +69,21 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Incorrect json provided", e);
         }
+    }
+
+    public List<? extends ShortenedUrlEvent> getShortenedUrlEventsOrderedByDateTimeDesc(
+            @NonNull String uniqueIdentifier,
+            @NonNull Integer offset,
+            @NonNull Integer size,
+            @NonNull OffsetDateTime from
+    ) {
+        return find("uniqueIdentifier = ?1 and metadata.eventDateTime <= ?2 order by metadata.eventDateTime desc", uniqueIdentifier, from)
+                .range(offset, (offset + size) - 1)
+                .list()
+                .stream()
+                .map(this::toShortenedUrlEvent)
+                .map(ShortenedUrlEventEnvelop::getEvent)
+                .toList();
     }
 
 //    public Iterator<List<ShortenedUrlEventEnvelop<?>>> iterator(int batchSize, int isAscending, String uniqueIdentifier) {

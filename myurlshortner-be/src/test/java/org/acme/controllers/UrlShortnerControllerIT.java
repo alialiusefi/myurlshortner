@@ -7,11 +7,13 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
 import jakarta.inject.Inject;
+import org.acme.application.controller.url.ShortenedUrlHistoryResponse;
 import org.acme.application.controller.url.UrlList;
 import org.acme.application.kafka.KafkaUrlPublisherLocal;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
 import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.ShortenedUrlRecordType;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.hamcrest.Matchers;
@@ -24,6 +26,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @QuarkusTest
@@ -53,6 +56,7 @@ class UrlShortnerControllerIT {
     @BeforeEach
     void cleanup() throws SaveShortenedUrlError {
         repo.cleanup();
+        eventStore.cleanup();
     }
 
     @Test
@@ -217,5 +221,48 @@ class UrlShortnerControllerIT {
                 .patch("/shortened-urls/abcdefghik")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void testGetShortenedUrlHistory() throws SaveShortenedUrlError {
+        var url = "youtube.com";
+        var uid = "abcdefghi2";
+        var entity = new ShortenedUrl(URI.create(url), uid);
+        repo.insertShortenedUrl(entity);
+
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                        entity
+                )
+        );
+        entity.setOriginalUrl(URI.create("abc.com"));
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
+                        entity
+                )
+        );
+        entity.setOriginalUrl(URI.create("yahoo.com"));
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
+                        entity
+                )
+        );
+
+        String now = OffsetDateTime.now().plusMinutes(1L).toString();
+        var response = when().get("/shortened-urls/" + uid + "/history?offset=1&size=1&from=" + now)
+                .then()
+                .statusCode(200)
+                .extract().jsonPath(config).getList("data", ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow.class);
+
+        assertThat("Size is correct", response.size() == 1);
+        assertThat("Content is correct", response.getFirst().url().equals("abc.com"));
+    }
+
+    @Test
+    void testGetShortenedUrlsHistory404() {
+        String uid = "unknown123";
+        when().get("/shortened-urls/" + uid + "/history")
+                .then()
+                .statusCode(404);
     }
 }

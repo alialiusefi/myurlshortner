@@ -4,6 +4,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
+import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -89,6 +91,38 @@ public class UrlShortnerController {
                             ).build());
                 },
                 success -> Response.status(Response.Status.NO_CONTENT).build()
+        );
+    }
+
+    @GET
+    @Path("/shortened-urls/{uniqueIdentifier}/history")
+    @Produces(APPLICATION_JSON)
+    public Response shortenedUrlHistory(
+            @PathParam("uniqueIdentifier") String uniqueIdentifier,
+            @QueryParam("size") Integer size,
+            @QueryParam("offset") Integer offset,
+            @QueryParam("from") String from
+    ) {
+        return shortenedUrlUseCases.getShortenedUrlHistory(uniqueIdentifier, offset, size, from).fold(
+                fail ->
+                        fail.error.map(notFound -> Response.status(404).build())
+                                .orElseGet(() -> Response.status(400).entity(ErrorResponse.buildFromApplicationErrors(fail.errors)).build())
+                ,
+                events ->
+                        Response.ok(new ShortenedUrlHistoryResponse(events.stream().map(e ->
+                                switch (e) {
+                                    case V1UserCreatedShortenedUrlEvent event ->
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
+                                                    event.originalUrl().toString(),
+                                                    event.createdAt()
+                                            );
+                                    case V1UserUpdatedOriginalUrlEvent event ->
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
+                                                    event.newOriginalUrl().toString(),
+                                                    event.updatedAt()
+                                            );
+                                }).toList())
+                        ).build()
         );
     }
 }
