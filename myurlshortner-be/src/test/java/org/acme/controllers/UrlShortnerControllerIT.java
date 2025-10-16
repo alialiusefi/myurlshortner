@@ -249,12 +249,13 @@ class UrlShortnerControllerIT {
         );
 
         String now = OffsetDateTime.now().plusMinutes(1L).toString();
-        var response = when().get("/shortened-urls/" + uid + "/history?offset=1&size=2&from=" + now)
+        var response = when().get("/shortened-urls/" + uid + "/history?offset=1&size=1&from=" + now)
                 .then()
                 .statusCode(200)
                 .extract().jsonPath(config).getList("data", ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow.class);
 
-        assert response.size() == 2;
+        assertThat("Size is correct", response.size() == 1);
+        assertThat("Content is correct", response.getFirst().url().equals("abc.com"));
     }
 
     @Test

@@ -4,7 +4,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
-import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
@@ -115,13 +114,11 @@ public class UrlShortnerController {
                                     case V1UserCreatedShortenedUrlEvent event ->
                                             new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
                                                     event.originalUrl().toString(),
-                                                    ShortenedUrl.toShortenedUrl(hostname, event.uniqueIdentifier()),
                                                     event.createdAt()
                                             );
                                     case V1UserUpdatedOriginalUrlEvent event ->
                                             new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
                                                     event.newOriginalUrl().toString(),
-                                                    ShortenedUrl.toShortenedUrl(hostname, event.uniqueIdentifier()),
                                                     event.updatedAt()
                                             );
                                 }).toList())

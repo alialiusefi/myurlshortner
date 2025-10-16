@@ -20,12 +20,10 @@ Authorization:
   "data" : [
     {
       "url": "https://www.google.com",
-      "shortened_url": "http://{hostname}/goto/CMLqFwlRu7",
       "event_date_time": "2025-10-15T15:13:42.978495+09:00"
     },
     {
       "url": "https://www.youtube.com",
-      "shortened_url": "http://{hostname}/goto/CMLqFwlRu7",
       "event_date_time": "2025-10-15T15:12:42.978495+09:00"
     }
   ]
