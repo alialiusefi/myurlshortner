@@ -2,6 +2,7 @@ package org.acme.domain.entity;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 public class ShortenedUrl {
     private URI originalUrl;
@@ -72,5 +73,21 @@ public class ShortenedUrl {
 
     public Boolean isEnabled() {
         return isEnabled;
+    }
+
+    public void setIsEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ShortenedUrl that = (ShortenedUrl) o;
+        return isEnabled == that.isEnabled && Objects.equals(originalUrl, that.originalUrl) && Objects.equals(publicIdentifier, that.publicIdentifier) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(originalUrl, publicIdentifier, createdAt, updatedAt, isEnabled);
     }
 }

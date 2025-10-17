@@ -2,16 +2,20 @@ package org.acme.application.usecases;
 
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import jakarta.inject.Singleton;
 import org.acme.application.controller.url.UpdateOriginalUrlRequest;
 import org.acme.application.exception.*;
 import org.acme.application.exception.url.GetAvailableUrlsError;
+import org.acme.application.exception.url.GetShortenedUrlError;
 import org.acme.application.exception.url.GetShortenedUrlHistoryError;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
+import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
+import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
@@ -97,7 +101,7 @@ public class ShortenedUrlUseCases {
         }
         OffsetDateTime parsed = null;
         try {
-            parsed = OffsetDateTime.parse(fromDateTime.replace(" ","+"));
+            parsed = OffsetDateTime.parse(fromDateTime.replace(" ", "+"));
         } catch (Throwable e) {
             errors.add(new DateTimeIsNotCorrectException(fromDateTime));
         }
@@ -106,5 +110,17 @@ public class ShortenedUrlUseCases {
         } else {
             return Either.left(new GetShortenedUrlHistoryError(errors));
         }
+    }
+
+    public Either<GetShortenedUrlError, ShortenedUrl> getShortenedUrl(String uniqueIdentifier) {
+        if (uniqueIdentifier == null || uniqueIdentifier.isBlank()) {
+            return Either.left(new GetShortenedUrlError(new UniqueIdentifierCannotBeEmptyValidationException()));
+        }
+        if (uniqueIdentifier.length() > 10) {
+            return Either.left(new GetShortenedUrlError(new UniqueIdentifierIsTooLongValidationException()));
+        }
+        return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier)).toEither(
+                new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
+        );
     }
 }

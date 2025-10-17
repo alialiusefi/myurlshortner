@@ -10,5 +10,6 @@ public record ShortenedUrlHistoryResponse(
     public record ShortenedUrlHistoryRow(
             String url,
             OffsetDateTime eventDateTime
-    ) { }
+    ) {
+    }
 }

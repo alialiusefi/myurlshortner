@@ -1,7 +1,6 @@
 package org.acme.application.repo.urlshortner;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.smallrye.common.constraint.NotNull;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.inject.Singleton;
