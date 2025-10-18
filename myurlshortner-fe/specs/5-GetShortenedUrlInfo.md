@@ -15,5 +15,5 @@ http://{hostname}/browse/{uniqueIdentifier}/info
 - Back Button
   - Redirects the user back to the browse page.
 - Title: History
-  - Scrollable list of shortened url state
-  - 3 elements can be viewed at once
+  - Scrollable list of shortened url states.
+  - 2 elements can be viewed at once.
