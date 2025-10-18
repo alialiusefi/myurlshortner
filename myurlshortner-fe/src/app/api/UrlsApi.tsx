@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 import { ErrorResponse } from "./Errors";
 
 export const GetAvailableUrlsSWR = (
@@ -30,6 +31,42 @@ export const GetAvailableUrlsSWR = (
     { refreshInterval: refreshInterval },
   );
 };
+
+export const GetShortenedUrlHistorySWR = (
+  size: number,
+  uniqueIdentifier: string,
+  fromDateTime: string,
+) => {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  const fetcher = (url) =>
+    fetch(url).then(async (res) => {
+      if (res.ok) {
+        return (await res.json()) as GetShortenedUrlHistoryResponse;
+      }
+      console.error("Unexpected BE response!");
+      return null;
+    });
+  return useSWRInfinite((page, prevPageData) => {
+    if (prevPageData != null && prevPageData.data.length < size) {
+      return null;
+    }
+    const offset = page * size;
+    return `${serverUrl}/shortened-urls/${uniqueIdentifier}/history?size=${size}&offset=${offset}&from=${fromDateTime}`;
+  }, fetcher);
+};
+
+export type GetShortenedUrlHistoryRowResponse = {
+  url: string;
+  event_date_time: string;
+};
+
+export class GetShortenedUrlHistoryResponse {
+  data: GetShortenedUrlHistoryRowResponse[];
+
+  constructor() {
+    this.data = [];
+  }
+}
 
 export class GetAvailableUrlsResponse {
   data: [

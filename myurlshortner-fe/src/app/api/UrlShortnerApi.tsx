@@ -15,10 +15,7 @@ export async function shortenUrlOperaton(
   };
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   try {
-    const rawResponse = await fetch(
-      `${serverUrl}/shorten`,
-      requestConfig,
-    );
+    const rawResponse = await fetch(`${serverUrl}/shorten`, requestConfig);
     if (!rawResponse.ok) {
       const jsonErrorResponse = await rawResponse.json();
       console.error(`Error while calling the BE! ${jsonErrorResponse}`);

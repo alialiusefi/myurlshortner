@@ -21,10 +21,11 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortenedUrlDialog";
 import CircleIcon from "@mui/icons-material/Circle";
+import { redirect } from "next/navigation";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const getIntParam = (
     key: string,
     validator: (string: string) => boolean,
@@ -92,6 +93,7 @@ export default function ShortnetedUrlsTable() {
                 />
               </TableCell>
               <TableCell></TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -105,7 +107,12 @@ export default function ShortnetedUrlsTable() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Link target="_blank" rel="noopener noreferrer" href={one.shortened_url} underline="none">
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={one.shortened_url}
+                    underline="none"
+                  >
                     {one.shortened_url}
                   </Link>
                 </TableCell>
@@ -145,6 +152,19 @@ export default function ShortnetedUrlsTable() {
                     ) : (
                       <></>
                     )}
+                  </IconButton>
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => {
+                      redirect(
+                        `/browse/${one.shortened_url.substring(
+                          one.shortened_url.indexOf("/goto/") + 6,
+                        )}/info`,
+                      );
+                    }}
+                  >
+                    <Button>INFO</Button>
                   </IconButton>
                 </TableCell>
               </TableRow>
