@@ -2,6 +2,27 @@ import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { ErrorResponse } from "./Errors";
 
+export const GetShortenedUrlInfoSWR = (
+  uniqueIdentifier: string
+) => {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  const fetcher = (url) =>
+    fetch(url).then(async (res) => {
+      if (res.ok) {
+        const json = (await res.json()) as GetShortenedUrlInfoResponse;
+        return json;
+      }
+      if (res.status == 404) {
+        throw new GetShortenedUrlInfo404Response();
+      }
+      throw new Error("Unexpected BE response!");
+    });
+  return useSWR(
+    `${serverUrl}/shortened-urls/${uniqueIdentifier}`,
+    fetcher,
+  );
+}
+
 export const GetAvailableUrlsSWR = (
   page: number,
   size: number,
@@ -57,6 +78,17 @@ export const GetShortenedUrlHistorySWR = (
     return `${serverUrl}/shortened-urls/${uniqueIdentifier}/history?size=${size}&offset=${offset}&from=${fromDateTime}`;
   }, fetcher);
 };
+
+export class GetShortenedUrlInfoResponse {
+  unique_identifier: string
+  shortened_url: string
+  url: string
+  is_enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export class GetShortenedUrlInfo404Response {}
 
 export type GetShortenedUrlHistoryRowResponse = {
   url: string;
