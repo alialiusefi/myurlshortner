@@ -43,6 +43,9 @@ export const GetShortenedUrlHistorySWR = (
       if (res.ok) {
         return (await res.json()) as GetShortenedUrlHistoryResponse;
       }
+      if (res.status == 404) {
+        throw new GetShortenedUrlHistory404Response();
+      }
       console.error("Unexpected BE response!");
       return null;
     });
@@ -67,6 +70,8 @@ export class GetShortenedUrlHistoryResponse {
     this.data = [];
   }
 }
+
+export class GetShortenedUrlHistory404Response {}
 
 export class GetAvailableUrlsResponse {
   data: [
