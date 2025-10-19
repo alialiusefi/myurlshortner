@@ -2,7 +2,7 @@
 
 ### User flow
 
-When the user is directed to the info page, the user can view the history of the shortened url. If the unique identifier provided doesnt exist, redirect user to 404.
+When the user is directed to the info page, the user can view the history of the shortened url. If the unique identifier provided doesnt exist, redirect user back to `http://{hostname}/browse`.
 
 ### Path
 
