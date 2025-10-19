@@ -9,11 +9,15 @@ import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.entity.ShortenedUrlFactory;
 import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
-import org.acme.domain.exceptions.url.*;
+import org.acme.domain.exceptions.url.ShortenUrlError;
+import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
+import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
+import org.acme.domain.exceptions.url.UrlValidationException;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.repo.ShortenedUrlRepository;
@@ -61,8 +65,23 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Optional<ShortenedUrl> getShortenedUrl(String uniqueIdentifier) {
-        return repo.getShortenedUrl(uniqueIdentifier);
+    public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier) {
+        return getShortenedUrlFromEvents(uniqueIdentifier);
+    }
+
+    @Override
+    public Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier) {
+        var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
+        if (maybeShortenedUrl.isEmpty()) {
+            return maybeShortenedUrl;
+        }
+        var isEnabled = maybeShortenedUrl.get().isEnabled();
+        return Optional.of(
+                ShortenedUrlFactory.createShortenedUrl(
+                        eventStore.iteratorFromStart(10, uniqueIdentifier),
+                        isEnabled
+                )
+        );
     }
 
     @Override

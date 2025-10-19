@@ -1,6 +1,5 @@
 package org.acme.domain.repo;
 
-import io.smallrye.common.constraint.NotNull;
 import io.vavr.Tuple2;
 import org.acme.application.repo.exception.ShortenedUrlOptimisticLockException;
 import org.acme.domain.entity.ShortenedUrl;

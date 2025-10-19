@@ -8,6 +8,7 @@ import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
 import jakarta.inject.Inject;
 import org.acme.application.controller.url.ShortenedUrlHistoryResponse;
+import org.acme.application.controller.url.ShortenedUrlResponse;
 import org.acme.application.controller.url.UrlList;
 import org.acme.application.kafka.KafkaUrlPublisherLocal;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
@@ -264,5 +265,51 @@ class UrlShortnerControllerIT {
         when().get("/shortened-urls/" + uid + "/history")
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    void testGetShortenedUrl404() {
+        String uid = "unknown123";
+        when().get("/shortened-urls/" + uid)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void testGetShortenedUrl() throws SaveShortenedUrlError {
+        var url = "youtube.com";
+        var uid = "abcdefghi2";
+        var entity = new ShortenedUrl(URI.create(url), uid);
+        repo.insertShortenedUrl(entity);
+
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                        entity
+                )
+        );
+        entity.setOriginalUrl(URI.create("abc.com"));
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
+                        entity
+                )
+        );
+        entity.setOriginalUrl(URI.create("yahoo.com"));
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
+                        entity
+                )
+        );
+        entity.setIsEnabled(false);
+        repo.updateShortenedUrl(entity, entity.getUpdatedAt());
+
+        var response = when().get("/shortened-urls/" + uid)
+                .then()
+                .statusCode(200)
+                .extract().jsonPath(config).getObject("", ShortenedUrlResponse.class);
+
+        assertThat("Url is correct", response.url().equals("yahoo.com"));
+        assertThat("Is Enabled is correct", !response.isEnabled());
+        assertThat("Updated at is correct", response.updatedAt().equals(entity.getUpdatedAt()));
+        assertThat("Created at is correct", response.createdAt().equals(entity.getCreatedAt()));
     }
 }

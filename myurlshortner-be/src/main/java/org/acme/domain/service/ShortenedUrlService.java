@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ShortenedUrlService {
-    Optional<ShortenedUrl> getShortenedUrl(String uniqueIdentifier);
+    Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier);
+
+    Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier);
 
     Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(@NonNull CreateShortenedUrlCommand command) throws SaveShortenedUrlError;
 
