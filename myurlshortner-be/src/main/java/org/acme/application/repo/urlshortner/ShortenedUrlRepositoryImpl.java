@@ -1,7 +1,6 @@
 package org.acme.application.repo.urlshortner;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.smallrye.common.constraint.NotNull;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.inject.Singleton;
@@ -92,7 +91,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
 
     @Override
     @Transactional
-    public @NotNull void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
+    public void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
         var count = update("set originalUrl = ?1, updatedAt = ?2, isEnabled = ?3 where uniqueIdentifier = ?4 and updatedAt = ?5",
                 shortenedUrl.getOriginalUrl().toString(),
                 shortenedUrl.getUpdatedAt(),

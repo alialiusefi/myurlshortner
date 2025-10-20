@@ -9,6 +9,8 @@ import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.entity.ShortenedUrlFactory;
+import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -59,6 +62,26 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             builder.append(i);
         }
         return builder.toString();
+    }
+
+    @Override
+    public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier) {
+        return getShortenedUrlFromEvents(uniqueIdentifier);
+    }
+
+    @Override
+    public Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier) {
+        var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
+        if (maybeShortenedUrl.isEmpty()) {
+            return maybeShortenedUrl;
+        }
+        var isEnabled = maybeShortenedUrl.get().isEnabled();
+        return Optional.of(
+                ShortenedUrlFactory.createShortenedUrl(
+                        eventStore.iteratorFromStart(10, uniqueIdentifier),
+                        isEnabled
+                )
+        );
     }
 
     @Override
@@ -108,5 +131,15 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             }
             return url;
         }).get());
+    }
+
+    @Override
+    public List<? extends ShortenedUrlEvent> getShortenedUrlHistory(
+            @NonNull String uniqueIdentifier,
+            @NonNull Integer offset,
+            @NonNull Integer size,
+            @NonNull OffsetDateTime from
+    ) {
+        return eventStore.getShortenedUrlEventsOrderedByDateTimeDesc(uniqueIdentifier, offset, size, from);
     }
 }

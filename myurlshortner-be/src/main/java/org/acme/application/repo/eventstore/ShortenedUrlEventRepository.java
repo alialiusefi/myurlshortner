@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import org.acme.domain.events.ShortenedUrlEventEnvelop;
-import org.acme.domain.events.ShortenedUrlRecordType;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.*;
+import org.jspecify.annotations.NonNull;
 
+import java.time.OffsetDateTime;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,6 +20,11 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
 
     ShortenedUrlEventRepository(ObjectMapper mapper) {
         this.mapper = mapper;
+    }
+
+    @Transactional
+    public void cleanup() {
+        deleteAll();
     }
 
     public Optional<ShortenedUrlEventEnvelop<?>> getShortenedUrlEventByEventId(UUID eventId) {
@@ -66,9 +72,24 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         }
     }
 
-//    public Iterator<List<ShortenedUrlEventEnvelop<?>>> iterator(int batchSize, int isAscending, String uniqueIdentifier) {
-//        return null;
-//    }
+    public List<? extends ShortenedUrlEvent> getShortenedUrlEventsOrderedByDateTimeDesc(
+            @NonNull String uniqueIdentifier,
+            @NonNull Integer offset,
+            @NonNull Integer size,
+            @NonNull OffsetDateTime from
+    ) {
+        return find("uniqueIdentifier = ?1 and metadata.eventDateTime <= ?2 order by metadata.eventDateTime desc", uniqueIdentifier, from)
+                .range(offset, (offset + size) - 1)
+                .list()
+                .stream()
+                .map(this::toShortenedUrlEvent)
+                .map(ShortenedUrlEventEnvelop::getEvent)
+                .toList();
+    }
+
+    public Iterator<List<? extends ShortenedUrlEvent>> iteratorFromStart(int batchSize, String uniqueIdentifier) {
+        return new ShortenedUrlEventIterator(this, uniqueIdentifier, batchSize);
+    }
 
     private ShortenedUrlEventMetadata toEmbeddedMetadata(ShortenedUrlEventEnvelop.Metadata metadata) {
         return new ShortenedUrlEventMetadata(
@@ -90,7 +111,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         );
     }
 
-    private ShortenedUrlEventEnvelop<?> toShortenedUrlEvent(ShortenedUrlEventEntity dbEntity) {
+    private ShortenedUrlEventEnvelop<? extends ShortenedUrlEvent> toShortenedUrlEvent(ShortenedUrlEventEntity dbEntity) {
         var meta = toEnvelopMetadata(dbEntity.getEventId(), dbEntity.getMetadata());
         try {
             switch (dbEntity.getMetadata().getRecordName()) {
@@ -113,4 +134,38 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
             throw new RuntimeException(e);
         }
     }
+
+    public static class ShortenedUrlEventIterator implements Iterator<List<? extends ShortenedUrlEvent>> {
+        private final ShortenedUrlEventRepository repo;
+        private int offset = 0;
+        private final String query = "uniqueIdentifier = ?1 order by metadata.eventDateTime asc";
+        private final String uniqueIdentifier;
+        private final int batchSize;
+        //private OffsetDateTime till;
+
+        public ShortenedUrlEventIterator(ShortenedUrlEventRepository repo, String uniqueIdentifier, int batchSize) {
+            this.repo = repo;
+            this.uniqueIdentifier = uniqueIdentifier;
+            this.batchSize = batchSize;
+        }
+
+        @Override
+        public boolean hasNext() {
+            var result = repo.find(query, uniqueIdentifier)
+                    .range(offset, offset)
+                    .list();
+            return result.size() == 1;
+        }
+
+        @Override
+        public List<? extends ShortenedUrlEvent> next() {
+            var result = repo.find(query, uniqueIdentifier)
+                    .range(offset, offset + batchSize - 1)
+                    .list()
+                    .stream().map(a -> repo.toShortenedUrlEvent(a).getEvent()).toList();
+            this.offset = this.offset + batchSize;
+            return result;
+        }
+    }
+
 }

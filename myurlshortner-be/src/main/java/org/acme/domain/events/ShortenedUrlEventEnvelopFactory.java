@@ -13,7 +13,12 @@ public class ShortenedUrlEventEnvelopFactory {
                 1,
                 ShortenedUrlRecordType.USER_CREATED_SHORTENED_URL,
                 shortenedUrl.getCreatedAt(),
-                new V1UserCreatedShortenedUrlEvent(shortenedUrl.getPublicIdentifier(), shortenedUrl.getCreatedAt(), shortenedUrl.isEnabled(), shortenedUrl.getOriginalUrl())
+                new V1UserCreatedShortenedUrlEvent(
+                        shortenedUrl.getPublicIdentifier(),
+                        shortenedUrl.getCreatedAt(),
+                        shortenedUrl.isEnabled(),
+                        shortenedUrl.getOriginalUrl()
+                )
         );
     }
 
