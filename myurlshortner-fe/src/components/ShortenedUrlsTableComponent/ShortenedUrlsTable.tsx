@@ -11,10 +11,7 @@ import TableBody from "@mui/material/TableBody";
 import TablePagination from "@mui/material/TablePagination";
 import { GetAvailableUrlsSWR } from "../../app/api/UrlsApi";
 import TableContainer from "@mui/material/TableContainer";
-import ZonedDateTimeFormatter from "ts-time-format/ZonedDateTimeFormatter";
 import Link from "@mui/material/Link";
-import { LOCAL_ZONE_ID } from "ts-time/Zone";
-import ZonedDateTime from "ts-time/ZonedDateTime";
 import { useSearchParams } from "next/navigation";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -22,6 +19,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortenedUrlDialog";
 import CircleIcon from "@mui/icons-material/Circle";
 import { redirect } from "next/navigation";
+import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
+import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -107,27 +106,14 @@ export default function ShortnetedUrlsTable() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Link
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={one.shortened_url}
-                    underline="none"
-                  >
-                    {one.shortened_url}
-                  </Link>
+                  <NewTabLink url={one.shortened_url} />
                 </TableCell>
                 <TableCell>{one.access_count}</TableCell>
                 <TableCell>
                   <OriginalUrl url={one.url} />
                 </TableCell>
                 <TableCell>
-                  {ZonedDateTimeFormatter.ofPattern(
-                    "YYYY-MM-dd HH:mm:ss",
-                  ).format(
-                    ZonedDateTime.parse(one.created_at).instant.atZone(
-                      LOCAL_ZONE_ID,
-                    ),
-                  )}
+                  <ReadableTimestamp datetime={one.created_at} />
                 </TableCell>
                 <TableCell>
                   <IconButton

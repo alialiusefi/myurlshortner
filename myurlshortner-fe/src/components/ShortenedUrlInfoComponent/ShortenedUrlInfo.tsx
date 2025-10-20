@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { redirect } from "next/navigation";
 import ShortenedUrlHistory from "components/ShortenedUrlHistoryComponent/ShortenedUrlHistory";
+import ShortenedUrlInfoCard from "components/ShortenedUrlInfoCardComponent/ShortenedUrlInfoCard";
 
 export default function ShortenedUrlInfo(params: {
   uniqueId: string;
@@ -24,6 +25,9 @@ export default function ShortenedUrlInfo(params: {
         >
           Back
         </Button>
+      </Grid>
+      <Grid>
+        <ShortenedUrlInfoCard uniqueId={params.uniqueId} />
       </Grid>
       <Grid>
         <ShortenedUrlHistory uniqueId={params.uniqueId} now={params.now} />
