@@ -115,6 +115,12 @@ curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artif
 ```
 > The ui is also available instead. (dev:8888, prod:8080)
 
+There are 2 replicas of consumers, to utilize the other replica, please recreate/alter the topic:
+
+```bash
+kafka-topics --bootstrap-server localhost:9092 --topic shortened-url-events --alter --partitions 4
+```
+
 # Architecture
 
 ![data flow architecture](myurlshortner.png)
