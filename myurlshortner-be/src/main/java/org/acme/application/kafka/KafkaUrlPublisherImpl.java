@@ -5,10 +5,12 @@ import com.acme.events.UserAccessedShortenedUrl;
 import com.acme.events.UserCreatedShortenedUrl;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.smallrye.reactive.messaging.MutinyEmitter;
+import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata;
 import jakarta.inject.Singleton;
 import org.acme.domain.entity.ShortenedUrl;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jspecify.annotations.NonNull;
 
 import java.net.URI;
@@ -41,8 +43,10 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
                 .setUniqueIdentifier(shortenedUrl.getPublicIdentifier())
                 .setAccessedAt(accessedAt.toString())
                 .build();
-
-        emitter.sendAndAwait(ShortenedUrlUserEvents.newBuilder().setUserAccessedShortenedUrlEvent(event).build());
+        var metadata = OutgoingKafkaRecordMetadata.builder().withKey(event.getUniqueIdentifier()).build();
+        var message = Message.of(ShortenedUrlUserEvents.newBuilder().setUserAccessedShortenedUrlEvent(event).build())
+                .addMetadata(metadata);
+        emitter.sendMessageAndAwait(message);
     }
 
     public void publishUserCreatedShortenedUrl(

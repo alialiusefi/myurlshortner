@@ -43,6 +43,8 @@ spec:
           value: '1'
         - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
           value: '0'
+        - name: KAFKA_LOG_MESSAGE_TIMESTAMP_TYPE
+          value: 'LogAppendTime'
       ports:
       - containerPort: 9094
       - containerPort: 9092

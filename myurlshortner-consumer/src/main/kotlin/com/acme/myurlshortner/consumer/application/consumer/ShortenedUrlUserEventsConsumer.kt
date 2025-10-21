@@ -4,22 +4,30 @@ import com.acme.events.ShortenedUrlUserEvents
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 @Component
 class ShortenedUrlUserEventsConsumer(
     private val useCases: ShortenedUrlUserEventsUseCases
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    @Value($$"${app.podname}")
+    lateinit var podName: String
 
     @KafkaListener(
         topics = ["shortened-url-events"],
-        autoStartup = "\${app.kafka.enabled}"
+        autoStartup = $$"${app.kafka.enabled}"
     )
     fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
+        val key = message.key()
         val record = message.value()
-        val instant = message.timestamp()
+        val datetime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp()), ZoneId.systemDefault())
+        logger.info("Received message: key={} appendTime={} podName={}", key, datetime, podName)
         when {
             record.userAccessedShortenedUrlEvent != null -> try {
                 useCases.handleUserAccessedShortenedUrl(
