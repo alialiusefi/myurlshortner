@@ -26,10 +26,10 @@ class ShortenedUrlUserEventsServiceImpl(
     override fun handleShortenedUrlUserAccessed(
         command: UserAccessedShortenedUrlCommand,
     ) {
-        val randomError = Random.nextInt(0, 101)
-        if (randomError in 0..50) {
+        val randomError = Random.nextInt(1, 101)
+        if (randomError in 1..50) {
             logger.info("Generated error number $randomError")
-            throw IllegalArgumentException("Random error 0 <= $randomError <= 50")
+            throw IllegalArgumentException("Random error 1 <= $randomError <= 50")
         } else {
             logger.info("No Error")
         }
