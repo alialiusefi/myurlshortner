@@ -10,18 +10,29 @@ import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShor
 import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
 import com.acme.myurlshortner.consumer.domain.userevent.service.ShortenedUrlUserEventsService
+import org.jboss.logging.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.random.Random
 
 @Service
 class ShortenedUrlUserEventsServiceImpl(
     private val repo: UserAccessedShortenedUrlRepo
 ) : ShortenedUrlUserEventsService {
 
+    private val logger = Logger.getLogger(ShortenedUrlUserEventsServiceImpl::class.java)
+
     @Transactional
     override fun handleShortenedUrlUserAccessed(
         command: UserAccessedShortenedUrlCommand,
     ) {
+        val randomError = Random.nextInt(0, 101)
+        if (randomError in 0..50) {
+            logger.info("Generated error number $randomError")
+            throw IllegalArgumentException("Random error 0 <= $randomError <= 50")
+        } else {
+            logger.info("No Error")
+        }
         repo.saveUserAccessedShortenedUrl(
             UserAccessedShortenedUrl(
                 uniqueIdentifier = command.uniqueIdentifier,
