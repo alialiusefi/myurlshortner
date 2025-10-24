@@ -17,14 +17,23 @@ kafka-consumer-groups --bootstrap-server localhost:9092 --list
 kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group <group-name> 
 ```
 
+## Topic Override and Creation
+
+> https://kafka.apache.org/documentation/#topicconfigs
+
 - Create a topic
 ```bash
-kafka-topics --bootstrap-server localhost:9092 --create --topic shortened-url-events --partitions 1 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic shortened-url-events --partitions 2 --replication-factor 1
 ```
 
-- Get topics
+- Update partition count
 ```bash
-kafka-topics --bootstrap-server localhost:9092 --describe --topic shortened-url-events
+kafka-topics --bootstrap-server localhost:9092 --topic shortened-url-events --alter --partitions 4
+```
+
+- Delete a topic 
+```bash
+kafka-topics --bootstrap-server localhost:9092 --delete --topic shortened-url-events
 ```
 
 - Read from topic
@@ -33,7 +42,8 @@ kafka-console-consumer --topic shortened-url-events --bootstrap-server localhost
 ```
 
 - Create schema
-- https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-managing-registry-artifacts-api.html#managing-artifact-versions-using-rest-api_registry
+>https://www.apicur.io/registry/docs/apicurio-registry/3.0.x/getting-started/assembly-managing-registry-artifacts-api.html#managing-artifact-versions-using-rest-api_registry
+
 ```bash
 curl -X POST http://localhost:8888/apis/registry/v3/groups/com.acme.events/artifacts \
   -H "Content-Type: application/json" \
