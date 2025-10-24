@@ -2,19 +2,25 @@ package com.acme.myurlshortner.consumer.application.repo
 
 import com.acme.myurlshortner.consumer.application.kafka.retry.KafkaEventType
 import com.acme.myurlshortner.consumer.application.kafka.retry.KafkaFailedEvent
-import com.acme.myurlshortner.consumer.application.repo.table.KafkaRetryTable
-import org.jetbrains.exposed.v1.core.*
+import com.acme.myurlshortner.consumer.application.repo.table.KafkaRetryKeysTable
+import com.acme.myurlshortner.consumer.application.repo.table.KafkaRetryQueueTable
+import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.select
-import org.jetbrains.exposed.v1.jdbc.update
+import org.jetbrains.exposed.v1.jdbc.*
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 
 @Repository
 class KafkaRetryQueueRepository {
+
+    enum class KafkaRetryKeyStatus {
+        AVAILABLE,
+        BUSY
+    }
 
     @Transactional
     fun insertFailedEvent(
@@ -25,11 +31,16 @@ class KafkaRetryQueueRepository {
         version: Int,
         topic: String
     ) {
-        KafkaRetryTable.insert {
+        KafkaRetryKeysTable.insertIgnore {
+            it[this.key] = key
+            it[this.topic] = topic
+            it[this.status] = KafkaRetryKeyStatus.AVAILABLE
+        }
+        KafkaRetryQueueTable.insert {
             it[this.event] = event
             it[this.eventDateTime] = eventDateTime
             it[this.key] = key
-            it[this.eventType] = type.toString()
+            it[this.eventType] = type
             it[this.version] = version
             it[this.topic] = topic
             it[this.retryCount] = 0
@@ -37,52 +48,75 @@ class KafkaRetryQueueRepository {
     }
 
     @Transactional
-    fun fetchLatestFailedEvent(topic: String): KafkaFailedEvent? {
-        val rank = rank()
-            .over()
-            .partitionBy(KafkaRetryTable.key)
-            .orderBy(KafkaRetryTable.eventDateTime)
-            .alias("rnk")
-        val pendingEvents = KafkaRetryTable.select(
-            KafkaRetryTable.id,
-            rank
-        ).where(KafkaRetryTable.retryCount.less(3) and KafkaRetryTable.topic.eq(topic))
-            .orderBy(KafkaRetryTable.eventDateTime).alias("temp")
-        return KafkaRetryTable.join(
-            pendingEvents,
-            onColumn = KafkaRetryTable.id,
-            otherColumn = pendingEvents[KafkaRetryTable.id],
-            joinType = JoinType.INNER
+    fun fetchEarliestFailedEventAndLockKey(topic: String): KafkaFailedEvent? {
+        val event = KafkaRetryKeysTable.join(
+            KafkaRetryQueueTable,
+            onColumn = null,
+            otherColumn = null,
+            joinType = JoinType.INNER,
+            additionalConstraint = {
+                KafkaRetryKeysTable.key.eq(KafkaRetryQueueTable.key)
+                    .and(KafkaRetryKeysTable.topic.eq(KafkaRetryQueueTable.topic))
+                    .and(KafkaRetryQueueTable.retryCount.less(3))
+                    .and(KafkaRetryKeysTable.topic.eq(topic))
+                    .and(KafkaRetryKeysTable.status.eq(KafkaRetryKeyStatus.AVAILABLE))
+            }
         ).select(
-            KafkaRetryTable.id,
-            KafkaRetryTable.retryCount,
-            KafkaRetryTable.event,
-            KafkaRetryTable.eventType,
-            KafkaRetryTable.version
-        ).where(pendingEvents[rank].eq(1)).limit(1)
-            .forUpdate(ForUpdateOption.PostgreSQL.ForUpdate(ForUpdateOption.PostgreSQL.MODE.SKIP_LOCKED)).map {
-            KafkaFailedEvent(
-                id = it[KafkaRetryTable.id],
-                eventType = KafkaEventType.valueOf(it[KafkaRetryTable.eventType]),
-                version = it[KafkaRetryTable.version],
-                event = it[KafkaRetryTable.event],
-                retryCount = it[KafkaRetryTable.retryCount]
+            KafkaRetryQueueTable.id,
+            KafkaRetryKeysTable.key,
+            KafkaRetryQueueTable.retryCount,
+            KafkaRetryQueueTable.event,
+            KafkaRetryQueueTable.eventType,
+            KafkaRetryQueueTable.version,
+            KafkaRetryQueueTable.topic
+        ).orderBy(KafkaRetryQueueTable.eventDateTime)
+            .limit(1)
+            .forUpdate(
+                ForUpdateOption.PostgreSQL.ForUpdate()
+            ).map {
+                KafkaFailedEvent(
+                    id = it[KafkaRetryQueueTable.id],
+                    key = it[KafkaRetryKeysTable.key],
+                    eventType = it[KafkaRetryQueueTable.eventType],
+                    version = it[KafkaRetryQueueTable.version],
+                    event = it[KafkaRetryQueueTable.event],
+                    retryCount = it[KafkaRetryQueueTable.retryCount],
+                    topic = it[KafkaRetryQueueTable.topic]
+                )
+            }.firstOrNull() ?: return null
+
+        KafkaRetryKeysTable.update(limit = null, where = {
+            KafkaRetryKeysTable.key.eq(event.key).and(
+                KafkaRetryKeysTable.topic.eq(event.topic)
             )
-        }.firstOrNull()
+        }) {
+            it[KafkaRetryKeysTable.status] = KafkaRetryKeyStatus.BUSY
+        }
+        return event
     }
 
     @Transactional
-    fun updatedRetryCount(id: Long, setRetryCount: Int) {
-        KafkaRetryTable.update(
-            limit = null,
-            where = { KafkaRetryTable.id.eq(id) }
-        ) {
-            it[KafkaRetryTable.retryCount] = setRetryCount
+    fun deleteFailedEventFromQueue(id: Long) {
+        KafkaRetryQueueTable.deleteWhere {
+            KafkaRetryQueueTable.id.eq(id)
         }
     }
 
     @Transactional
-    fun deleteFailedEvent(id: Long) {
-        KafkaRetryTable.deleteWhere { KafkaRetryTable.id.eq(id) }
+    fun updateRetryCountOfFailedEvent(id: Long, setRetryCount: Int) {
+        KafkaRetryQueueTable.update(limit = null, where = { KafkaRetryQueueTable.id.eq(id) }) {
+            it[KafkaRetryQueueTable.retryCount] = setRetryCount
+        }
+    }
+
+    @Transactional
+    fun unlockKey(key: String, topic: String) {
+        KafkaRetryKeysTable.update(limit = null, where = {
+            KafkaRetryKeysTable.key.eq(key).and(
+                KafkaRetryKeysTable.topic.eq(topic)
+            )
+        }) {
+            it[KafkaRetryKeysTable.status] = KafkaRetryKeyStatus.AVAILABLE
+        }
     }
 }

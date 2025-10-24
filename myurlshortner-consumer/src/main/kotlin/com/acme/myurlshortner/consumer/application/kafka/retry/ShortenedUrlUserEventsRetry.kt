@@ -11,7 +11,6 @@ import org.jboss.logging.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayOutputStream
 import java.time.OffsetDateTime
 import com.acme.events.UserAccessedShortenedUrl as AvroUserAccessedShortenedUrl
@@ -23,7 +22,7 @@ class ShortenedUrlUserEventsRetry(
 ) {
     private val logger = Logger.getLogger(ShortenedUrlUserEventsRetry::class.java)
 
-    @Value($$"${app.kafka.enabled}")
+    @Value($$"${app.kafka.topic-name}")
     lateinit var topic: String
 
     fun handleFailedKafkaUserAccessedShortenedUrlEvent(event: AvroUserAccessedShortenedUrl) {
@@ -47,30 +46,30 @@ class ShortenedUrlUserEventsRetry(
     }
 
     @Scheduled(fixedRate = 5000)
-    @Transactional
     fun retryFailedKafkaEvents() {
-        val failedEvent = repository.fetchLatestFailedEvent(topic)
-        if (failedEvent != null) {
-            try {
-                logger.info("Retrying failed event id=${failedEvent.id} type=${failedEvent.eventType} with retryCount=${failedEvent.retryCount}")
-                when (failedEvent.eventType) {
-                    KafkaEventType.USER_ACCESSED_SHORTENED_URL -> {
-                        val decoder = DecoderFactory.get().jsonDecoder(
-                            AvroUserAccessedShortenedUrl.getClassSchema(),
-                            failedEvent.event
-                        )
-                        val reader: SpecificDatumReader<AvroUserAccessedShortenedUrl> =
-                            SpecificDatumReader(AvroUserAccessedShortenedUrl.getClassSchema())
-                        val record = reader.read(null, decoder)
-                        useCases.handleUserAccessedShortenedUrl(record)
-                    }
+        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return
+        try {
+            logger.info("Retrying failed event id=${failedEvent.id} type=${failedEvent.eventType} with retryCount=${failedEvent.retryCount}")
+            when (failedEvent.eventType) {
+                KafkaEventType.USER_ACCESSED_SHORTENED_URL -> {
+                    val decoder = DecoderFactory.get().jsonDecoder(
+                        AvroUserAccessedShortenedUrl.getClassSchema(),
+                        failedEvent.event
+                    )
+                    val reader: SpecificDatumReader<AvroUserAccessedShortenedUrl> =
+                        SpecificDatumReader(AvroUserAccessedShortenedUrl.getClassSchema())
+                    val record = reader.read(null, decoder)
+                    useCases.handleUserAccessedShortenedUrl(record)
+                    repository.deleteFailedEventFromQueue(failedEvent.id)
                 }
-            } catch (e: Throwable) {
-                logger.error("Retry failed for event=${failedEvent.id}", e)
-                repository.updatedRetryCount(failedEvent.id, failedEvent.retryCount + 1)
-                return
             }
-            repository.deleteFailedEvent(failedEvent.id)
+        } catch (e: Throwable) {
+            logger.error("Retry failed for event=${failedEvent.id}", e)
+            if (failedEvent.retryCount + 1 == 3) {
+                logger.info("Out of retries for event retry id=${failedEvent.id}")
+            }
+            repository.updateRetryCountOfFailedEvent(failedEvent.id, failedEvent.retryCount + 1)
         }
+        repository.unlockKey(failedEvent.key, failedEvent.topic)
     }
 }
