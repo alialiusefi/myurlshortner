@@ -33,6 +33,7 @@ dependencies {
     implementation("io.apicurio:apicurio-registry-serdes-avro-serde:3.0.0.M4")
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-java-time:1.0.0-rc-1")
+    implementation("org.jetbrains.exposed:exposed-json:1.0.0-rc-1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     //implementation("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
