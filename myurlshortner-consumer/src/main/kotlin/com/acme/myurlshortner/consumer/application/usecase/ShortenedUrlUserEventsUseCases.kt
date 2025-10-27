@@ -12,9 +12,7 @@ class ShortenedUrlUserEventsUseCases(
     private val service: ShortenedUrlUserEventsService
 ) {
 
-    fun handleUserAccessedShortenedUrl(
-        event: UserAccessedShortenedUrl,
-    ) {
+    fun handleUserAccessedShortenedUrl(event: UserAccessedShortenedUrl) {
         val command = UserAccessedShortenedUrlCommand(
             uniqueIdentifier = event.uniqueIdentifier,
             originalUrl = URI.create(event.originalUrl),

@@ -1,6 +1,7 @@
-package com.acme.myurlshortner.consumer.application.consumer
+package com.acme.myurlshortner.consumer.application.kafka.consumer
 
 import com.acme.events.ShortenedUrlUserEvents
+import com.acme.myurlshortner.consumer.application.kafka.retry.ShortenedUrlUserEventsRetry
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -13,14 +14,16 @@ import java.time.ZoneId
 
 @Component
 class ShortenedUrlUserEventsConsumer(
-    private val useCases: ShortenedUrlUserEventsUseCases
+    private val useCases: ShortenedUrlUserEventsUseCases,
+    private val retry: ShortenedUrlUserEventsRetry
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Value($$"${app.podname}")
     lateinit var podName: String
 
     @KafkaListener(
-        topics = ["shortened-url-events"],
+        topics = [$$"${app.kafka.topic-name}"],
         autoStartup = $$"${app.kafka.enabled}"
     )
     fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
@@ -30,11 +33,10 @@ class ShortenedUrlUserEventsConsumer(
         logger.info("Received message: key={} appendTime={} podName={}", key, datetime, podName)
         when {
             record.userAccessedShortenedUrlEvent != null -> try {
-                useCases.handleUserAccessedShortenedUrl(
-                    event = record.userAccessedShortenedUrlEvent,
-                )
+                useCases.handleUserAccessedShortenedUrl(record.userAccessedShortenedUrlEvent)
             } catch (e: Throwable) {
                 logger.error("Failed to process message: $e", e)
+                retry.handleFailedKafkaUserAccessedShortenedUrlEvent(record.userAccessedShortenedUrlEvent)
             }
         }
     }
