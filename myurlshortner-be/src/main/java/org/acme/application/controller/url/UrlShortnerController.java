@@ -26,14 +26,25 @@ public class UrlShortnerController {
     }
 
     @POST
+    @Path("/unique-identifiers")
+    @Produces(APPLICATION_JSON)
+    public Response generateUniqueIdentifier() {
+        return Response.status(201).entity(new GenerateUniqueIdentifierResponse(this.shortenedUrlUseCases.generateUniqueIdentifier())).build();
+    }
+
+    @POST
     @Path("/shorten")
     @Produces(APPLICATION_JSON)
-    public Response generateAShortenedUrl(
+    public Response createShortenedUrl(
             ShortenUrlRequest request
     ) {
-        return this.shortenedUrlUseCases.generateShortenedUrl(request.url()).fold(
+        return this.shortenedUrlUseCases.createShortenedUrl(request).fold(
                 error -> Response.status(Response.Status.BAD_REQUEST)
-                        .entity(ErrorResponse.buildFromDomainErrors(error.errors())).build(),
+                        .entity(
+                                error.opError().map(a -> ErrorResponse.buildFromDomainErrors(List.of(a)))
+                                        .orElseGet(() -> ErrorResponse.buildFromDomainErrors(error.validationExceptions()))
+
+                        ).build(),
                 success -> Response.status(Response.Status.CREATED)
                         .entity(new ShortenUrlResponse(success.shortenedUrl(hostname))).build()
         );

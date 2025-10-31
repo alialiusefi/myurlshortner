@@ -1,6 +1,12 @@
 package org.acme.domain.exceptions.url;
 
-import java.util.List;
+import org.acme.domain.exceptions.DomainException;
 
-public record ShortenUrlError(List<UrlValidationException> errors) {
+import java.util.List;
+import java.util.Optional;
+
+public record ShortenUrlError(
+        Optional<UniqueIdentifierAlreadyExists> opError,
+        List<? extends DomainException> validationExceptions
+) {
 }

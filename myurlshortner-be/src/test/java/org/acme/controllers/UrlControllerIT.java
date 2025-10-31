@@ -3,7 +3,7 @@ package org.acme.controllers;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.repo.SaveShortenedUrlError;
+import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ public class UrlControllerIT {
     public ShortenedUrlRepository repo;
 
     @Test
-    void shouldReturnTemporaryRedirect() throws SaveShortenedUrlError {
+    void shouldReturnTemporaryRedirect() throws SaveShortenedUrlConflictError {
         var originalUrl = URI.create("http://www.example.com");
         repo.insertShortenedUrl(new ShortenedUrl(originalUrl, "abcdeabcde"));
         given()

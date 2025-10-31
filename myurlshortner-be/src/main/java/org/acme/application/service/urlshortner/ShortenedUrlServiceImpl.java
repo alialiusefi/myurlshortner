@@ -14,12 +14,11 @@ import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
-import org.acme.domain.exceptions.url.ShortenUrlError;
-import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
-import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
-import org.acme.domain.exceptions.url.UrlValidationException;
+import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
+import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
+import org.acme.domain.exceptions.url.*;
 import org.acme.domain.projection.AvailableShortenedUrl;
-import org.acme.domain.repo.SaveShortenedUrlError;
+import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.service.UrlValidator;
@@ -50,7 +49,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         this.publisher = publisher;
     }
 
-    private String generateUniqueIdentifier() {
+    @Override
+    public @NonNull String generateUniqueIdentifier() {
         final int UNIQUE_IDENTIFIER_SIZE = 10;
         Random random = new Random();
         IntStream stream = random.ints(0, ASCIITable.VALID_ASCII_TABLE.length - 1);
@@ -86,15 +86,48 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     @Transactional
-    public Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(@NonNull CreateShortenedUrlCommand command) throws SaveShortenedUrlError {
+    public Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(@NonNull CreateShortenedUrlCommand command) {
         Either<List<UrlValidationException>, URI> either = UrlValidator.validateUrl(hostname, command.originalUrl());
         if (either.isLeft()) {
-            return Either.left(new ShortenUrlError(either.getLeft()));
+            return Either.left(new ShortenUrlError(Optional.empty(), either.getLeft()));
+        }
+        if (command.uniqueIdentifier().isPresent()) {
+            if (repo.getShortenedUrl(command.uniqueIdentifier().get()).isPresent()) {
+                return Either.left(new ShortenUrlError(
+                        Optional.of(new UniqueIdentifierAlreadyExists()),
+                        List.of()
+                ));
+            }
+            // todo: extract unique identifier validation into separate domain validator
+            if (command.uniqueIdentifier().get().isBlank()) {
+                return Either.left(
+                        new ShortenUrlError(
+                                Optional.empty(),
+                                List.of(new UniqueIdentifierCannotBeEmptyValidationException())
+                        )
+                );
+            }
+
+            if (command.uniqueIdentifier().get().length() > 10) {
+                return Either.left(
+                        new ShortenUrlError(
+                                Optional.empty(),
+                                List.of(new UniqueIdentifierIsTooLongValidationException())
+                        )
+                );
+            }
         }
 
-        String uniqueIdentifier = this.generateUniqueIdentifier();
+        String uniqueIdentifier = command.uniqueIdentifier().orElseGet(this::generateUniqueIdentifier);
         ShortenedUrl shortUrl = new ShortenedUrl(either.get(), uniqueIdentifier);
-        repo.insertShortenedUrl(shortUrl);
+        try {
+            repo.insertShortenedUrl(shortUrl);
+        } catch (SaveShortenedUrlConflictError err) {
+            return Either.left(new ShortenUrlError(
+                    Optional.of(new UniqueIdentifierAlreadyExists()),
+                    List.of()
+            ));
+        }
 
         var event = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortUrl);
         eventStore.insertEvent(event);

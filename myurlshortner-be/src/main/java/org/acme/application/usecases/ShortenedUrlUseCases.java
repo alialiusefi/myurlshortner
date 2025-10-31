@@ -4,6 +4,7 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import jakarta.inject.Singleton;
+import org.acme.application.controller.url.ShortenUrlRequest;
 import org.acme.application.controller.url.UpdateOriginalUrlRequest;
 import org.acme.application.exception.*;
 import org.acme.application.exception.url.GetAvailableUrlsError;
@@ -19,7 +20,6 @@ import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
-import org.acme.domain.repo.SaveShortenedUrlError;
 import org.acme.domain.service.ShortenedUrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public class ShortenedUrlUseCases {
@@ -38,17 +39,11 @@ public class ShortenedUrlUseCases {
         this.service = service;
     }
 
-    public Either<ShortenUrlError, ShortenedUrl> generateShortenedUrl(String originalUrl) {
-        for (int i = 0; i < 3; i++) {
-            try {
-                return service.generateShortenedUrl(new CreateShortenedUrlCommand(originalUrl));
-            } catch (SaveShortenedUrlError e) {
-                logger.warn("Unable to generate url", e);
-            }
-        }
-        var message = "Failed to generate url after all retry attempts";
-        logger.error(message);
-        throw new IllegalStateException(message);
+    public Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(ShortenUrlRequest request) {
+        return service.createShortenedUrl(
+                new CreateShortenedUrlCommand(
+                        Optional.ofNullable(request.uniqueIdentifier()), request.url())
+        );
     }
 
     public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrl>>> listAvailableUrls(Integer page, Integer size, String order) {
@@ -122,5 +117,9 @@ public class ShortenedUrlUseCases {
         return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier)).toEither(
                 new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
         );
+    }
+
+    public String generateUniqueIdentifier() {
+        return service.generateUniqueIdentifier();
     }
 }

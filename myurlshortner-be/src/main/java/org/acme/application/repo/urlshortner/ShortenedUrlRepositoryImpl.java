@@ -8,8 +8,9 @@ import jakarta.transaction.Transactional;
 import org.acme.application.repo.exception.ShortenedUrlOptimisticLockException;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.projection.AvailableShortenedUrl;
-import org.acme.domain.repo.SaveShortenedUrlError;
+import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.NonNull;
 
 import java.net.URI;
@@ -25,13 +26,12 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
 
     @Override
     @Transactional
-    public void insertShortenedUrl(@NonNull ShortenedUrl shortenedUrl) throws SaveShortenedUrlError {
-        if (this.getShortenedUrl(shortenedUrl.getPublicIdentifier()).isPresent()) {
-            throw new SaveShortenedUrlError(shortenedUrl.getPublicIdentifier());
-        } else {
-            this.persist(
-                    toEntity(shortenedUrl)
-            );
+    public void insertShortenedUrl(@NonNull ShortenedUrl shortenedUrl) throws SaveShortenedUrlConflictError {
+        try {
+            this.persistAndFlush(toEntity(shortenedUrl));
+        } catch (ConstraintViolationException e) {
+            throw new SaveShortenedUrlConflictError(shortenedUrl.getPublicIdentifier());
+
         }
     }
 
