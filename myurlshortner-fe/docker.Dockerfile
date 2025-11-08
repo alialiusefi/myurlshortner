@@ -30,6 +30,7 @@ COPY . .
 # Setting environment variables
 ENV INTERNAL_SERVER_URL=http://be:8080
 ENV NEXT_PUBLIC_EXTERNAL_SERVER_URL=http://localhost:8080
+ENV NEXT_PUBLIC_EXTERNAL_CLIENT_URL=http://localhost
 
 RUN \
   if [ -f package-lock.json ]; then npm run build; \

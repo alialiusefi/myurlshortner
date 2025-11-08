@@ -1,11 +1,50 @@
 "use client";
 
+import useSWR from "swr";
 import { ErrorResponse } from "./Errors";
+
+export const generateUniqueId = () => {
+  const requestConfig = {
+    method: "POST",
+  };
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  const fetcher = (url) =>
+    fetch(url, requestConfig)
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Unexpected Error Response!");
+        }
+      })
+      .then((json) => json as GenerateUniqueIdResponse)
+      .catch((err) => err);
+  return useSWR(`${serverUrl}/unique-identifiers`, fetcher);
+};
+
+export const GenerateUniqueIdFetch =
+  async (): Promise<GenerateUniqueIdResponse> => {
+    const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+    const requestConfig = {
+      method: "POST",
+    };
+    return fetch(`${serverUrl}/unique-identifiers`, requestConfig)
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Unexpected Error Response!");
+        }
+      })
+      .then((json) => json as GenerateUniqueIdResponse)
+      .catch((err) => err);
+  };
 
 export async function shortenUrlOperaton(
   url: string,
+  uid: string,
 ): Promise<ShortenUrlResponse | ErrorResponse> {
-  const request = new ShortenUrlRequest((url = url));
+  const request = new ShortenUrlRequest(url, uid);
   const requestConfig = {
     method: "POST",
     body: JSON.stringify(request),
@@ -76,9 +115,11 @@ class UpdateShortenedUrlRequest {
 
 class ShortenUrlRequest {
   url: string;
+  unique_identifier: string;
 
-  constructor(url: string) {
+  constructor(url: string, unique_identifier: string) {
     this.url = url;
+    this.unique_identifier = unique_identifier;
   }
 }
 
@@ -88,4 +129,8 @@ export class ShortenUrlResponse {
   constructor(url: string) {
     this.shortened_url = url;
   }
+}
+
+export class GenerateUniqueIdResponse {
+  unique_identifier: string;
 }
