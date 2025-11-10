@@ -16,7 +16,7 @@ import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.ShortenedUrlRecordType;
-import org.acme.domain.repo.SaveShortenedUrlError;
+import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,13 +55,13 @@ class UrlShortnerControllerIT {
     JsonPathConfig config = JsonPathConfig.jsonPathConfig().with().jackson2ObjectMapperFactory(factory);
 
     @BeforeEach
-    void cleanup() throws SaveShortenedUrlError {
+    void cleanup() throws SaveShortenedUrlConflictError {
         repo.cleanup();
         eventStore.cleanup();
     }
 
     @Test
-    void testGetUrlsEndpoint() throws SaveShortenedUrlError {
+    void testGetUrlsEndpoint() throws SaveShortenedUrlConflictError {
         var datetime = OffsetDateTime.now();
         repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true));
         repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime, datetime, false));
@@ -79,7 +79,15 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testGenerateShortenedUrl() {
+    void generateUniqueId() {
+        given()
+                .post("/unique-identifiers")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test
+    void testCreateShortenedUrl() {
         var body = """
                     {
                         "url": "https://www.example.com"
@@ -110,7 +118,39 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testUpdateShortenedUrl() throws SaveShortenedUrlError {
+    void testCreateShortenedUrlWithIdentifier() {
+        var body = """
+                    {
+                        "url": "https://www.example.com",
+                        "unique_identifier": "abcd"
+                    }
+                """.stripIndent();
+        var shortenedUrl = given()
+                .body(body)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/shorten")
+                .then()
+                .statusCode(201)
+                .body("shortened_url", Matchers.startsWith("http://localhost/goto/"))
+                .extract().body().jsonPath().getString("shortened_url");
+        var uid = shortenedUrl.substring(shortenedUrl.lastIndexOf("/") + 1);
+        var maybeShortenedUrl = repo.getShortenedUrl(uid);
+        var event = eventStore.getLatestShortenedUrlEventByIdAndType(uid, ShortenedUrlRecordType.USER_CREATED_SHORTENED_URL);
+
+        assertThat("Shortened url exists", maybeShortenedUrl.isPresent());
+        assertThat("Event exists", event.isPresent());
+        assertThat("Starts with https", maybeShortenedUrl.get().getOriginalUrl().toString().startsWith("https"));
+        assertThat("Enabled", maybeShortenedUrl.get().isEnabled());
+        Mockito.verify(publisher).publishUserCreatedShortenedUrl(
+                Mockito.any(OffsetDateTime.class),
+                Mockito.any(URI.class),
+                Mockito.any(String.class)
+        );
+    }
+
+    @Test
+    void testUpdateShortenedUrl() throws SaveShortenedUrlConflictError {
         var url = "youtube.com";
         var uid = "abcdefghik";
         var entity = new ShortenedUrl(URI.create(url), uid);
@@ -143,7 +183,7 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testDisableShortenedUrl() throws SaveShortenedUrlError {
+    void testDisableShortenedUrl() throws SaveShortenedUrlConflictError {
         var url = "https://www.google.com";
         var uid = "abcdefghik";
         var entity = new ShortenedUrl(URI.create(url), uid);
@@ -176,7 +216,7 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testUpdateShortenedUrlNotFound() throws SaveShortenedUrlError {
+    void testUpdateShortenedUrlNotFound() throws SaveShortenedUrlConflictError {
         var body = """
                 {
                     "url": "google.com"
@@ -192,7 +232,7 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testUpdateShortenedUrlBadRequest() throws SaveShortenedUrlError {
+    void testUpdateShortenedUrlBadRequest() throws SaveShortenedUrlConflictError {
         var url = "youtube.com";
         var uid = "abcdefghik";
         var entity = new ShortenedUrl(URI.create(url), uid);
@@ -225,7 +265,7 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testGetShortenedUrlHistory() throws SaveShortenedUrlError {
+    void testGetShortenedUrlHistory() throws SaveShortenedUrlConflictError {
         var url = "youtube.com";
         var uid = "abcdefghi2";
         var entity = new ShortenedUrl(URI.create(url), uid);
@@ -276,7 +316,7 @@ class UrlShortnerControllerIT {
     }
 
     @Test
-    void testGetShortenedUrl() throws SaveShortenedUrlError {
+    void testGetShortenedUrl() throws SaveShortenedUrlConflictError {
         var url = "youtube.com";
         var uid = "abcdefghi2";
         var entity = new ShortenedUrl(URI.create(url), uid);

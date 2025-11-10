@@ -1,7 +1,7 @@
 package org.acme.domain.repo;
 
-public class SaveShortenedUrlError extends Exception {
-    public SaveShortenedUrlError(String uid) {
+public class SaveShortenedUrlConflictError extends Exception {
+    public SaveShortenedUrlConflictError(String uid) {
         super(String.format("Such shortened url with uid '%s' already exists!", uid));
     }
 }
