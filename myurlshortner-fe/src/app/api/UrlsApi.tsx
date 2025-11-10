@@ -18,6 +18,23 @@ export const GetShortenedUrlInfoSWR = (uniqueIdentifier: string) => {
   return useSWR(`${serverUrl}/shortened-urls/${uniqueIdentifier}`, fetcher);
 };
 
+export const GetShortenedUrlInfoFetch = async (
+  uniqueIdentifier: string,
+): Promise<GetShortenedUrlInfoResponse> => {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  return fetch(`${serverUrl}/shortened-urls/${uniqueIdentifier}`)
+    .then(async (res) => {
+      if (res.ok) {
+        const json = (await res.json()) as GetShortenedUrlInfoResponse;
+        return json;
+      }
+      if (res.status == 404) {
+        return null;
+      }
+    })
+    .catch(() => null);
+};
+
 export const GetAvailableUrlsSWR = (
   page: number,
   size: number,
