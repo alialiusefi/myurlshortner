@@ -32,7 +32,7 @@ export const GetShortenedUrlInfoFetch = async (
         return null;
       }
     })
-    .catch((err) => null);
+    .catch(() => null);
 };
 
 export const GetAvailableUrlsSWR = (

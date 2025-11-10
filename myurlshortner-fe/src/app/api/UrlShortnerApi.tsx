@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import { ErrorResponse } from "./Errors";
 
-export const generateUniqueId = () => {
+export const GenerateUniqueIdSWR = () => {
   const requestConfig = {
     method: "POST",
   };

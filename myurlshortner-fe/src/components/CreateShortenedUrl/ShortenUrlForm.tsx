@@ -2,7 +2,7 @@
 import {
   shortenUrlOperaton,
   ShortenUrlResponse,
-  generateUniqueId,
+  GenerateUniqueIdSWR,
   GenerateUniqueIdFetch,
 } from "../../app/api/UrlShortnerApi";
 import { ErrorResponse } from "../../app/api/Errors";
@@ -31,7 +31,7 @@ export default function ShortenUrlForm() {
   const [buttonIsLoadingState, setLoadingButtonState] = useState(false);
   const [targetUrlInput, setTargetUrlInput] = useState("");
   const [selectedMode, setSelectedMode] = useState(AUTO_TYPE_VALUE);
-  const { data, isLoading } = generateUniqueId();
+  const { data } = GenerateUniqueIdSWR();
   const [uidInput, setUidInput] = useState(null);
   const [shortenedUrlState, setShortenedUrlState] = useState({
     errorResponse: null,
