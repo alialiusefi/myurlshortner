@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: myurlshortner-fe
-          image: alialiusefi/myurlshortner-fe-kube:1.0.1
+          image: alialiusefi/myurlshortner-fe-kube:1.0.2
           ports:
             - containerPort: 3000
           livenessProbe:
