@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ShortenedUrlRepository {
-    void insertShortenedUrl(@NonNull ShortenedUrl shortenedUrl) throws SaveShortenedUrlError;
+    void insertShortenedUrl(@NonNull ShortenedUrl shortenedUrl) throws SaveShortenedUrlConflictError;
 
     Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier);
 
