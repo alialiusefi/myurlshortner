@@ -5,10 +5,10 @@ export default function Page() {
   return (
     <Grid
       container
-      direction="row"
+      direction="column"
       sx={{ justifyContent: "center", alignItems: "center", height: "500px" }}
     >
-      <Grid size={2}>
+      <Grid>
         <ShortenUrlForm />
       </Grid>
     </Grid>

@@ -7,9 +7,15 @@ Started At: 2025-08-21T19:58
 When the user opens the homepage, he's greeted with a form the allows him to submit a valid url to shorten.
 The form consists of:
 
-- Title
-- URL Input
-  - Label: URL
+- Selection between Auto & Custom
+- Shortened Url
+  - Shortened Url Label
+  - App Url
+  - Unique ID Input
+    - Refresh button that regenerates the id
+    - Input that is validated
+- Target URL
+  - Label: Target URL
   - Placeholder: https://www.example.com
   - Validation:
     - Must be a valid http url.
