@@ -1,4 +1,4 @@
-package org.acme.domain.service;
+package org.acme.domain.validator;
 
 import org.junit.jupiter.api.Test;
 
