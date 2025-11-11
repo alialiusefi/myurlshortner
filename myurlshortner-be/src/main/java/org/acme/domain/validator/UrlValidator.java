@@ -1,4 +1,4 @@
-package org.acme.domain.service;
+package org.acme.domain.validator;
 
 import io.vavr.control.Either;
 import org.acme.domain.exceptions.url.UrlValidationException;

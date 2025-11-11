@@ -1,7 +1,11 @@
 package org.acme.application.service.urlshortner;
 
-public class ASCIITable {
-    public static final Character[] VALID_ASCII_TABLE = new Character[]{
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class UniqueIdentifierCharTable {
+    public static final Character[] UNIQUE_ID_CHAR_TABLE = new Character[]{
             'A',
             'B',
             'C',
@@ -66,4 +70,6 @@ public class ASCIITable {
             '9',
             '-'
     };
+
+    public static final Set<Character> UNIQUE_ID_CHAR_SET = Arrays.stream(UNIQUE_ID_CHAR_TABLE).collect(Collectors.toSet());
 }
