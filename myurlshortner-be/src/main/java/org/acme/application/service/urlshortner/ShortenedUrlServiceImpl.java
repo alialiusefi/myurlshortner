@@ -53,7 +53,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     public @NonNull String generateUniqueIdentifier() {
         final int UNIQUE_IDENTIFIER_SIZE = 10;
         Random random = new Random();
-        IntStream stream = random.ints(0, ASCIITable.VALID_ASCII_TABLE.length - 1);
+        IntStream stream = random.ints(0, ASCIITable.VALID_ASCII_TABLE.length);
         Character[] result = stream.mapToObj((gen) -> ASCIITable.VALID_ASCII_TABLE[gen])
                 .limit(UNIQUE_IDENTIFIER_SIZE)
                 .toArray(Character[]::new);
