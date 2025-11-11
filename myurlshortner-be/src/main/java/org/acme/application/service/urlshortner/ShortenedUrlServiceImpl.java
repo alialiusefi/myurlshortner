@@ -14,14 +14,13 @@ import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.events.ShortenedUrlEventEnvelop;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
-import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
-import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.acme.domain.exceptions.url.*;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
-import org.acme.domain.service.UrlValidator;
+import org.acme.domain.validator.UniqueIdValidator;
+import org.acme.domain.validator.UrlValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -53,8 +52,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     public @NonNull String generateUniqueIdentifier() {
         final int UNIQUE_IDENTIFIER_SIZE = 10;
         Random random = new Random();
-        IntStream stream = random.ints(0, ASCIITable.VALID_ASCII_TABLE.length);
-        Character[] result = stream.mapToObj((gen) -> ASCIITable.VALID_ASCII_TABLE[gen])
+        IntStream stream = random.ints(0, UniqueIdentifierCharTable.UNIQUE_ID_CHAR_TABLE.length);
+        Character[] result = stream.mapToObj((gen) -> UniqueIdentifierCharTable.UNIQUE_ID_CHAR_TABLE[gen])
                 .limit(UNIQUE_IDENTIFIER_SIZE)
                 .toArray(Character[]::new);
         StringBuilder builder = new StringBuilder();
@@ -98,22 +97,11 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                         List.of()
                 ));
             }
-            // todo: extract unique identifier validation into separate domain validator
-            if (command.uniqueIdentifier().get().isBlank()) {
-                return Either.left(
-                        new ShortenUrlError(
-                                Optional.empty(),
-                                List.of(new UniqueIdentifierCannotBeEmptyValidationException())
-                        )
-                );
-            }
 
-            if (command.uniqueIdentifier().get().length() > 10) {
+            var validationError = UniqueIdValidator.validate(command.uniqueIdentifier().get());
+            if (validationError.isPresent()) {
                 return Either.left(
-                        new ShortenUrlError(
-                                Optional.empty(),
-                                List.of(new UniqueIdentifierIsTooLongValidationException())
-                        )
+                        new ShortenUrlError(Optional.empty(), List.of(validationError.get()))
                 );
             }
         }
