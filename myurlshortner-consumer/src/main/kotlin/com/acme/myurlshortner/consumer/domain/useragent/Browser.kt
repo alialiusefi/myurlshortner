@@ -10,7 +10,7 @@ sealed class Browser {
     }
 
     data object Firefox : Browser("Mozilla Firefox", "Firefox")
-    data object Safari : Browser("Safari", "Safari")
+    data object Safari : Browser("Safari", "Version")
     data object Chrome : Browser("Google Chrome", "Chrome")
     data object Other : Browser("Other", null)
 }
