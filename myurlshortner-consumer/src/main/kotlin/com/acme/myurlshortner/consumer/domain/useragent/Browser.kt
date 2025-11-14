@@ -1,16 +1,14 @@
 package com.acme.myurlshortner.consumer.domain.useragent
 
 sealed class Browser {
-    val value: String
     val userAgentValue: String?
 
-    constructor(value: String, userAgentValue: String?) {
-        this.value = value
+    constructor(userAgentValue: String?) {
         this.userAgentValue = userAgentValue
     }
 
-    data object Firefox : Browser("Mozilla Firefox", "Firefox")
-    data object Safari : Browser("Safari", "Version")
-    data object Chrome : Browser("Google Chrome", "Chrome")
-    data object Other : Browser("Other", null)
+    data object Firefox : Browser("Firefox")
+    data object Safari : Browser("Version")
+    data object Chrome : Browser("Chrome")
+    data object Other : Browser(null)
 }

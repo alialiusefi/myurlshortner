@@ -48,7 +48,6 @@ class ShortenedUrlUserEventsServiceTest {
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
         val accessedAt = OffsetDateTime.now()
         (listOfNormalUserAgents + listOfBotCrawlersUserAgents + listOfLibraryLikeUserAgents).map {
-            println(it.key)
             service.handleShortenedUrlUserAccessed(
                 UserAccessedShortenedUrlCommand(
                     uniqueIdentifier = uid,
