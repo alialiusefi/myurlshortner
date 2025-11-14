@@ -33,6 +33,7 @@ class ShortenedUrlUserEventsConsumer(
         logger.info("Received message: key={} appendTime={} podName={}", key, datetime, podName)
         when {
             record.userAccessedShortenedUrlEvent != null -> try {
+                // todo: handle ordering when same key is already in retry queue.
                 useCases.handleUserAccessedShortenedUrl(record.userAccessedShortenedUrlEvent)
             } catch (e: Throwable) {
                 logger.error("Failed to process message: $e", e)
