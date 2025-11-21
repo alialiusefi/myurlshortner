@@ -16,6 +16,7 @@ val quarkusPlatformVersion: String by project
 dependencies {
     implementation(enforcedPlatform(libs.quarkus.bom))
     implementation(libs.quarkus.restjackson)
+    implementation(libs.quarkus.redis)
     implementation(libs.quarkus.flyway)
     implementation(libs.quarkus.arc)
     implementation(libs.quarkus.kafka)
