@@ -6,25 +6,28 @@ import java.util.Objects;
 
 public class ShortenedUrl {
     private URI originalUrl;
-    private final String publicIdentifier;
-    private final OffsetDateTime createdAt;
+    private String publicIdentifier;
+    private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-    private boolean isEnabled;
+    private boolean enabled;
+
+    public ShortenedUrl() {
+    }
 
     public ShortenedUrl(URI originalUrl, String publicIdentifier) {
         this.originalUrl = originalUrl;
         this.publicIdentifier = publicIdentifier;
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = this.createdAt;
-        this.isEnabled = true;
+        this.enabled = true;
     }
 
-    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt, Boolean isEnabled) {
+    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt, Boolean enabled) {
         this.originalUrl = URI.create(originalUrl);
         this.publicIdentifier = publicIdentifier;
         this.createdAt = datetime;
         this.updatedAt = updatedAt;
-        this.isEnabled = isEnabled;
+        this.enabled = enabled;
     }
 
     public String shortenedUrl(String serviceHostname) {
@@ -39,12 +42,12 @@ public class ShortenedUrl {
     public ShortenedUrl updateOriginalUrl(URI newOriginalUrl, Boolean isEnabled) {
         this.originalUrl = newOriginalUrl;
         this.updatedAt = OffsetDateTime.now();
-        this.isEnabled = isEnabled;
+        this.enabled = isEnabled;
         return this;
     }
 
     public boolean canRedirect() {
-        return isEnabled;
+        return enabled;
     }
 
     public URI getOriginalUrl() {
@@ -72,22 +75,22 @@ public class ShortenedUrl {
     }
 
     public Boolean isEnabled() {
-        return isEnabled;
+        return enabled;
     }
 
     public void setIsEnabled(boolean isEnabled) {
-        this.isEnabled = isEnabled;
+        this.enabled = isEnabled;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShortenedUrl that = (ShortenedUrl) o;
-        return isEnabled == that.isEnabled && Objects.equals(originalUrl, that.originalUrl) && Objects.equals(publicIdentifier, that.publicIdentifier) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt);
+        return enabled == that.enabled && Objects.equals(originalUrl, that.originalUrl) && Objects.equals(publicIdentifier, that.publicIdentifier) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(originalUrl, publicIdentifier, createdAt, updatedAt, isEnabled);
+        return Objects.hash(originalUrl, publicIdentifier, createdAt, updatedAt, enabled);
     }
 }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 @Singleton
 public class RedirectUserUseCases {
     final UrlService service;
+
     private RedirectUserUseCases(UrlService service) {
         this.service = service;
     }

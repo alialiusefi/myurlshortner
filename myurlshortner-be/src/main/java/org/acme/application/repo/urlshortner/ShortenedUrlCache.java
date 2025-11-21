@@ -1,25 +1,48 @@
 package org.acme.application.repo.urlshortner;
 
 import io.quarkus.redis.datasource.RedisDataSource;
-import io.quarkus.redis.datasource.value.ValueCommands;
-import io.quarkus.runtime.StartupEvent;
+import io.quarkus.redis.datasource.json.JsonCommands;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
+import org.acme.domain.entity.ShortenedUrl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 // https://quarkus.io/guides/redis-reference
 @ApplicationScoped
 public class ShortenedUrlCache {
-    private final ValueCommands<String, String> api;
+    private static Logger logger = LoggerFactory.getLogger(ShortenedUrlCache.class);
+    private final JsonCommands<String> api;
 
     public ShortenedUrlCache(RedisDataSource ds) {
-        this.api = ds.value(String.class);
+        this.api = ds.json();
     }
 
-    public void onStart(@Observes StartupEvent event) {
-        System.out.println("Starting cache!");
-        System.out.println("Setup cache!");
-        this.api.set("shortened_url:1", "example");
-        System.out.println("Get from cache!");
-        System.out.println(this.api.get("shortened_url:1"));
+    public Optional<ShortenedUrl> get(String uid, Supplier<Optional<ShortenedUrl>> fromDb) {
+        var cached = api.jsonGetObject(uid);
+        logger.debug("Cache returned {} for uid {}", cached, uid);
+        if (cached == null) {
+            logger.debug("Cache missed!");
+            var raw = fromDb.get();
+            if (raw.isEmpty()) {
+                logger.debug("Setting empty json for key {}", uid);
+                api.jsonSet(uid, "$", Map.of());
+                return Optional.empty();
+            } else {
+                api.jsonSet(uid, "$", raw.get());
+                return raw;
+            }
+        } else if (cached.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(cached.mapTo(ShortenedUrl.class));
+        }
+    }
+
+    public void put(String uid, ShortenedUrl shortenedUrl) {
+        api.jsonSet(uid, shortenedUrl);
     }
 }

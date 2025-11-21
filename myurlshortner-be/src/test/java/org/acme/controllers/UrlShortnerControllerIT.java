@@ -155,7 +155,11 @@ class UrlShortnerControllerIT {
         var uid = "abcdefghik";
         var entity = new ShortenedUrl(URI.create(url), uid);
         repo.insertShortenedUrl(entity);
-
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                        entity
+                )
+        );
         var body = """
                 {
                     "url": "google.com",
@@ -185,10 +189,14 @@ class UrlShortnerControllerIT {
     @Test
     void testDisableShortenedUrl() throws SaveShortenedUrlConflictError {
         var url = "https://www.google.com";
-        var uid = "abcdefghik";
+        var uid = "abcdefghic";
         var entity = new ShortenedUrl(URI.create(url), uid);
         repo.insertShortenedUrl(entity);
-
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                        entity
+                )
+        );
         var body = """
                 {
                     "url": "google.com",
@@ -237,7 +245,11 @@ class UrlShortnerControllerIT {
         var uid = "abcdefghik";
         var entity = new ShortenedUrl(URI.create(url), uid);
         repo.insertShortenedUrl(entity);
-
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                        entity
+                )
+        );
         var body = """
                 {
                     "url": "something"
