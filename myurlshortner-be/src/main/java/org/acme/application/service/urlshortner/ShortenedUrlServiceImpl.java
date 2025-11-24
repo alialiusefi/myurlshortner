@@ -1,6 +1,5 @@
 package org.acme.application.service.urlshortner;
 
-import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import jakarta.inject.Singleton;
@@ -87,7 +86,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                     var isEnabled = maybeShortenedUrl.get().isEnabled();
                     return Optional.of(
                             ShortenedUrlFactory.createShortenedUrl(
-                                    eventStore.iteratorFromStart(10, uniqueIdentifier),
+                                    eventStore.iteratorUntilLatest(10, uniqueIdentifier),
                                     isEnabled
                             )
                     );
