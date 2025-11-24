@@ -2,7 +2,9 @@ package org.acme.controllers;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.domain.entity.ShortenedUrl;
+import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.hamcrest.Matchers;
@@ -18,10 +20,19 @@ public class UrlControllerIT {
     @Inject
     public ShortenedUrlRepository repo;
 
+    @Inject
+    public ShortenedUrlEventRepository eventStore;
+
     @Test
     void shouldReturnTemporaryRedirect() throws SaveShortenedUrlConflictError {
         var originalUrl = URI.create("http://www.example.com");
-        repo.insertShortenedUrl(new ShortenedUrl(originalUrl, "abcdeabcde"));
+        var entity = new ShortenedUrl(originalUrl, "abcdeabcde");
+        repo.insertShortenedUrl(entity);
+        eventStore.insertEvent(
+                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                        entity
+                )
+        );
         given()
                 .header("User-Agent", "Test/V1")
                 .when()

@@ -6,6 +6,7 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import org.acme.application.kafka.KafkaUrlPublisher;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
+import org.acme.application.repo.urlshortner.ShortenedUrlCache;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
@@ -40,12 +41,19 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     private final ShortenedUrlRepository repo;
     private final ShortenedUrlEventRepository eventStore;
     private final KafkaUrlPublisher publisher;
+    private final ShortenedUrlCache cache;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    ShortenedUrlServiceImpl(ShortenedUrlRepository repo, ShortenedUrlEventRepository eventStore, KafkaUrlPublisher publisher) {
+    ShortenedUrlServiceImpl(
+            ShortenedUrlRepository repo,
+            ShortenedUrlEventRepository eventStore,
+            KafkaUrlPublisher publisher,
+            ShortenedUrlCache cache
+    ) {
         this.repo = repo;
         this.eventStore = eventStore;
         this.publisher = publisher;
+        this.cache = cache;
     }
 
     @Override
@@ -70,16 +78,19 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     public Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier) {
-        var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
-        if (maybeShortenedUrl.isEmpty()) {
-            return maybeShortenedUrl;
-        }
-        var isEnabled = maybeShortenedUrl.get().isEnabled();
-        return Optional.of(
-                ShortenedUrlFactory.createShortenedUrl(
-                        eventStore.iteratorFromStart(10, uniqueIdentifier),
-                        isEnabled
-                )
+        return cache.get(uniqueIdentifier, () -> {
+                    var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
+                    if (maybeShortenedUrl.isEmpty()) {
+                        return maybeShortenedUrl;
+                    }
+                    var isEnabled = maybeShortenedUrl.get().isEnabled();
+                    return Optional.of(
+                            ShortenedUrlFactory.createShortenedUrl(
+                                    eventStore.iteratorUntilLatest(10, uniqueIdentifier),
+                                    isEnabled
+                            )
+                    );
+                }
         );
     }
 
@@ -91,7 +102,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             return Either.left(new ShortenUrlError(Optional.empty(), either.getLeft()));
         }
         if (command.uniqueIdentifier().isPresent()) {
-            if (repo.getShortenedUrl(command.uniqueIdentifier().get()).isPresent()) {
+            if (this.getShortenedUrl(command.uniqueIdentifier().get()).isPresent()) {
                 return Either.left(new ShortenUrlError(
                         Optional.of(new UniqueIdentifierAlreadyExists()),
                         List.of()
@@ -116,10 +127,10 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                     List.of()
             ));
         }
-
         var event = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortUrl);
         eventStore.insertEvent(event);
         publisher.publishUserCreatedShortenedUrl(shortUrl.getCreatedAt(), shortUrl.getOriginalUrl(), shortUrl.getPublicIdentifier());
+        cache.put(uniqueIdentifier, shortUrl);
         logger.debug("Successfully generated a short url!");
         return Either.right(shortUrl);
     }
@@ -132,7 +143,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     @Override
     @Transactional
     public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(@NonNull UpdateOriginalUrlCommand command) {
-        var maybeShortenedUrl = repo.getShortenedUrl(command.uniqueIdentifier());
+        var maybeShortenedUrl = this.getShortenedUrl(command.uniqueIdentifier());
         if (maybeShortenedUrl.isEmpty()) {
             return Either.left(UpdateOriginalUrlError.createFromOperationError(new UpdateOriginalUrlException.ShortenedUrlIsNotFound()));
         }
@@ -150,6 +161,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                 ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(url);
                 eventStore.insertEvent(event);
             }
+            cache.put(command.uniqueIdentifier(), url);
             return url;
         }).get());
     }
