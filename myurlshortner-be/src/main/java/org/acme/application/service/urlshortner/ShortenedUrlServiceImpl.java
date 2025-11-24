@@ -122,16 +122,16 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         ShortenedUrl shortUrl = new ShortenedUrl(either.get(), uniqueIdentifier);
         try {
             repo.insertShortenedUrl(shortUrl);
-            var event = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortUrl);
-            eventStore.insertEvent(event);
-            publisher.publishUserCreatedShortenedUrl(shortUrl.getCreatedAt(), shortUrl.getOriginalUrl(), shortUrl.getPublicIdentifier());
-            cache.put(uniqueIdentifier, shortUrl);
         } catch (SaveShortenedUrlConflictError err) {
             return Either.left(new ShortenUrlError(
                     Optional.of(new UniqueIdentifierAlreadyExists()),
                     List.of()
             ));
         }
+        var event = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortUrl);
+        eventStore.insertEvent(event);
+        publisher.publishUserCreatedShortenedUrl(shortUrl.getCreatedAt(), shortUrl.getOriginalUrl(), shortUrl.getPublicIdentifier());
+        cache.put(uniqueIdentifier, shortUrl);
         logger.debug("Successfully generated a short url!");
         return Either.right(shortUrl);
     }
