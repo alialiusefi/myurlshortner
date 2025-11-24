@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  namespace: default
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:8.2.3
+      ports:
+        - containerPort: 6379
+          name: redis-port

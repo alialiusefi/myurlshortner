@@ -87,7 +87,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                 .toList();
     }
 
-    public Iterator<List<? extends ShortenedUrlEvent>> iteratorFromStart(int batchSize, String uniqueIdentifier) {
+    public Iterator<List<? extends ShortenedUrlEvent>> iteratorUntilLatest(int batchSize, String uniqueIdentifier) {
         return new ShortenedUrlEventIterator(this, uniqueIdentifier, batchSize);
     }
 

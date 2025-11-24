@@ -9,12 +9,14 @@ services:
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: safetypassword
       POSTGRES_DB: postgres
+      REDIS_URL: redis://redis:6379
     ports:
       - "8080:8080"
     depends_on:
       - kafka-broker-and-controller
       - schema-registry
       - postgres
+      - redis
     networks:
       - docker-network
   consumer:
