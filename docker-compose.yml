@@ -60,6 +60,12 @@ services:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - docker-network
+  redis:
+    image: redis:8.2.3
+    ports:
+      - "6379:6379"
+    networks:
+      - docker-network
 volumes:
   kafka-broker-and-controller-data:
 networks:

@@ -6,7 +6,7 @@ import org.acme.application.kafka.KafkaUrlPublisher;
 import org.acme.domain.exceptions.url.GetUrlError;
 import org.acme.domain.exceptions.url.GetUrlException;
 import org.acme.domain.exceptions.url.GetUrlValidationException;
-import org.acme.domain.repo.ShortenedUrlRepository;
+import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.service.UrlService;
 import org.jspecify.annotations.NonNull;
 
@@ -16,11 +16,11 @@ import java.util.ArrayList;
 
 @Singleton
 public class UrlServiceImpl implements UrlService {
-    final ShortenedUrlRepository repo;
+    final ShortenedUrlService service;
     final KafkaUrlPublisher publisher;
 
-    private UrlServiceImpl(ShortenedUrlRepository repo, KafkaUrlPublisher publisher) {
-        this.repo = repo;
+    private UrlServiceImpl(ShortenedUrlService service, KafkaUrlPublisher publisher) {
+        this.service = service;
         this.publisher = publisher;
     }
 
@@ -42,7 +42,7 @@ public class UrlServiceImpl implements UrlService {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));
         }
 
-        var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
+        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier);
         var accessedAt = OffsetDateTime.now();
 
         if (maybeShortenedUrl.isEmpty()) {

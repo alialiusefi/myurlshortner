@@ -61,7 +61,10 @@ kubernetes-kafka:
 	kubectl apply -f k8s/kafka/volume.yaml
 	kubectl apply -f k8s/kafka/kafka.yaml
 	kubectl apply -f k8s/kafka/service.yaml
-kubernetes: kubernetes-secrets kubernetes-postgres kubernetes-kafka kubernetes-be kubernetes-consumer kubernetes-apicurio kubernetes-fe kubernetes-apigateway
+kubernetes-redis:
+	kubectl apply -f k8s/redis/redis.yaml
+	kubectl apply -f k8s/redis/service.yaml
+kubernetes: kubernetes-secrets kubernetes-postgres kubernetes-kafka kubernetes-redis kubernetes-be kubernetes-consumer kubernetes-apicurio kubernetes-fe kubernetes-apigateway
 
 prod: be-artifact consumer-artifact fe-kube-artifact kubernetes
 
