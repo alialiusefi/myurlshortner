@@ -14,6 +14,7 @@ import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.UpdateOriginalUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEvent;
+import org.acme.domain.exceptions.DomainException;
 import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
 import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
 import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
@@ -21,6 +22,7 @@ import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.service.ShortenedUrlService;
+import org.acme.domain.validator.UserIdValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +41,26 @@ public class ShortenedUrlUseCases {
         this.service = service;
     }
 
-    public Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(ShortenUrlRequest request) {
+    public Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(String userId, ShortenUrlRequest request) {
+        var userIdValidation = UserIdValidator.validate(userId);
+        if (userIdValidation.isLeft()) {
+            return Either.left(new ShortenUrlError(Optional.empty(), List.of(userIdValidation.getLeft())));
+        }
         return service.createShortenedUrl(
                 new CreateShortenedUrlCommand(
-                        Optional.ofNullable(request.uniqueIdentifier()), request.url())
+                        Optional.ofNullable(request.uniqueIdentifier()),
+                        request.url(),
+                        userId
+                )
         );
     }
 
-    public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrl>>> listAvailableUrls(Integer page, Integer size, String order) {
+    public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrl>>> listAvailableUrls(
+            Integer page,
+            Integer size,
+            String order,
+            String userId
+    ) {
         List<ApplicationException> errors = new ArrayList<>();
         if (page == null || page < 1) {
             errors.add(new PageNumberIsNotCorrectException(page));
@@ -64,6 +78,11 @@ public class ShortenedUrlUseCases {
             order = "desc";
         }
 
+        var userIdValidation = UserIdValidator.validate(userId);
+        if (userIdValidation.isLeft()) {
+            errors.add(new ApplicationException(userIdValidation.getLeft()));
+        }
+
         if (errors.isEmpty()) {
             return Either.right(service.listOfAvailableUrls(page, size, order.equals("asc")));
         } else {
@@ -71,13 +90,22 @@ public class ShortenedUrlUseCases {
         }
     }
 
-    public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(String uniqueIdentifier, UpdateOriginalUrlRequest request) {
+    public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(
+            String uniqueIdentifier,
+            UpdateOriginalUrlRequest request,
+            String userId
+    ) {
+        var userIdValidation = UserIdValidator.validate(userId);
+        if (userIdValidation.isLeft()) {
+            return Either.left(new UpdateOriginalUrlError(List.of(userIdValidation.getLeft()), Optional.empty()));
+        }
         return service.updateOriginalUrl(
                 new UpdateOriginalUrlCommand(uniqueIdentifier, request.url(), request.isEnabled())
         );
     }
 
     public Either<GetShortenedUrlHistoryError, List<? extends ShortenedUrlEvent>> getShortenedUrlHistory(
+            String userId,
             String uniqueIdentifier,
             Integer offset,
             Integer size,
@@ -100,6 +128,11 @@ public class ShortenedUrlUseCases {
         } catch (Throwable e) {
             errors.add(new DateTimeIsNotCorrectException(fromDateTime));
         }
+        var userIdValidation = UserIdValidator.validate(userId);
+        if (userIdValidation.isLeft()) {
+            errors.add(new ApplicationException(userIdValidation.getLeft()));
+        }
+
         if (errors.isEmpty()) {
             return Either.right(service.getShortenedUrlHistory(uniqueIdentifier, offset, size, parsed));
         } else {
@@ -107,13 +140,22 @@ public class ShortenedUrlUseCases {
         }
     }
 
-    public Either<GetShortenedUrlError, ShortenedUrl> getShortenedUrl(String uniqueIdentifier) {
+    public Either<GetShortenedUrlError, ShortenedUrl> getShortenedUrl(String userId, String uniqueIdentifier) {
+        List<DomainException> errors = new ArrayList<>();
         if (uniqueIdentifier == null || uniqueIdentifier.isBlank()) {
-            return Either.left(new GetShortenedUrlError(new UniqueIdentifierCannotBeEmptyValidationException()));
+            errors.add(new UniqueIdentifierCannotBeEmptyValidationException());
+        } else if (uniqueIdentifier.length() > 10) {
+            errors.add(new UniqueIdentifierIsTooLongValidationException());
         }
-        if (uniqueIdentifier.length() > 10) {
-            return Either.left(new GetShortenedUrlError(new UniqueIdentifierIsTooLongValidationException()));
+        var userIdValidation = UserIdValidator.validate(userId);
+        if (userIdValidation.isLeft()) {
+            errors.add(userIdValidation.getLeft());
         }
+
+        if (!errors.isEmpty()) {
+            return Either.left(new GetShortenedUrlError(errors));
+        }
+
         return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier)).toEither(
                 new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
         );
