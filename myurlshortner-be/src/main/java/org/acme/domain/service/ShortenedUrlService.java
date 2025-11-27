@@ -27,7 +27,8 @@ public interface ShortenedUrlService {
     Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(
             @NonNull Integer page,
             @NonNull Integer size,
-            boolean isAscending
+            boolean isAscending,
+            @NonNull Long userId
     );
 
     Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(@NonNull UpdateOriginalUrlCommand command);
@@ -36,6 +37,7 @@ public interface ShortenedUrlService {
             @NonNull String uniqueIdentifier,
             @NonNull Integer offset,
             @NonNull Integer size,
-            @NonNull OffsetDateTime from
+            @NonNull OffsetDateTime from,
+            @NonNull Long userId
     );
 }

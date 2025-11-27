@@ -5,6 +5,7 @@ import org.jspecify.annotations.NonNull;
 public record UpdateOriginalUrlCommand(
         @NonNull String uniqueIdentifier,
         @NonNull String newOriginalUrl,
-        @NonNull Boolean isEnabled
+        @NonNull Boolean isEnabled,
+        @NonNull Long userId
 ) {
 }

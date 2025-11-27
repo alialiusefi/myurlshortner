@@ -84,7 +84,7 @@ public class ShortenedUrlUseCases {
         }
 
         if (errors.isEmpty()) {
-            return Either.right(service.listOfAvailableUrls(page, size, order.equals("asc")));
+            return Either.right(service.listOfAvailableUrls(page, size, order.equals("asc"), userIdValidation.get()));
         } else {
             return Either.left(new GetAvailableUrlsError(errors));
         }
@@ -100,7 +100,7 @@ public class ShortenedUrlUseCases {
             return Either.left(new UpdateOriginalUrlError(List.of(userIdValidation.getLeft()), Optional.empty()));
         }
         return service.updateOriginalUrl(
-                new UpdateOriginalUrlCommand(uniqueIdentifier, request.url(), request.isEnabled())
+                new UpdateOriginalUrlCommand(uniqueIdentifier, request.url(), request.isEnabled(), userIdValidation.get())
         );
     }
 
@@ -134,7 +134,7 @@ public class ShortenedUrlUseCases {
         }
 
         if (errors.isEmpty()) {
-            return Either.right(service.getShortenedUrlHistory(uniqueIdentifier, offset, size, parsed));
+            return Either.right(service.getShortenedUrlHistory(uniqueIdentifier, offset, size, parsed, userIdValidation.get()));
         } else {
             return Either.left(new GetShortenedUrlHistoryError(errors));
         }

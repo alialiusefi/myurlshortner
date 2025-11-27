@@ -136,7 +136,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending) {
+    public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending, @NonNull Long userId) {
         return repo.listAvailableShortenedUrls(page, size, isAscending);
     }
 
@@ -171,7 +171,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             @NonNull String uniqueIdentifier,
             @NonNull Integer offset,
             @NonNull Integer size,
-            @NonNull OffsetDateTime from
+            @NonNull OffsetDateTime from,
+            @NonNull Long userId
     ) {
         return eventStore.getShortenedUrlEventsOrderedByDateTimeDesc(uniqueIdentifier, offset, size, from);
     }
