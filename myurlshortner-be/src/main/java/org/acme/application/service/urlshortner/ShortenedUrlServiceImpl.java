@@ -24,6 +24,7 @@ import org.acme.domain.validator.UniqueIdValidator;
 import org.acme.domain.validator.UrlValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @Singleton
@@ -72,26 +74,26 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier) {
-        return getShortenedUrlFromEvents(uniqueIdentifier);
+    public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier, @Nullable Long userId) {
+        return getShortenedUrlFromEvents(uniqueIdentifier, userId);
     }
 
     @Override
-    public Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier) {
-        return cache.get(uniqueIdentifier, () -> {
-                    var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier);
-                    if (maybeShortenedUrl.isEmpty()) {
-                        return maybeShortenedUrl;
-                    }
-                    var isEnabled = maybeShortenedUrl.get().isEnabled();
-                    return Optional.of(
-                            ShortenedUrlFactory.createShortenedUrl(
-                                    eventStore.iteratorUntilLatest(10, uniqueIdentifier),
-                                    isEnabled
-                            )
-                    );
-                }
-        );
+    public Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier, @Nullable Long userId) {
+        Supplier<Optional<ShortenedUrl>> fromDb = () -> {
+            var maybeShortenedUrl = repo.getShortenedUrl(uniqueIdentifier, userId);
+            if (maybeShortenedUrl.isEmpty()) {
+                return maybeShortenedUrl;
+            }
+            var isEnabled = maybeShortenedUrl.get().isEnabled();
+            return Optional.of(
+                    ShortenedUrlFactory.createShortenedUrl(
+                            eventStore.iteratorUntilLatest(10, uniqueIdentifier),
+                            isEnabled
+                    )
+            );
+        };
+        return userId == null ? cache.getByKey(uniqueIdentifier, fromDb) : cache.getByKeyAndUserId(uniqueIdentifier, userId, fromDb);
     }
 
     @Override
@@ -102,7 +104,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             return Either.left(new ShortenUrlError(Optional.empty(), either.getLeft()));
         }
         if (command.uniqueIdentifier().isPresent()) {
-            if (this.getShortenedUrl(command.uniqueIdentifier().get()).isPresent()) {
+            if (this.getShortenedUrl(command.uniqueIdentifier().get(), null).isPresent()) {
                 return Either.left(new ShortenUrlError(
                         Optional.of(new UniqueIdentifierAlreadyExists()),
                         List.of()
@@ -118,7 +120,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         }
 
         String uniqueIdentifier = command.uniqueIdentifier().orElseGet(this::generateUniqueIdentifier);
-        ShortenedUrl shortUrl = new ShortenedUrl(either.get(), uniqueIdentifier);
+        ShortenedUrl shortUrl = new ShortenedUrl(either.get(), uniqueIdentifier, command.userId());
         try {
             repo.insertShortenedUrl(shortUrl);
         } catch (SaveShortenedUrlConflictError err) {
@@ -137,13 +139,13 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending, @NonNull Long userId) {
-        return repo.listAvailableShortenedUrls(page, size, isAscending);
+        return repo.listAvailableShortenedUrls(page, size, isAscending, userId);
     }
 
     @Override
     @Transactional
     public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(@NonNull UpdateOriginalUrlCommand command) {
-        var maybeShortenedUrl = this.getShortenedUrl(command.uniqueIdentifier());
+        var maybeShortenedUrl = this.getShortenedUrl(command.uniqueIdentifier(), command.userId());
         if (maybeShortenedUrl.isEmpty()) {
             return Either.left(UpdateOriginalUrlError.createFromOperationError(new UpdateOriginalUrlException.ShortenedUrlIsNotFound()));
         }

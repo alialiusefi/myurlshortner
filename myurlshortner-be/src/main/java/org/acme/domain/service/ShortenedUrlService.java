@@ -10,6 +10,7 @@ import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,9 +19,9 @@ import java.util.Optional;
 public interface ShortenedUrlService {
     @NonNull String generateUniqueIdentifier();
 
-    Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier);
+    Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier, @Nullable Long userId);
 
-    Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier);
+    Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier, @Nullable Long userId);
 
     Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(@NonNull CreateShortenedUrlCommand command);
 

@@ -50,7 +50,7 @@ public class ShortenedUrlUseCases {
                 new CreateShortenedUrlCommand(
                         Optional.ofNullable(request.uniqueIdentifier()),
                         request.url(),
-                        userId
+                        userIdValidation.get()
                 )
         );
     }
@@ -111,7 +111,7 @@ public class ShortenedUrlUseCases {
             Integer size,
             String fromDateTime
     ) {
-        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier);
+        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier, null);
         if (maybeShortenedUrl.isEmpty()) {
             return Either.left(new GetShortenedUrlHistoryError(new ShortenedUrlIsNotFoundException()));
         }
@@ -156,7 +156,7 @@ public class ShortenedUrlUseCases {
             return Either.left(new GetShortenedUrlError(errors));
         }
 
-        return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier)).toEither(
+        return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier, userIdValidation.get())).toEither(
                 new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
         );
     }

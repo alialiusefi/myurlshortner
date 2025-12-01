@@ -12,6 +12,7 @@ import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 import java.time.Instant;
@@ -36,14 +37,16 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     }
 
     @Override
-    public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier) {
-        return find("uniqueIdentifier = ?1", uniqueIdentifier).firstResultOptional().map(
+    public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier, @Nullable Long userId) {
+        var query = userId == null ? find("uniqueIdentifier = ?1", uniqueIdentifier) : find("uniqueIdentifier = ?1 and userId = ?2", uniqueIdentifier, userId);
+        return query.firstResultOptional().map(
                 result -> new ShortenedUrl(
                         result.getOriginalUrl(),
                         result.getUniqueIdentifier(),
                         result.getCreatedAt(),
                         result.getUpdatedAt(),
-                        result.getEnabled()
+                        result.getEnabled(),
+                        result.getUserId()
                 )
         );
     }
@@ -57,22 +60,26 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     public Tuple2<Long, List<AvailableShortenedUrl>> listAvailableShortenedUrls(
             @NonNull Integer page,
             @NonNull Integer size,
-            boolean isAscending
+            boolean isAscending,
+            @Nullable Long userId
     ) {
+        var whereClause = userId == null ? "" : String.format("where us1.user_id = %s", userId);
         var order = isAscending ? "asc" : "desc";
-        var queryForCount = """
+        var queryForCount = String.format("""
                 select count(*) from (
                 select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
+                %s \s
                 group by us1.unique_identifier, us1.original_url, us1.created_at, us1.is_enabled \s
                 );
-                """;
+                """, whereClause);
         var query = String.format("""
                 select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
+                %s
                 group by us1.unique_identifier, us1.original_url, us1.created_at, us1.is_enabled \s
                 order by us1.created_at %s limit ?1 offset ?2
-                """, order);
+                """, whereClause, order);
         var count = (Long) getEntityManager().createNativeQuery(queryForCount).getSingleResult();
         var preparedStatement = getEntityManager().createNativeQuery(query);
         preparedStatement.setParameter(1, size);
@@ -105,6 +112,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     }
 
     private ShortenedUrlEntity toEntity(ShortenedUrl from) {
-        return new ShortenedUrlEntity(from.getPublicIdentifier(), from.getOriginalUrl().toString(), from.getCreatedAt(), from.getUpdatedAt(), from.isEnabled());
+        return new ShortenedUrlEntity(
+                from.getPublicIdentifier(), from.getOriginalUrl().toString(), from.getCreatedAt(), from.getUpdatedAt(), from.isEnabled(), from.getUserId());
     }
 }

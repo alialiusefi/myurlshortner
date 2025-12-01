@@ -6,6 +6,6 @@ import java.util.Optional;
 public record CreateShortenedUrlCommand(
         Optional<String> uniqueIdentifier,
         String originalUrl,
-        String userId
+        Long userId
 ) {
 }

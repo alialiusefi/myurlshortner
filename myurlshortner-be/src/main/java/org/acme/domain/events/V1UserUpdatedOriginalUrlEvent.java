@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 public record V1UserUpdatedOriginalUrlEvent(
         @NonNull String uniqueIdentifier,
         @NonNull URI newOriginalUrl,
-        @NonNull OffsetDateTime updatedAt
+        @NonNull OffsetDateTime updatedAt,
+        @NonNull Long userId
 ) implements ShortenedUrlEvent {
 }

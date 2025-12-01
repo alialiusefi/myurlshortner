@@ -17,7 +17,8 @@ public class ShortenedUrlEventEnvelopFactory {
                         shortenedUrl.getPublicIdentifier(),
                         shortenedUrl.getCreatedAt(),
                         shortenedUrl.isEnabled(),
-                        shortenedUrl.getOriginalUrl()
+                        shortenedUrl.getOriginalUrl(),
+                        shortenedUrl.getUserId()
                 )
         );
     }
@@ -30,7 +31,12 @@ public class ShortenedUrlEventEnvelopFactory {
                 1,
                 ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL,
                 url.getUpdatedAt(),
-                new V1UserUpdatedOriginalUrlEvent(url.getPublicIdentifier(), url.getOriginalUrl(), url.getUpdatedAt())
+                new V1UserUpdatedOriginalUrlEvent(
+                        url.getPublicIdentifier(),
+                        url.getOriginalUrl(),
+                        url.getUpdatedAt(),
+                        url.getUserId()
+                )
         );
     }
 }

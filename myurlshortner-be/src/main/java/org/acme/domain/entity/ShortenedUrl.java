@@ -10,24 +10,27 @@ public class ShortenedUrl {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private boolean enabled;
+    private Long userId;
 
     public ShortenedUrl() {
     }
 
-    public ShortenedUrl(URI originalUrl, String publicIdentifier) {
+    public ShortenedUrl(URI originalUrl, String publicIdentifier, Long userId) {
         this.originalUrl = originalUrl;
         this.publicIdentifier = publicIdentifier;
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = this.createdAt;
         this.enabled = true;
+        this.userId = userId;
     }
 
-    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt, Boolean enabled) {
+    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt, Boolean enabled, Long userId) {
         this.originalUrl = URI.create(originalUrl);
         this.publicIdentifier = publicIdentifier;
         this.createdAt = datetime;
         this.updatedAt = updatedAt;
         this.enabled = enabled;
+        this.userId = userId;
     }
 
     public String shortenedUrl(String serviceHostname) {
@@ -44,6 +47,14 @@ public class ShortenedUrl {
         this.updatedAt = OffsetDateTime.now();
         this.enabled = isEnabled;
         return this;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public boolean canRedirect() {
