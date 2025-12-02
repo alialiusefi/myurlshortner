@@ -15,13 +15,12 @@ export default function RootLayout({
 }) {
   const [userId, setUserId] = React.useState<number>();
   React.useEffect(() => {
-    const cookieValue =
+    let cookieValue =
       document.cookie
         .split("; ")
         .find((a) => a.startsWith("UserId"))
         ?.split("=")[1] ?? "1";
-    const cookiedValueInt = parseInt(cookieValue);
-    setUserId(cookiedValueInt);
+    setUserId(parseInt(cookieValue));
   }, [userId]);
   return (
     <html lang="en">
