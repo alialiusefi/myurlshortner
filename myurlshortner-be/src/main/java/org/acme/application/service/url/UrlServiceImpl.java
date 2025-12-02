@@ -42,7 +42,7 @@ public class UrlServiceImpl implements UrlService {
             return Either.left(GetUrlError.createFromValidationExceptions(errors));
         }
 
-        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier);
+        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier, null);
         var accessedAt = OffsetDateTime.now();
 
         if (maybeShortenedUrl.isEmpty()) {

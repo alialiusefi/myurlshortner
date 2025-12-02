@@ -15,6 +15,7 @@ Returns list of shortened urls. The list is ordered by `created_at`. `created_at
 
 ```http
 Authorization:
+User-Id: 1
 https://{hostname}/shortened-urls?page=1&size=10&order=desc
 ```
 
