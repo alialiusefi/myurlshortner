@@ -3,28 +3,35 @@ import useSWRInfinite from "swr/infinite";
 import { ErrorResponse } from "./Errors";
 import { buildUserIdHeader } from "./Utility";
 
-export const GetShortenedUrlInfoSWR = (uniqueIdentifier: string, userId: number) => {
+export const GetShortenedUrlInfoSWR = (
+  uniqueIdentifier: string,
+  userId: number,
+) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
-    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(async (res) => {
-      if (res.ok) {
-        const json = (await res.json()) as GetShortenedUrlInfoResponse;
-        return json;
-      }
-      if (res.status == 404) {
-        throw new GetShortenedUrlInfo404Response();
-      }
-      throw new Error("Unexpected BE response!");
-    });
+    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(
+      async (res) => {
+        if (res.ok) {
+          const json = (await res.json()) as GetShortenedUrlInfoResponse;
+          return json;
+        }
+        if (res.status == 404) {
+          throw new GetShortenedUrlInfo404Response();
+        }
+        throw new Error("Unexpected BE response!");
+      },
+    );
   return useSWR(`${serverUrl}/shortened-urls/${uniqueIdentifier}`, fetcher);
 };
 
 export const GetShortenedUrlInfoFetch = async (
   uniqueIdentifier: string,
-  userId: number
+  userId: number,
 ): Promise<GetShortenedUrlInfoResponse> => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  return fetch(`${serverUrl}/shortened-urls/${uniqueIdentifier}`, { headers: { ...buildUserIdHeader(userId) } })
+  return fetch(`${serverUrl}/shortened-urls/${uniqueIdentifier}`, {
+    headers: { ...buildUserIdHeader(userId) },
+  })
     .then(async (res) => {
       if (res.ok) {
         const json = (await res.json()) as GetShortenedUrlInfoResponse;
@@ -46,21 +53,23 @@ export const GetAvailableUrlsSWR = (
 ) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
-    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(async (res) => {
-      if (res.ok) {
-        const json = (await res.json()) as GetAvailableUrlsResponse;
-        return json;
-      }
-      if (res.status == 400) {
-        const json = (await res.json()) as ErrorResponse;
-        console.error(`Bad Request from BE: ${json}`);
-        const error = new Error("Unexpected BE error!");
+    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(
+      async (res) => {
+        if (res.ok) {
+          const json = (await res.json()) as GetAvailableUrlsResponse;
+          return json;
+        }
+        if (res.status == 400) {
+          const json = (await res.json()) as ErrorResponse;
+          console.error(`Bad Request from BE: ${json}`);
+          const error = new Error("Unexpected BE error!");
+          throw error;
+        }
+        console.error("Unexpected BE Response!");
+        const error = new Error("Unexpected BE response!");
         throw error;
-      }
-      console.error("Unexpected BE Response!");
-      const error = new Error("Unexpected BE response!");
-      throw error;
-    });
+      },
+    );
   return useSWR(
     `${serverUrl}/shortened-urls?page=${page}&size=${size}&order=${order}`,
     fetcher,
@@ -76,16 +85,18 @@ export const GetShortenedUrlHistorySWR = (
 ) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
-    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(async (res) => {
-      if (res.ok) {
-        return (await res.json()) as GetShortenedUrlHistoryResponse;
-      }
-      if (res.status == 404) {
-        throw new GetShortenedUrlHistory404Response();
-      }
-      console.error("Unexpected BE response!");
-      return null;
-    });
+    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(
+      async (res) => {
+        if (res.ok) {
+          return (await res.json()) as GetShortenedUrlHistoryResponse;
+        }
+        if (res.status == 404) {
+          throw new GetShortenedUrlHistory404Response();
+        }
+        console.error("Unexpected BE response!");
+        return null;
+      },
+    );
   return useSWRInfinite((page, prevPageData) => {
     if (prevPageData != null && prevPageData.data.length < size) {
       return null;
@@ -104,7 +115,7 @@ export class GetShortenedUrlInfoResponse {
   updated_at: string;
 }
 
-export class GetShortenedUrlInfo404Response { }
+export class GetShortenedUrlInfo404Response {}
 
 export type GetShortenedUrlHistoryRowResponse = {
   url: string;
@@ -119,7 +130,7 @@ export class GetShortenedUrlHistoryResponse {
   }
 }
 
-export class GetShortenedUrlHistory404Response { }
+export class GetShortenedUrlHistory404Response {}
 
 export class GetAvailableUrlsResponse {
   data: [

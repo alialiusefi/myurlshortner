@@ -64,8 +64,13 @@ export default function ShortnetedUrlsTable() {
   const [directonState, setDirectionState] = useState<Direction>(orderParam);
   const [size, setSizeState] = useState(sizeParam);
   const [page, setPageState] = useState(pageParam - 1);
-  const userId = useContext(UserProvider)
-  const { data, mutate } = GetAvailableUrlsSWR(page + 1, size, directonState, userId);
+  const userId = useContext(UserProvider);
+  const { data, mutate } = GetAvailableUrlsSWR(
+    page + 1,
+    size,
+    directonState,
+    userId,
+  );
   const toggleDirection = () => {
     if (directonState == "desc") {
       setDirectionState("asc");

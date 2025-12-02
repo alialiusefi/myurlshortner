@@ -40,7 +40,7 @@ export default function ShortenUrlForm() {
   });
   const [openModalUrlState, setOpenModalUrlState] = useState(false);
   const [uidExists, setUidExists] = useState(false);
-  const userId = useContext(UserProvider)
+  const userId = useContext(UserProvider);
   const validateUidExists = async (uidInput: string) => {
     const uid = uidInput == null ? data?.unique_identifier : uidInput;
     const res = await GetShortenedUrlInfoFetch(uid, userId);
@@ -66,7 +66,7 @@ export default function ShortenUrlForm() {
     const result = await shortenUrlOperaton(
       targetUrlInput,
       uidInput == null ? data?.unique_identifier : uidInput,
-      userId
+      userId,
     );
     if (result instanceof ShortenUrlResponse) {
       const shortenedUrl = (result as ShortenUrlResponse).shortened_url;

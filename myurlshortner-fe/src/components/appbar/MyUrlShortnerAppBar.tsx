@@ -10,7 +10,7 @@ import { UserProvider } from "app/context";
 import Grid from "@mui/material/Grid";
 
 export default function MyUrlShorterAppBar() {
-  const userId = useContext(UserProvider)
+  const userId = useContext(UserProvider);
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -25,9 +25,7 @@ export default function MyUrlShorterAppBar() {
             Browse
           </Button>
           <Grid container columnSpacing={1}>
-            <Typography>
-              UserId: {userId}
-            </Typography>
+            <Typography>UserId: {userId}</Typography>
           </Grid>
         </Toolbar>
       </AppBar>

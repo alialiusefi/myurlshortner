@@ -44,7 +44,7 @@ export const GenerateUniqueIdFetch =
 export async function shortenUrlOperaton(
   url: string,
   uid: string,
-  userId: number
+  userId: number,
 ): Promise<ShortenUrlResponse | ErrorResponse> {
   const request = new ShortenUrlRequest(url, uid);
   const requestConfig = {
@@ -52,7 +52,7 @@ export async function shortenUrlOperaton(
     body: JSON.stringify(request),
     headers: {
       ...buildUserIdHeader(userId),
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
   };
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
@@ -76,7 +76,7 @@ export async function updateShortenedUrl(
   uniqueIdentifier: string,
   newOriginalUrl: string,
   isEnabled: boolean,
-  userId: number
+  userId: number,
 ): Promise<ErrorResponse | null> {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const request = new UpdateShortenedUrlRequest(newOriginalUrl, isEnabled);
@@ -86,7 +86,7 @@ export async function updateShortenedUrl(
     body: JSON.stringify(request),
     headers: {
       "Content-Type": "application/json",
-      ...buildUserIdHeader(userId)
+      ...buildUserIdHeader(userId),
     },
   };
   return fetch(url, requestConfig)

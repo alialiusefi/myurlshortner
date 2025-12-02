@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import * as React from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -15,10 +15,14 @@ export default function RootLayout({
 }) {
   const [userId, setUserId] = React.useState<number>();
   React.useEffect(() => {
-    const cookieValue = document.cookie.split("; ").find(a => a.startsWith("UserId"))?.split("=")[1] ?? "1"
-    const cookiedValueInt = parseInt(cookieValue)
-    setUserId(cookiedValueInt)
-  }, [userId])
+    const cookieValue =
+      document.cookie
+        .split("; ")
+        .find((a) => a.startsWith("UserId"))
+        ?.split("=")[1] ?? "1";
+    const cookiedValueInt = parseInt(cookieValue);
+    setUserId(cookiedValueInt);
+  }, [userId]);
   return (
     <html lang="en">
       <body>

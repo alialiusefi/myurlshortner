@@ -17,7 +17,7 @@ export default function ShortenedUrlHistory(params: {
   uniqueId: string;
   now: string;
 }) {
-  const userId = useContext(UserProvider)
+  const userId = useContext(UserProvider);
   const { data, isLoading, setSize, error } = GetShortenedUrlHistorySWR(
     5,
     params.uniqueId,

@@ -13,8 +13,11 @@ import { useContext } from "react";
 import { UserProvider } from "app/context";
 
 export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
-  const userId = useContext(UserProvider)
-  const { data, isLoading, error } = GetShortenedUrlInfoSWR(params.uniqueId, userId);
+  const userId = useContext(UserProvider);
+  const { data, isLoading, error } = GetShortenedUrlInfoSWR(
+    params.uniqueId,
+    userId,
+  );
   if (isLoading) {
     return null;
   }

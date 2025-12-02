@@ -24,7 +24,7 @@ type Properties = {
 };
 
 export default function UpdateShortenedUrlDialog(props: Properties) {
-  const userId = useContext(UserProvider)
+  const userId = useContext(UserProvider);
   const [newTargetUrl, setNewTargetUrl] = useState<string>(props.originalUrl);
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isValid, setIsValid] = useState(true);
@@ -36,7 +36,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
       props.uniqueIdentifier,
       newTargetUrl,
       isEnabled,
-      userId
+      userId,
     );
     if (response) {
       setError(response);
