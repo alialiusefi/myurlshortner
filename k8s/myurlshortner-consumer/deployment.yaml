@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: myurlshortner-consumer
-          image: alialiusefi/myurlshortner-consumer:1.0.2
+          image: alialiusefi/myurlshortner-consumer:1.0.3
           ports:
             - containerPort: 7070
           env:
