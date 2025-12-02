@@ -2,8 +2,8 @@ package org.acme.domain.validator;
 
 import org.acme.application.service.urlshortner.UniqueIdentifierCharTable;
 import org.acme.domain.exceptions.DomainException;
-import org.acme.domain.exceptions.UniqueIdContainsInvalidCharactersValidationException;
 import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
+import org.acme.domain.exceptions.UniqueIdContainsInvalidCharactersValidationException;
 import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.jspecify.annotations.NonNull;
 
