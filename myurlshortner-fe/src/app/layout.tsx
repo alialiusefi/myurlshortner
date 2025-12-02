@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   const [userId, setUserId] = React.useState<number>();
   React.useEffect(() => {
-    let cookieValue =
+    const cookieValue =
       document.cookie
         .split("; ")
         .find((a) => a.startsWith("UserId"))
