@@ -9,9 +9,12 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DoNotDisturbOnIcon from "@mui/icons-material/DoNotDisturbOn";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
+import { useContext } from "react";
+import { UserProvider } from "app/context";
 
 export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
-  const { data, isLoading, error } = GetShortenedUrlInfoSWR(params.uniqueId);
+  const userId = useContext(UserProvider)
+  const { data, isLoading, error } = GetShortenedUrlInfoSWR(params.uniqueId, userId);
   if (isLoading) {
     return null;
   }

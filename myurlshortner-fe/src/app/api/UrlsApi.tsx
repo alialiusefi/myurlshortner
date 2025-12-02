@@ -1,11 +1,12 @@
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { ErrorResponse } from "./Errors";
+import { buildUserIdHeader } from "./Utility";
 
-export const GetShortenedUrlInfoSWR = (uniqueIdentifier: string) => {
+export const GetShortenedUrlInfoSWR = (uniqueIdentifier: string, userId: number) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
-    fetch(url).then(async (res) => {
+    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(async (res) => {
       if (res.ok) {
         const json = (await res.json()) as GetShortenedUrlInfoResponse;
         return json;
@@ -20,9 +21,10 @@ export const GetShortenedUrlInfoSWR = (uniqueIdentifier: string) => {
 
 export const GetShortenedUrlInfoFetch = async (
   uniqueIdentifier: string,
+  userId: number
 ): Promise<GetShortenedUrlInfoResponse> => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  return fetch(`${serverUrl}/shortened-urls/${uniqueIdentifier}`)
+  return fetch(`${serverUrl}/shortened-urls/${uniqueIdentifier}`, { headers: { ...buildUserIdHeader(userId) } })
     .then(async (res) => {
       if (res.ok) {
         const json = (await res.json()) as GetShortenedUrlInfoResponse;
@@ -39,11 +41,12 @@ export const GetAvailableUrlsSWR = (
   page: number,
   size: number,
   order: string,
+  userId: number,
   refreshInterval: number = 0,
 ) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
-    fetch(url).then(async (res) => {
+    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(async (res) => {
       if (res.ok) {
         const json = (await res.json()) as GetAvailableUrlsResponse;
         return json;
@@ -68,11 +71,12 @@ export const GetAvailableUrlsSWR = (
 export const GetShortenedUrlHistorySWR = (
   size: number,
   uniqueIdentifier: string,
+  userId: number,
   fromDateTime: string,
 ) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
-    fetch(url).then(async (res) => {
+    fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(async (res) => {
       if (res.ok) {
         return (await res.json()) as GetShortenedUrlHistoryResponse;
       }
@@ -100,7 +104,7 @@ export class GetShortenedUrlInfoResponse {
   updated_at: string;
 }
 
-export class GetShortenedUrlInfo404Response {}
+export class GetShortenedUrlInfo404Response { }
 
 export type GetShortenedUrlHistoryRowResponse = {
   url: string;
@@ -115,7 +119,7 @@ export class GetShortenedUrlHistoryResponse {
   }
 }
 
-export class GetShortenedUrlHistory404Response {}
+export class GetShortenedUrlHistory404Response { }
 
 export class GetAvailableUrlsResponse {
   data: [
