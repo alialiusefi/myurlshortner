@@ -5,6 +5,7 @@ Return details of a shortened url
 ```http
 GET http://{hostname}/shortened-urls/{uid}
 Content-Type: application/json
+User-Id: 1
 Authorization:
 ```
 
