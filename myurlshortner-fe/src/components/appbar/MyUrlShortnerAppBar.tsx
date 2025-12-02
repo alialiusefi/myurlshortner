@@ -5,8 +5,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { redirect } from "next/navigation";
+import { useContext } from "react";
+import { UserProvider } from "app/context";
+import Grid from "@mui/material/Grid";
 
 export default function MyUrlShorterAppBar() {
+  const userId = useContext(UserProvider);
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -20,6 +24,9 @@ export default function MyUrlShorterAppBar() {
           <Button onClick={() => redirect("/browse")} color="inherit">
             Browse
           </Button>
+          <Grid container columnSpacing={1}>
+            <Typography>UserId: {userId}</Typography>
+          </Grid>
         </Toolbar>
       </AppBar>
     </Box>

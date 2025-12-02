@@ -9,10 +9,11 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { updateShortenedUrl } from "app/api/UrlShortnerApi";
 import { apiErrorSnackBar } from "../utility/ApiErrorSnackBar";
 import { ErrorResponse } from "app/api/Errors";
+import { UserProvider } from "app/context";
 
 type Properties = {
   isOpen: boolean;
@@ -23,6 +24,7 @@ type Properties = {
 };
 
 export default function UpdateShortenedUrlDialog(props: Properties) {
+  const userId = useContext(UserProvider);
   const [newTargetUrl, setNewTargetUrl] = useState<string>(props.originalUrl);
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isValid, setIsValid] = useState(true);
@@ -34,6 +36,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
       props.uniqueIdentifier,
       newTargetUrl,
       isEnabled,
+      userId,
     );
     if (response) {
       setError(response);

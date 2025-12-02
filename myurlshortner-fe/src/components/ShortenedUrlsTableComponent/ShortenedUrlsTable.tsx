@@ -4,7 +4,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Table from "@mui/material/Table";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TableBody from "@mui/material/TableBody";
@@ -21,6 +21,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
+import { UserProvider } from "app/context";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -63,7 +64,13 @@ export default function ShortnetedUrlsTable() {
   const [directonState, setDirectionState] = useState<Direction>(orderParam);
   const [size, setSizeState] = useState(sizeParam);
   const [page, setPageState] = useState(pageParam - 1);
-  const { data, mutate } = GetAvailableUrlsSWR(page + 1, size, directonState);
+  const userId = useContext(UserProvider);
+  const { data, mutate } = GetAvailableUrlsSWR(
+    page + 1,
+    size,
+    directonState,
+    userId,
+  );
   const toggleDirection = () => {
     if (directonState == "desc") {
       setDirectionState("asc");

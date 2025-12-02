@@ -1,13 +1,13 @@
 export async function getOriginalUrl(
   uniqueId: string,
-  userAgent: string
+  userAgent: string,
 ): Promise<GetOriginalUrlResponse | null> {
   const serverUrl = process.env.INTERNAL_SERVER_URL;
   return fetch(`${serverUrl}/urls/${uniqueId}`, {
     redirect: "manual",
     headers: {
-      "User-Agent": userAgent
-    }
+      "User-Agent": userAgent,
+    },
   })
     .then((response) => {
       if (response.status == 404) {

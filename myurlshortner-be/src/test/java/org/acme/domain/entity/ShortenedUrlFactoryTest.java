@@ -24,7 +24,8 @@ public class ShortenedUrlFactoryTest {
                 uid,
                 createdAt,
                 createdAt,
-                true
+                true,
+                1L
         );
         List created = List.of(ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortenedUrl).getEvent());
         var iterator = Mockito.mock(ShortenedUrlEventRepository.ShortenedUrlEventIterator.class); // the factory relies on the api of the iterator
@@ -44,7 +45,8 @@ public class ShortenedUrlFactoryTest {
                 uid,
                 createdAt,
                 createdAt,
-                false
+                false,
+                1L
         );
         V1UserCreatedShortenedUrlEvent created = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortenedUrl).getEvent();
         List events1 = List.of(created);

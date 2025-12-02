@@ -9,6 +9,7 @@ public record V1UserCreatedShortenedUrlEvent(
         @NonNull String uniqueIdentifier,
         @NonNull OffsetDateTime createdAt,
         @NonNull Boolean isEnabled,
-        @NonNull URI originalUrl
+        @NonNull URI originalUrl,
+        @NonNull Long userId
 ) implements ShortenedUrlEvent {
 }

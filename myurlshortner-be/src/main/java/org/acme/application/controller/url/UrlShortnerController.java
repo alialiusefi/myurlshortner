@@ -12,6 +12,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.acme.application.controller.url.Constants.USER_ID_HEADER_KEY;
 
 @Path("/")
 public class UrlShortnerController {
@@ -36,9 +37,11 @@ public class UrlShortnerController {
     @Path("/shorten")
     @Produces(APPLICATION_JSON)
     public Response createShortenedUrl(
-            ShortenUrlRequest request
+            ShortenUrlRequest request,
+            @DefaultValue("1")
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
-        return this.shortenedUrlUseCases.createShortenedUrl(request).fold(
+        return this.shortenedUrlUseCases.createShortenedUrl(userIdHeader, request).fold(
                 error -> Response.status(Response.Status.BAD_REQUEST)
                         .entity(
                                 error.opError().map(a -> ErrorResponse.buildFromDomainErrors(List.of(a)))
@@ -56,12 +59,15 @@ public class UrlShortnerController {
     public Response getShortenedUrls(
             @QueryParam("page") Integer page,
             @QueryParam("size") Integer size,
-            @QueryParam("order") String order
+            @QueryParam("order") String order,
+            @DefaultValue("1")
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
         return this.shortenedUrlUseCases.listAvailableUrls(
                 page,
                 size,
-                order
+                order,
+                userIdHeader
         ).fold(
                 error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromApplicationErrors(error.getErrors())).build(),
                 success -> {
@@ -84,11 +90,16 @@ public class UrlShortnerController {
     @PATCH
     @Path("/shortened-urls/{uniqueIdentifier}")
     @Produces(APPLICATION_JSON)
-    public Response updateOriginalUrl(UpdateOriginalUrlRequest request, @PathParam("uniqueIdentifier") String uniqueIdentifier) {
+    public Response updateOriginalUrl(
+            UpdateOriginalUrlRequest request,
+            @PathParam("uniqueIdentifier") String uniqueIdentifier,
+            @DefaultValue("1")
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
+    ) {
         if (request.isEnabled() == null) {
             request = new UpdateOriginalUrlRequest(request.url(), true);
         }
-        return shortenedUrlUseCases.updateOriginalUrl(uniqueIdentifier, request).fold(
+        return shortenedUrlUseCases.updateOriginalUrl(uniqueIdentifier, request, userIdHeader).fold(
                 fail -> {
                     return fail.operationError().map(
                             error -> switch (error) {
@@ -110,11 +121,13 @@ public class UrlShortnerController {
     @GET
     @Path("/shortened-urls/{uniqueIdentifier}")
     public Response shortenedUrl(
-            @PathParam("uniqueIdentifier") String uniqueIdentifier
+            @PathParam("uniqueIdentifier") String uniqueIdentifier,
+            @DefaultValue("1")
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
-        return shortenedUrlUseCases.getShortenedUrl(uniqueIdentifier).fold(
+        return shortenedUrlUseCases.getShortenedUrl(userIdHeader, uniqueIdentifier).fold(
                 fail -> fail.notFound.map(a -> Response.status(404).build()).orElseGet(
-                        () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(List.of(fail.validationException.get()))).build()),
+                        () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(fail.validationException)).build()),
                 success -> Response.ok(new ShortenedUrlResponse(
                         success.getPublicIdentifier(),
                         success.shortenedUrl(hostname),
@@ -132,9 +145,11 @@ public class UrlShortnerController {
             @PathParam("uniqueIdentifier") String uniqueIdentifier,
             @QueryParam("size") Integer size,
             @QueryParam("offset") Integer offset,
-            @QueryParam("from") String from
+            @QueryParam("from") String from,
+            @DefaultValue("1")
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
-        return shortenedUrlUseCases.getShortenedUrlHistory(uniqueIdentifier, offset, size, from).fold(
+        return shortenedUrlUseCases.getShortenedUrlHistory(userIdHeader, uniqueIdentifier, offset, size, from).fold(
                 fail ->
                         fail.error.map(notFound -> Response.status(404).build())
                                 .orElseGet(() -> Response.status(400).entity(ErrorResponse.buildFromApplicationErrors(fail.errors)).build())

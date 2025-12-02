@@ -26,7 +26,7 @@ public class UrlControllerIT {
     @Test
     void shouldReturnTemporaryRedirect() throws SaveShortenedUrlConflictError {
         var originalUrl = URI.create("http://www.example.com");
-        var entity = new ShortenedUrl(originalUrl, "abcdeabcde");
+        var entity = new ShortenedUrl(originalUrl, "abcdeabcde", 1L);
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
