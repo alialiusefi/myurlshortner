@@ -1,3 +1,3 @@
-import * as React from "react";
+import { createContext } from "react";
 
-export const UserProvider = React.createContext<number>(1);
+export const UserProvider = createContext<number>(1);
