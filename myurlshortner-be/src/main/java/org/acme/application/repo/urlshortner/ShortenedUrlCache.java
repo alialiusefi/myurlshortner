@@ -21,7 +21,7 @@ public class ShortenedUrlCache {
         this.api = ds.json();
     }
 
-    public Optional<ShortenedUrl> get(String uid, Supplier<Optional<ShortenedUrl>> fromDb) {
+    public Optional<ShortenedUrl> getByKey(String uid, Supplier<Optional<ShortenedUrl>> fromDb) {
         var cached = api.jsonGetObject(uid);
         logger.debug("Cache returned {} for uid {}", cached, uid);
         if (cached == null) {
@@ -40,6 +40,18 @@ public class ShortenedUrlCache {
         } else {
             return Optional.of(cached.mapTo(ShortenedUrl.class));
         }
+    }
+
+    public Optional<ShortenedUrl> getByKeyAndUserId(String uid, Long userId, Supplier<Optional<ShortenedUrl>> fromDb) {
+        var optionalUrl = getByKey(uid, fromDb);
+        if (optionalUrl.isPresent()) {
+            if (optionalUrl.get().getUserId().equals(userId)) {
+                return optionalUrl;
+            } else {
+                return Optional.empty();
+            }
+        }
+        return optionalUrl;
     }
 
     public void put(String uid, ShortenedUrl shortenedUrl) {

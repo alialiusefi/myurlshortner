@@ -9,7 +9,7 @@ import { ErrorResponse } from "../../app/api/Errors";
 import Button from "@mui/material/Button";
 import FormGroup from "@mui/material/FormGroup";
 import FormControl from "@mui/material/FormControl";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -23,6 +23,7 @@ import Grow from "@mui/material/Grow";
 import { TextField } from "@mui/material";
 import { GetShortenedUrlInfoFetch } from "app/api/UrlsApi";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { UserProvider } from "app/context";
 
 const AUTO_TYPE_VALUE = 0;
 const CUSTOM_TYPE_VALUE = 1;
@@ -39,10 +40,10 @@ export default function ShortenUrlForm() {
   });
   const [openModalUrlState, setOpenModalUrlState] = useState(false);
   const [uidExists, setUidExists] = useState(false);
-
+  const userId = useContext(UserProvider);
   const validateUidExists = async (uidInput: string) => {
     const uid = uidInput == null ? data?.unique_identifier : uidInput;
-    const res = await GetShortenedUrlInfoFetch(uid);
+    const res = await GetShortenedUrlInfoFetch(uid, userId);
     setUidExists(res != null);
   };
 
@@ -65,6 +66,7 @@ export default function ShortenUrlForm() {
     const result = await shortenUrlOperaton(
       targetUrlInput,
       uidInput == null ? data?.unique_identifier : uidInput,
+      userId,
     );
     if (result instanceof ShortenUrlResponse) {
       const shortenedUrl = (result as ShortenUrlResponse).shortened_url;

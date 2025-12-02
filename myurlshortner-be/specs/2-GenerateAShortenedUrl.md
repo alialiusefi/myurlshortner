@@ -9,6 +9,7 @@ Returns a shortened url that should be accessible.
 ```http
 POST https://{hostname}/shorten
 Content-Type: application/json
+User-Id: 1
 Authorization: 
 {
   "url": "https://www.google.com",

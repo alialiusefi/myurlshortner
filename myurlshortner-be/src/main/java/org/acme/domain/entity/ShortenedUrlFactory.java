@@ -22,7 +22,8 @@ public class ShortenedUrlFactory {
                             created.uniqueIdentifier(),
                             created.createdAt(),
                             created.createdAt(),
-                            true
+                            true,
+                            created.userId()
                     );
                 }
                 case V1UserUpdatedOriginalUrlEvent updated -> {

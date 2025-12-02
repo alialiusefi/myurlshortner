@@ -9,6 +9,7 @@ Updates an original url in a shortened url.
 ```http
 POST https://{hostname}/shortened-urls/{uniqueIdentifier}
 Content-Type: application/json
+User-Id: 1
 Authorization: 
 {
   "url": "https://www.newurl.com",

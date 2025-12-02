@@ -10,14 +10,18 @@ import { sleep } from "app/lib/Utility";
 import { redirect } from "next/navigation";
 import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
+import { useContext } from "react";
+import { UserProvider } from "app/context";
 
 export default function ShortenedUrlHistory(params: {
   uniqueId: string;
   now: string;
 }) {
+  const userId = useContext(UserProvider);
   const { data, isLoading, setSize, error } = GetShortenedUrlHistorySWR(
     5,
     params.uniqueId,
+    userId,
     params.now,
   );
   if (isLoading) {
