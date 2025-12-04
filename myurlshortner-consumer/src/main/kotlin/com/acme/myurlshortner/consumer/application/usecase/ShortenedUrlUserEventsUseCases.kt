@@ -2,14 +2,14 @@ package com.acme.myurlshortner.consumer.application.usecase
 
 import com.acme.events.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShortenedUrlCommand
-import com.acme.myurlshortner.consumer.domain.userevent.service.ShortenedUrlUserEventsService
+import com.acme.myurlshortner.consumer.domain.userevent.service.UserAccessedShortenedUrlEventService
 import org.springframework.stereotype.Component
 import java.net.URI
 import java.time.OffsetDateTime
 
 @Component
 class ShortenedUrlUserEventsUseCases(
-    private val service: ShortenedUrlUserEventsService
+    private val service: UserAccessedShortenedUrlEventService
 ) {
 
     fun handleUserAccessedShortenedUrl(event: UserAccessedShortenedUrl) {

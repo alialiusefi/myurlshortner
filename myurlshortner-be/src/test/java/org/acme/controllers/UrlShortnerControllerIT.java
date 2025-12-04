@@ -8,7 +8,7 @@ import io.restassured.http.Header;
 import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
 import jakarta.inject.Inject;
-import org.acme.application.controller.url.Constants;
+import org.acme.application.controller.Constants;
 import org.acme.application.controller.url.ShortenedUrlHistoryResponse;
 import org.acme.application.controller.url.ShortenedUrlResponse;
 import org.acme.application.controller.url.UrlList;

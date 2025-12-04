@@ -8,7 +8,7 @@ import { Virtuoso } from "react-virtuoso";
 import Card from "@mui/material/Card";
 import { sleep } from "app/lib/Utility";
 import { redirect } from "next/navigation";
-import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
+import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
@@ -24,8 +24,8 @@ export default function ShortenedUrlHistory(params: {
     userId,
     params.now,
   );
-  if (isLoading) {
-    return null;
+  if (isLoading || data == null) {
+    return <></>;
   }
   if (error instanceof GetShortenedUrlHistory404Response) {
     redirect("/browse");
@@ -54,7 +54,7 @@ export default function ShortenedUrlHistory(params: {
                     <Card variant="outlined">
                       <Grid>
                         <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
-                          <ReadableTimestamp datetime={comp.event_date_time} />
+                          {readableTimestamp(comp.event_date_time)}
                         </Typography>
                       </Grid>
                       <Grid>
