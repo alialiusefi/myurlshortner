@@ -1,20 +1,25 @@
 package com.acme.myurlshortner.consumer.userevent.service
 
-import com.acme.myurlshortner.consumer.application.service.ShortenedUrlUserEventsServiceImpl
+import com.acme.myurlshortner.consumer.application.client.ShortenedUrlApiClient
+import com.acme.myurlshortner.consumer.application.service.UserAccessedShortenedUrlEventServiceImpl
+import com.acme.myurlshortner.consumer.domain.notification.repo.NotificationRepository
 import com.acme.myurlshortner.consumer.domain.useragent.Browser
 import com.acme.myurlshortner.consumer.domain.useragent.Device
 import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem
 import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShortenedUrlCommand
 import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
 
 class ShortenedUrlUserEventsServiceTest {
     val mockRepo = mockk<UserAccessedShortenedUrlRepo>(relaxed = true);
+    val mockClient = mockk<ShortenedUrlApiClient>()
+    val mockNotificationRepo = mockk<NotificationRepository>()
     val listOfNormalUserAgents = mapOf(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 to Triple(Device.PC, OperatingSystem.Windows, Browser.Chrome),
@@ -42,11 +47,17 @@ class ShortenedUrlUserEventsServiceTest {
 
     @Test
     fun shouldSaveUserAccessEvent() {
-        val service = ShortenedUrlUserEventsServiceImpl(mockRepo, false)
+        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo)
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
         val accessedAt = OffsetDateTime.now()
+        coEvery {
+            mockClient.getShortenedUrlById(uid)
+        } returns ShortenedUrlApiClient.GetShortenedUrlByIdResponse(1)
+        coEvery {
+            mockRepo.countById(uid)
+        } returns 0L
         (listOfNormalUserAgents + listOfBotCrawlersUserAgents + listOfLibraryLikeUserAgents).map {
             service.handleShortenedUrlUserAccessed(
                 UserAccessedShortenedUrlCommand(
@@ -57,7 +68,7 @@ class ShortenedUrlUserEventsServiceTest {
                     accessedAt = accessedAt
                 )
             )
-            verify {
+            coVerify {
                 mockRepo.saveUserAccessedShortenedUrl(
                     access = UserAccessedShortenedUrl(
                         uniqueIdentifier = uid,
@@ -71,5 +82,60 @@ class ShortenedUrlUserEventsServiceTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun shouldSaveNotificationWhen10Views() {
+        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo)
+        val uid = "abcabcabc1"
+        val originalUrl = URI.create("https://www.example.com")
+        val shortenedUrl = URI.create("http://localhost/goto${uid}")
+        val accessedAt = OffsetDateTime.now()
+        val validAgent = listOfNormalUserAgents.entries.first()
+        coEvery {
+            mockClient.getShortenedUrlById(uid)
+        } returns ShortenedUrlApiClient.GetShortenedUrlByIdResponse(1)
+        coEvery {
+            mockRepo.countById(uid)
+        } returns 9L
+        coEvery {
+            mockNotificationRepo.insertShortenedUrlViewedNTimesNotification(
+                1,
+                uid,
+                10,
+                OffsetDateTime.now()
+            )
+        } returns Unit
+        service.handleShortenedUrlUserAccessed(
+            UserAccessedShortenedUrlCommand(
+                uniqueIdentifier = uid,
+                originalUrl = originalUrl,
+                shortenedUrl = shortenedUrl,
+                userAgent = validAgent.key,
+                accessedAt = accessedAt
+            )
+        )
+        coVerify {
+            mockRepo.saveUserAccessedShortenedUrl(
+                access = UserAccessedShortenedUrl(
+                    uniqueIdentifier = uid,
+                    originalUrl = originalUrl,
+                    shortenedUrl = shortenedUrl,
+                    device = validAgent.value.first,
+                    browser = validAgent.value.third,
+                    operatingSystem = validAgent.value.second,
+                    accessedAt = accessedAt
+                )
+            )
+        }
+        coVerify {
+            mockNotificationRepo.insertShortenedUrlViewedNTimesNotification(
+                1,
+                uid,
+                10,
+                any()
+            )
+        }
+
     }
 }

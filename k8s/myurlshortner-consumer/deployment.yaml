@@ -39,6 +39,11 @@ spec:
                 secretKeyRef:
                   name: db-secret
                   key: password
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: be-apikey
+                  key: apikey
           livenessProbe:
             initialDelaySeconds: 10
             periodSeconds: 5

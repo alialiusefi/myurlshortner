@@ -1,6 +1,6 @@
 services:
   be:
-    image: alialiusefi/myurlshortner-be:1.0.4
+    image: alialiusefi/myurlshortner-be:1.0.5
     environment:
       REGISTRY_URL: "http://schema-registry:8080"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"
@@ -10,6 +10,7 @@ services:
       POSTGRES_PASSWORD: safetypassword
       POSTGRES_DB: postgres
       REDIS_URL: redis://redis:6379
+      API_KEY: safetypassword
     ports:
       - "8080:8080"
     depends_on:
@@ -20,11 +21,12 @@ services:
     networks:
       - docker-network
   consumer:
-    image: alialiusefi/myurlshortner-consumer:1.0.2
+    image: alialiusefi/myurlshortner-consumer:1.0.3
     environment:
       REGISTRY_URL: "http://schema-registry:8080/apis/registry/v3"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"
       POSTGRES_URL: "jdbc:postgresql://postgres:5432/postgres"
+      API_KEY: safetypassword
       spring_profiles_active: "dev"
     ports:
       - "7070:8080"
@@ -35,7 +37,7 @@ services:
     networks:
       - docker-network
   fe:
-    image: alialiusefi/myurlshortner-fe-docker:1.0.2
+    image: alialiusefi/myurlshortner-fe-docker:1.0.3
     ports:
       - "3000:3000"
     depends_on:

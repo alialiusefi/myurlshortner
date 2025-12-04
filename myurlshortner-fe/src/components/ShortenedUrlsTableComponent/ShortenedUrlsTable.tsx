@@ -8,6 +8,7 @@ import { useContext, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TableBody from "@mui/material/TableBody";
+import TableFooter from "@mui/material/TableFooter";
 import TablePagination from "@mui/material/TablePagination";
 import { GetAvailableUrlsSWR } from "../../app/api/UrlsApi";
 import TableContainer from "@mui/material/TableContainer";
@@ -20,7 +21,7 @@ import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortene
 import CircleIcon from "@mui/icons-material/Circle";
 import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
-import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
+import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
 
 export default function ShortnetedUrlsTable() {
@@ -120,7 +121,7 @@ export default function ShortnetedUrlsTable() {
                   <OriginalUrl url={one.url} />
                 </TableCell>
                 <TableCell>
-                  <ReadableTimestamp datetime={one.created_at} />
+                  <Typography>{readableTimestamp(one?.created_at)}</Typography>
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -148,34 +149,38 @@ export default function ShortnetedUrlsTable() {
                   </IconButton>
                 </TableCell>
                 <TableCell>
-                  <IconButton
+                  <Button
                     onClick={() => {
-                      redirect(
-                        `/browse/${one.shortened_url.substring(
-                          one.shortened_url.indexOf("/goto/") + 6,
-                        )}/info`,
+                      const uid = one?.shortened_url?.substring(
+                        one?.shortened_url?.indexOf("/goto/") + 6,
                       );
+                      const infoUrl = `/browse/${uid}/info`;
+                      redirect(infoUrl);
                     }}
                   >
-                    <Button>INFO</Button>
-                  </IconButton>
+                    INFO
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 15]}
+                count={data?.total}
+                rowsPerPage={size}
+                page={page}
+                onPageChange={(event, page) => {
+                  setPageState(page);
+                }}
+                onRowsPerPageChange={(event) => {
+                  setSizeState(parseInt(event.target.value));
+                }}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 15]}
-          count={data?.total}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(event, page) => {
-            setPageState(page);
-          }}
-          onRowsPerPageChange={(event) => {
-            setSizeState(parseInt(event.target.value));
-          }}
-        />
       </TableContainer>
     </Box>
   );
