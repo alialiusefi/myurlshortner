@@ -12,7 +12,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.acme.application.controller.url.Constants.USER_ID_HEADER_KEY;
+import static org.acme.application.controller.Constants.USER_ID_HEADER_KEY;
 
 @Path("/")
 public class UrlShortnerController {
