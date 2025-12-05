@@ -1,6 +1,6 @@
 package com.acme.myurlshortner.consumer.userevent.service
 
-import com.acme.myurlshortner.consumer.application.service.ShortenedUrlUserEventsServiceImpl
+import com.acme.myurlshortner.consumer.application.service.UserAccessedShortenedUrlEventServiceImpl
 import com.acme.myurlshortner.consumer.domain.useragent.Browser
 import com.acme.myurlshortner.consumer.domain.useragent.Device
 import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem
@@ -42,7 +42,7 @@ class ShortenedUrlUserEventsServiceTest {
 
     @Test
     fun shouldSaveUserAccessEvent() {
-        val service = ShortenedUrlUserEventsServiceImpl(mockRepo, false)
+        val service = UserAccessedShortenedUrlEventServiceImpl(mockRepo)
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
