@@ -1,5 +1,6 @@
 package com.acme.myurlshortner.consumer.application.service
 
+import com.acme.myurlshortner.consumer.application.util.TestErrorGenerator
 import com.acme.myurlshortner.consumer.domain.useragent.Browser
 import com.acme.myurlshortner.consumer.domain.useragent.Browser.*
 import com.acme.myurlshortner.consumer.domain.useragent.Device
@@ -10,35 +11,21 @@ import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem.Windows
 import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShortenedUrlCommand
 import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
-import com.acme.myurlshortner.consumer.domain.userevent.service.ShortenedUrlUserEventsService
-import org.jboss.logging.Logger
+import com.acme.myurlshortner.consumer.domain.userevent.service.UserAccessedShortenedUrlEventService
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import kotlin.random.Random
 
 @Service
-class ShortenedUrlUserEventsServiceImpl(
+class UserAccessedShortenedUrlEventServiceImpl(
     private val repo: UserAccessedShortenedUrlRepo,
-    private val isErrorGeneratorEnabled: Boolean = true,
-) : ShortenedUrlUserEventsService {
+) : UserAccessedShortenedUrlEventService {
 
     private val MOZILLA_PREFIX = "Mozilla/5.0"
-    private val GOOGLE_BOT_PREFIX = "Googlebot"
-    private val logger = Logger.getLogger(ShortenedUrlUserEventsServiceImpl::class.java)
 
-    @Transactional
     override fun handleShortenedUrlUserAccessed(
         command: UserAccessedShortenedUrlCommand,
     ) {
-        if (isErrorGeneratorEnabled) {
-            val randomError = Random.nextInt(1, 101)
-            if (randomError in 1..50) {
-                logger.info("Generated error number $randomError")
-                throw IllegalArgumentException("Random error 1 <= $randomError <= 50")
-            } else {
-                logger.info("No Error")
-            }
-        }
+        // for demonstration purposes.
+        TestErrorGenerator.generateTestError()
         val (device, browser, os) = if (command.userAgent.startsWith(MOZILLA_PREFIX)) {
             val noPrefix = command.userAgent.substring(MOZILLA_PREFIX.length + 1)
             val systemInfoIdxEnd = noPrefix.indexOfFirst { it == ')' } + 1
@@ -50,8 +37,6 @@ class ShortenedUrlUserEventsServiceImpl(
                 else -> Browser.Other
             }
             Triple(device, browser, os)
-        } else if (command.userAgent.startsWith(GOOGLE_BOT_PREFIX)) {
-            Triple(Device.Other, Browser.Other, OperatingSystem.Other)
         } else {
             Triple(Device.Other, Browser.Other, OperatingSystem.Other)
         }

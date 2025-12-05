@@ -5,10 +5,12 @@ import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShort
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 class UserAccessedShortenedUrlRepoImpl(
 ) : UserAccessedShortenedUrlRepo {
+    @Transactional
     override fun saveUserAccessedShortenedUrl(access: UserAccessedShortenedUrl) {
         UserAccessedShortenedUrlTable.insert {
             it[uniqueIdentifier] = access.uniqueIdentifier
