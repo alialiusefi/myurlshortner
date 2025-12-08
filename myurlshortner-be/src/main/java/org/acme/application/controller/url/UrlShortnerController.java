@@ -12,6 +12,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.acme.application.controller.Constants.API_KEY;
 import static org.acme.application.controller.Constants.USER_ID_HEADER_KEY;
 
 @Path("/")
@@ -122,19 +123,22 @@ public class UrlShortnerController {
     @Path("/shortened-urls/{uniqueIdentifier}")
     public Response shortenedUrl(
             @PathParam("uniqueIdentifier") String uniqueIdentifier,
-            @DefaultValue("1")
-            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader,
+            @HeaderParam(API_KEY) String apiKey
     ) {
-        return shortenedUrlUseCases.getShortenedUrl(userIdHeader, uniqueIdentifier).fold(
+        return shortenedUrlUseCases.getShortenedUrl(userIdHeader, uniqueIdentifier, apiKey).fold(
                 fail -> fail.notFound.map(a -> Response.status(404).build()).orElseGet(
                         () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(fail.validationException)).build()),
                 success -> Response.ok(new ShortenedUrlResponse(
-                        success.getPublicIdentifier(),
-                        success.shortenedUrl(hostname),
-                        success.getCreatedAt(),
-                        success.getUpdatedAt(),
-                        success.getOriginalUrl().toString(),
-                        success.isEnabled())).build()
+                                success.getPublicIdentifier(),
+                                success.shortenedUrl(hostname),
+                                success.getCreatedAt(),
+                                success.getUpdatedAt(),
+                                success.getOriginalUrl().toString(),
+                                success.isEnabled(),
+                                success.getUserId()
+                        )
+                ).build()
         );
     }
 

@@ -23,6 +23,7 @@ import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.validator.UserIdValidator;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +35,11 @@ import java.util.Optional;
 @Singleton
 public class ShortenedUrlUseCases {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    private final String apiKey;
     private final ShortenedUrlService service;
 
-    public ShortenedUrlUseCases(ShortenedUrlService service) {
+    public ShortenedUrlUseCases(@ConfigProperty(name = "app.apikey") String apiKey, ShortenedUrlService service) {
+        this.apiKey = apiKey;
         this.service = service;
     }
 
@@ -140,25 +142,40 @@ public class ShortenedUrlUseCases {
         }
     }
 
-    public Either<GetShortenedUrlError, ShortenedUrl> getShortenedUrl(String userId, String uniqueIdentifier) {
+    public Either<GetShortenedUrlError, ShortenedUrl> getShortenedUrl(String userId, String uniqueIdentifier, String apiKey) {
         List<DomainException> errors = new ArrayList<>();
         if (uniqueIdentifier == null || uniqueIdentifier.isBlank()) {
             errors.add(new UniqueIdentifierCannotBeEmptyValidationException());
         } else if (uniqueIdentifier.length() > 10) {
             errors.add(new UniqueIdentifierIsTooLongValidationException());
         }
-        var userIdValidation = UserIdValidator.validate(userId);
-        if (userIdValidation.isLeft()) {
-            errors.add(userIdValidation.getLeft());
-        }
 
-        if (!errors.isEmpty()) {
-            return Either.left(new GetShortenedUrlError(errors));
-        }
+        if (userId != null && !userId.isBlank()) {
+            var userIdValidation = UserIdValidator.validate(userId);
+            if (userIdValidation.isLeft()) {
+                errors.add(userIdValidation.getLeft());
+            }
 
-        return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier, userIdValidation.get())).toEither(
-                new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
-        );
+            if (!errors.isEmpty()) {
+                return Either.left(new GetShortenedUrlError(errors));
+            }
+
+            return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier, userIdValidation.get())).toEither(
+                    new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
+            );
+        } else {
+            if (!errors.isEmpty()) {
+                return Either.left(new GetShortenedUrlError(errors));
+            }
+            if (apiKey == null || apiKey.isBlank()) {
+                return Either.left(new GetShortenedUrlError(new ShortenedUrlIsNotFoundException()));
+            } else if (!apiKey.equals(this.apiKey)) {
+                return Either.left(new GetShortenedUrlError(new ShortenedUrlIsNotFoundException()));
+            }
+            return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier, null)).toEither(
+                    new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
+            );
+        }
     }
 
     public String generateUniqueIdentifier() {

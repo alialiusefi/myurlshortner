@@ -1,9 +1,9 @@
 package org.acme.domain.entity;
 
 public interface NotificationParams {
-    public class ShortenedUrlReachedNViewsParams implements NotificationParams {
+    class ShortenedUrlReachedNViewsParams implements NotificationParams {
         String uniqueIdentifier;
-        Integer views;
+        Long views;
 
         public String getUniqueIdentifier() {
             return uniqueIdentifier;
@@ -13,11 +13,11 @@ public interface NotificationParams {
             this.uniqueIdentifier = uniqueIdentifier;
         }
 
-        public Integer getViews() {
+        public Long getViews() {
             return views;
         }
 
-        public void setViews(Integer views) {
+        public void setViews(Long views) {
             this.views = views;
         }
     }
