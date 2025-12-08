@@ -38,6 +38,7 @@ dev: be-artifact consumer-artifact fe-docker-artifact
 # kubernetes
 kubernetes-secrets:
 	kubectl apply -f k8s/postgres/secrets.yaml
+	kubectl apply -f k8s/myurlshortner-be/secrets.yaml
 kubernetes-be: 
 	kubectl apply -f k8s/myurlshortner-be/deployment.yaml
 	kubectl apply -f k8s/myurlshortner-be/service.yaml

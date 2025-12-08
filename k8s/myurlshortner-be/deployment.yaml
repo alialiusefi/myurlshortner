@@ -41,6 +41,11 @@ spec:
               value: "-Dquarkus.profile=prod -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
             - name: REDIS_URL
               value: redis://redis-service:6379
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: be-apikey
+                  key: apikey
           livenessProbe:
             initialDelaySeconds: 10
             periodSeconds: 5
