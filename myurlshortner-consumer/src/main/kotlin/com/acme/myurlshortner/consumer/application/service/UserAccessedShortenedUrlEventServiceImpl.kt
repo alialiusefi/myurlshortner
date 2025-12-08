@@ -1,6 +1,8 @@
 package com.acme.myurlshortner.consumer.application.service
 
+import com.acme.myurlshortner.consumer.application.client.ShortenedUrlApiClient
 import com.acme.myurlshortner.consumer.application.util.TestErrorGenerator
+import com.acme.myurlshortner.consumer.domain.notification.repo.NotificationRepository
 import com.acme.myurlshortner.consumer.domain.useragent.Browser
 import com.acme.myurlshortner.consumer.domain.useragent.Browser.*
 import com.acme.myurlshortner.consumer.domain.useragent.Device
@@ -12,12 +14,28 @@ import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShor
 import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
 import com.acme.myurlshortner.consumer.domain.userevent.service.UserAccessedShortenedUrlEventService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Service
+import java.time.OffsetDateTime
 
 @Service
 class UserAccessedShortenedUrlEventServiceImpl(
+    private val client: ShortenedUrlApiClient,
     private val repo: UserAccessedShortenedUrlRepo,
+    private val notificationRepo: NotificationRepository
 ) : UserAccessedShortenedUrlEventService {
+
+//    companion object {
+//        @JvmStatic
+//        fun main(args: Array<String>) {
+//            runBlocking(Dispatchers.IO) {
+//                val client = ShortenedUrlApiClient("http://localhost:8080", "safetypassword")
+//                val userId = client.getShortenedUrlById("abcdabcd11").user_id
+//                println(userId)
+//            }
+//        }
+//    }
 
     private val MOZILLA_PREFIX = "Mozilla/5.0"
 
@@ -40,17 +58,30 @@ class UserAccessedShortenedUrlEventServiceImpl(
         } else {
             Triple(Device.Other, Browser.Other, OperatingSystem.Other)
         }
-        repo.saveUserAccessedShortenedUrl(
-            UserAccessedShortenedUrl(
-                uniqueIdentifier = command.uniqueIdentifier,
-                originalUrl = command.originalUrl,
-                shortenedUrl = command.shortenedUrl,
-                device = device,
-                browser = browser,
-                operatingSystem = os,
-                accessedAt = command.accessedAt
+        runBlocking(Dispatchers.IO) {
+            val count = repo.countById(command.uniqueIdentifier)
+            if (count == 9L) {
+                val userId = client.getShortenedUrlById(command.uniqueIdentifier).user_id
+                notificationRepo.insertShortenedUrlViewedNTimesNotification(
+                    userId = userId,
+                    uid = command.uniqueIdentifier,
+                    viewCount = count + 1,
+                    createdAt = OffsetDateTime.now()
+                )
+            }
+            repo.saveUserAccessedShortenedUrl(
+                UserAccessedShortenedUrl(
+                    uniqueIdentifier = command.uniqueIdentifier,
+                    originalUrl = command.originalUrl,
+                    shortenedUrl = command.shortenedUrl,
+                    device = device,
+                    browser = browser,
+                    operatingSystem = os,
+                    accessedAt = command.accessedAt
+                )
             )
-        )
+
+        }
     }
 
     /**
