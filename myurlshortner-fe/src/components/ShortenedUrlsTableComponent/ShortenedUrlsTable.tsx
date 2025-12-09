@@ -148,17 +148,17 @@ export default function ShortnetedUrlsTable() {
                   </IconButton>
                 </TableCell>
                 <TableCell>
-                  <IconButton
+                  <Button
                     onClick={() => {
-                      redirect(
-                        `/browse/${one.shortened_url.substring(
-                          one.shortened_url.indexOf("/goto/") + 6,
-                        )}/info`,
-                      );
+                      const uid = one?.shortened_url?.substring(
+                          one?.shortened_url?.indexOf("/goto/") + 6,
+                        )
+                      const infoUrl = `/browse/${uid}/info`
+                      redirect(infoUrl);
                     }}
                   >
-                    <Button>INFO</Button>
-                  </IconButton>
+                    INFO
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
