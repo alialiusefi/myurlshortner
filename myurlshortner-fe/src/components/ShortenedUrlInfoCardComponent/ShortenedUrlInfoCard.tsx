@@ -18,8 +18,8 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
     params.uniqueId,
     userId,
   );
-  if (isLoading) {
-    return null;
+  if (isLoading || data == null) {
+    return (<></>);
   }
   if (error instanceof GetShortenedUrlInfo404Response) {
     redirect("/browse");

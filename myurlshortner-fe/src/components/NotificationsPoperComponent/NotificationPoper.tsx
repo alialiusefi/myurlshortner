@@ -37,9 +37,9 @@ export function NotificationsPopper(props: NotificationsPopperProps) {
         <List sx={{ overflow: "auto", maxHeight: 300 }}>
           {data.data.map((not: ShortenedUrlReachedNViewsNotification) => {
             return (
-              <ListItem>
+              <ListItem key={not.id}>
                 <Paper sx={{ p: 1 }}>
-                  <ListItemText
+                  <ListItemText key={not.id}
                     primary={shortenedUrlReachedNViewNotificationFactory.getTitle(
                       not,
                     )}
