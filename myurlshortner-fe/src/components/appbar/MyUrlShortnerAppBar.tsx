@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { redirect } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { UserProvider } from "app/context";
 import Grid from "@mui/material/Grid";
 import { IconButton } from "@mui/material";

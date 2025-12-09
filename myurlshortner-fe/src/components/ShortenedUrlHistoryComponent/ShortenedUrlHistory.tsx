@@ -24,8 +24,8 @@ export default function ShortenedUrlHistory(params: {
     userId,
     params.now,
   );
-  if (isLoading) {
-    return null;
+  if (isLoading || data == null) {
+    return (<></>);
   }
   if (error instanceof GetShortenedUrlHistory404Response) {
     redirect("/browse");
