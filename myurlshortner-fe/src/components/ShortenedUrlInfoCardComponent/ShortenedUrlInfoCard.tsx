@@ -8,7 +8,7 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DoNotDisturbOnIcon from "@mui/icons-material/DoNotDisturbOn";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
-import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
+import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
 
@@ -59,14 +59,14 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
             paddingLeft={2}
             sx={{ color: "text.secondary", fontSize: 14 }}
           >
-            Created At: {<ReadableTimestamp datetime={data?.created_at} />}
+            Created At: {readableTimestamp(data?.created_at)}
           </Typography>
           <Typography
             gutterBottom
             paddingLeft={2}
             sx={{ color: "text.secondary", fontSize: 14 }}
           >
-            Last Updated At: {<ReadableTimestamp datetime={data?.updated_at} />}
+            Last Updated At: {readableTimestamp(data?.updated_at)}
           </Typography>
         </Grid>
       </Card>

@@ -20,7 +20,7 @@ import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortene
 import CircleIcon from "@mui/icons-material/Circle";
 import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
-import ReadableTimestamp from "components/ReadableTimestampComponent/ReadableTimestamp";
+import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
 
 export default function ShortnetedUrlsTable() {
@@ -120,7 +120,7 @@ export default function ShortnetedUrlsTable() {
                   <OriginalUrl url={one.url} />
                 </TableCell>
                 <TableCell>
-                  <ReadableTimestamp datetime={one.created_at} />
+                  <Typography>{readableTimestamp(one?.created_at)}</Typography>
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -151,9 +151,9 @@ export default function ShortnetedUrlsTable() {
                   <Button
                     onClick={() => {
                       const uid = one?.shortened_url?.substring(
-                          one?.shortened_url?.indexOf("/goto/") + 6,
-                        )
-                      const infoUrl = `/browse/${uid}/info`
+                        one?.shortened_url?.indexOf("/goto/") + 6,
+                      );
+                      const infoUrl = `/browse/${uid}/info`;
                       redirect(infoUrl);
                     }}
                   >
