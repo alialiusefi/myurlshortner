@@ -97,11 +97,11 @@ public class ShortenedUrl {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShortenedUrl that = (ShortenedUrl) o;
-        return enabled == that.enabled && Objects.equals(originalUrl, that.originalUrl) && Objects.equals(publicIdentifier, that.publicIdentifier) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt);
+        return enabled == that.enabled && Objects.equals(originalUrl, that.originalUrl) && Objects.equals(publicIdentifier, that.publicIdentifier) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt) && Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(originalUrl, publicIdentifier, createdAt, updatedAt, enabled);
+        return Objects.hash(originalUrl, publicIdentifier, createdAt, updatedAt, enabled, userId);
     }
 }
