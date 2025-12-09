@@ -39,7 +39,8 @@ export function NotificationsPopper(props: NotificationsPopperProps) {
             return (
               <ListItem key={not.id}>
                 <Paper sx={{ p: 1 }}>
-                  <ListItemText key={not.id}
+                  <ListItemText
+                    key={not.id}
                     primary={shortenedUrlReachedNViewNotificationFactory.getTitle(
                       not,
                     )}

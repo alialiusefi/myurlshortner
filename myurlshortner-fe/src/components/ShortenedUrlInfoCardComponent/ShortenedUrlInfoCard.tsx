@@ -19,7 +19,7 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
     userId,
   );
   if (isLoading || data == null) {
-    return (<></>);
+    return <></>;
   }
   if (error instanceof GetShortenedUrlInfo404Response) {
     redirect("/browse");
