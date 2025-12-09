@@ -26,17 +26,6 @@ class UserAccessedShortenedUrlEventServiceImpl(
     private val notificationRepo: NotificationRepository
 ) : UserAccessedShortenedUrlEventService {
 
-//    companion object {
-//        @JvmStatic
-//        fun main(args: Array<String>) {
-//            runBlocking(Dispatchers.IO) {
-//                val client = ShortenedUrlApiClient("http://localhost:8080", "safetypassword")
-//                val userId = client.getShortenedUrlById("abcdabcd11").user_id
-//                println(userId)
-//            }
-//        }
-//    }
-
     private val MOZILLA_PREFIX = "Mozilla/5.0"
 
     override fun handleShortenedUrlUserAccessed(
