@@ -8,6 +8,7 @@ import { useContext, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TableBody from "@mui/material/TableBody";
+import TableFooter from "@mui/material/TableFooter";
 import TablePagination from "@mui/material/TablePagination";
 import { GetAvailableUrlsSWR } from "../../app/api/UrlsApi";
 import TableContainer from "@mui/material/TableContainer";
@@ -163,19 +164,23 @@ export default function ShortnetedUrlsTable() {
               </TableRow>
             ))}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 15]}
+                count={data?.total}
+                rowsPerPage={size}
+                page={page}
+                onPageChange={(event, page) => {
+                  setPageState(page);
+                }}
+                onRowsPerPageChange={(event) => {
+                  setSizeState(parseInt(event.target.value));
+                }}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 15]}
-          count={data?.total}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(event, page) => {
-            setPageState(page);
-          }}
-          onRowsPerPageChange={(event) => {
-            setSizeState(parseInt(event.target.value));
-          }}
-        />
       </TableContainer>
     </Box>
   );
