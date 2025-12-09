@@ -21,7 +21,7 @@ export default function RootLayout({
         .find((a) => a.startsWith("UserId"))
         ?.split("=")[1] ?? "1";
     setUserId(parseInt(cookieValue));
-  }, [userId]);
+  }, []);
   return (
     <html lang="en">
       <body>
