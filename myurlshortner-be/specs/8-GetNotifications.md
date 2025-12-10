@@ -17,12 +17,10 @@ GET {hostname}/notifications
 {
   "id": 1,
   "type": "SHORTENED_URL_REACHED_N_VIEWS",
-  "params": [
-    {
+  "params": {
       "uniqueIdentifier": "abcdabcd11",
       "views": 10
     }
-  ]
 }
 ```
 
