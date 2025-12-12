@@ -29,7 +29,8 @@ public class NotificationController {
                                 new NotificationResponse.NotificationRowResponse(
                                         a.id(),
                                         a.type(),
-                                        a.params()
+                                        a.params(),
+                                        a.readAt()
                                 )
                         ).toList()
                 )).build()
