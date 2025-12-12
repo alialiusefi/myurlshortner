@@ -1,4 +1,4 @@
-package org.acme.application.service;
+package org.acme.application.service.notification;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.application.repo.notification.NotificationRepository;
