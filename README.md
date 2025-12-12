@@ -1,6 +1,6 @@
 # Url Shortner App Pet Project (myurlshortner)
 
-A simple url shortener that utilizes different technologies. The user can be set as a cookie in browser with key 'UserId'.
+A simple url shortener that utilizes different technologies. The user can be set as a cookie in browser with key 'User-Id'.
 
 This repo consists of multiple applications:
 - [Url Shortner App Pet Project (myurlshortner)](#url-shortner-app-pet-project-myurlshortner)
