@@ -1,8 +1,6 @@
 package org.acme.application.controller.notification;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.NotificationUseCases;
@@ -35,6 +33,17 @@ public class NotificationController {
                                 )
                         ).toList()
                 )).build()
+        );
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response readNotification(@HeaderParam(USER_ID_HEADER_KEY) String userId, @PathParam("id") String id) {
+        return useCases.readNotification(userId, id).fold(
+                () -> Response.ok().build(),
+                errors -> errors.notFound().map((e) -> Response.status(404).build()).orElseGet(
+                        () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(errors.validationException())).build()
+                )
         );
     }
 }

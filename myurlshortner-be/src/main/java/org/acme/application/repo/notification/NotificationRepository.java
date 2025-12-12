@@ -3,12 +3,16 @@ package org.acme.application.repo.notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.acme.domain.entity.Notification;
 import org.acme.domain.entity.NotificationParams;
+import org.acme.domain.exceptions.NotificationIsNotFound;
 import org.jspecify.annotations.NonNull;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @ApplicationScoped
@@ -45,5 +49,13 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
                 entity.getCreatedAt(),
                 entity.getReadAt()
         );
+    }
+
+    @Transactional
+    public int setNotificationReadAtByIdAndUserId(@NonNull OffsetDateTime readAt,
+                                                   @NonNull Long notificationId,
+                                                   @NonNull Long userId
+    ) {
+        return update("set readAt = ?1 where id = ?2 and userId = ?3", readAt, notificationId, userId);
     }
 }

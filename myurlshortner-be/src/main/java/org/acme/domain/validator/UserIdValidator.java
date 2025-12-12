@@ -1,7 +1,7 @@
 package org.acme.domain.validator;
 
 import io.vavr.control.Either;
-import org.acme.application.exception.UserIdIsNotCorrectException;
+import org.acme.domain.exceptions.UserIdIsNotCorrectException;
 import org.acme.domain.exceptions.DomainException;
 import org.jspecify.annotations.Nullable;
 
