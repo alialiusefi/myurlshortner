@@ -5,6 +5,11 @@ public interface NotificationParams {
         String uniqueIdentifier;
         Long views;
 
+        public ShortenedUrlReachedNViewsParams(String uniqueIdentifier, Long views) {
+            this.uniqueIdentifier = uniqueIdentifier;
+            this.views = views;
+        }
+
         public String getUniqueIdentifier() {
             return uniqueIdentifier;
         }

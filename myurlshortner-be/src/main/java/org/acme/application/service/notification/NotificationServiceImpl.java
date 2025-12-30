@@ -5,6 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.acme.application.repo.notification.NotificationRepository;
 import org.acme.domain.entity.Notification;
+import org.acme.domain.exceptions.DomainException;
+import org.acme.domain.exceptions.NotificationIsAlreadyRead;
 import org.acme.domain.exceptions.NotificationIsNotFound;
 import org.acme.domain.service.NotificationService;
 import org.jspecify.annotations.NonNull;
@@ -26,11 +28,17 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Option<NotificationIsNotFound> readNotification(@NonNull Long userId, @NonNull Long notificationId) {
-        if (this.notificationRepository.setNotificationReadAtByIdAndUserId(OffsetDateTime.now(), notificationId, userId) == 0) {
-            return Option.of(new NotificationIsNotFound());
+    @Transactional
+    public Option<DomainException> readNotification(@NonNull Long userId, @NonNull Long notificationId) {
+        var maybeNotification = this.notificationRepository.getNotificationById(notificationId, userId);
+        if (maybeNotification.isPresent()) {
+            if (this.notificationRepository.setNotificationReadAtByIdAndUserId(OffsetDateTime.now(), notificationId, userId) == 0) {
+                return Option.of(new NotificationIsAlreadyRead());
+            } else {
+                return Option.none();
+            }
         } else {
-            return Option.none();
+            return Option.of(new NotificationIsNotFound());
         }
     }
 }

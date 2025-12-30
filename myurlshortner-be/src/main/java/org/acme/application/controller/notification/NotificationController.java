@@ -43,7 +43,13 @@ public class NotificationController {
         return useCases.readNotification(userId, id).fold(
                 () -> Response.ok().build(),
                 errors -> errors.notFound().map((e) -> Response.status(404).build()).orElseGet(
-                        () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(errors.validationException())).build()
+                        () -> {
+                            if (errors.alreadyRead().isPresent()) {
+                                return Response.status(409).entity(ErrorResponse.buildFromDomainError(errors.alreadyRead().get())).build();
+                            } else {
+                                return Response.status(400).entity(ErrorResponse.buildFromDomainErrors(errors.validationException())).build();
+                            }
+                        }
                 )
         );
     }
