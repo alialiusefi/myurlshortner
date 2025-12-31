@@ -40,7 +40,11 @@ export default function MyUrlShorterAppBar() {
               setAnchorElement(event.currentTarget);
             }}
           >
-            <Badge badgeContent={data?.data.filter(it => it.read_at == null).length}>
+            <Badge
+              badgeContent={
+                data?.data.filter((it) => it.read_at == null).length
+              }
+            >
               <NotificationsIcon />
             </Badge>
           </IconButton>

@@ -31,14 +31,14 @@ export const GetNotificationsSWR = (userId: number) => {
 
 export const ReadNotification = (userId: number, notificationId: number) => {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  return fetch(`${serverUrl}/notifications/${notificationId}`, { 
+  return fetch(`${serverUrl}/notifications/${notificationId}`, {
     method: "PUT",
-    headers: { ...buildUserIdHeader(userId) } 
+    headers: { ...buildUserIdHeader(userId) },
   }).then(async (res) => {
     if (!res.ok) {
-          console.error("Unexpected BE response!");
-          return (await res.json()) as ErrorResponse;
+      console.error("Unexpected BE response!");
+      return (await res.json()) as ErrorResponse;
     }
     return res;
   });
-}
+};
