@@ -1,8 +1,8 @@
 package org.acme.domain.validator;
 
 import org.acme.domain.exceptions.DomainException;
-import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
 import org.acme.domain.exceptions.UniqueIdContainsInvalidCharactersValidationException;
+import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
 import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

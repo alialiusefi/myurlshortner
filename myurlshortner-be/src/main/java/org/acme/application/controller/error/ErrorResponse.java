@@ -12,6 +12,10 @@ public class ErrorResponse {
         this.errors = errors;
     }
 
+    public static ErrorResponse buildFromDomainError(DomainException error) {
+        return new ErrorResponse(List.of(new Error(error.code, error.message)));
+    }
+
     public static ErrorResponse buildFromDomainErrors(List<? extends DomainException> errors) {
         return new ErrorResponse(errors.stream().map(a -> new Error(a.code, a.message)).toList());
     }

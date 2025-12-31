@@ -8,14 +8,17 @@ import { redirect } from "next/navigation";
 import { useContext, useState } from "react";
 import { UserProvider } from "app/context";
 import Grid from "@mui/material/Grid";
-import { IconButton } from "@mui/material";
+import { IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { NotificationsPopper } from "components/NotificationsPoperComponent/NotificationPoper";
+import { GetNotificationsSWR } from "app/api/NotificationApi";
 
 export default function MyUrlShorterAppBar() {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [anchorElement, setAnchorElement] = useState<HTMLButtonElement>();
   const userId = useContext(UserProvider);
+  const { data, isLoading, mutate } = GetNotificationsSWR(userId);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -37,13 +40,27 @@ export default function MyUrlShorterAppBar() {
               setAnchorElement(event.currentTarget);
             }}
           >
-            {/* <Badge></Badge> */}
-            <NotificationsIcon />
+            {data?.data.filter((it) => it.read_at === null).length === 0 ?
+              (
+                <NotificationsIcon />
+              ) :
+              (
+                <Badge
+                  badgeContent={
+                    data?.data.filter((it) => it.read_at === null).length
+                  }
+                >
+                  <NotificationsIcon />
+                </Badge>
+              )
+            }
           </IconButton>
           <NotificationsPopper
+            notifications={isLoading || data == null ? [] : data.data}
             open={openNotifications}
             anchorElem={anchorElement}
             close={() => setOpenNotifications(false)}
+            mutate={mutate}
           />
           <Grid container columnSpacing={1}>
             <Typography>UserId: {userId}</Typography>

@@ -1,13 +1,21 @@
 package org.acme.application.usecases;
 
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.acme.application.exception.notification.GetLatestNotificationsError;
+import org.acme.application.exception.notification.ReadNotificationError;
 import org.acme.domain.entity.Notification;
-import org.acme.domain.exceptions.notification.GetLatestNotificationsError;
+import org.acme.domain.exceptions.DomainException;
+import org.acme.domain.exceptions.NotificationIsAlreadyRead;
+import org.acme.domain.exceptions.NotificationIsNotFound;
 import org.acme.domain.service.NotificationService;
+import org.acme.domain.validator.NotificationIdValidator;
 import org.acme.domain.validator.UserIdValidator;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class NotificationUseCases {
@@ -24,5 +32,25 @@ public class NotificationUseCases {
         }
 
         return Either.right(notificationService.getLatestNotifications(userValidation.get()));
+    }
+
+    public Option<ReadNotificationError> readNotification(String userId, String notificationId) {
+        var errors = new ArrayList<DomainException>();
+        var userValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
+        var notificationIdValidation = NotificationIdValidator.validate(notificationId).mapLeft(errors::add);
+
+        if (!errors.isEmpty()) {
+            return Option.of(new ReadNotificationError(errors, Optional.empty(), Optional.empty()));
+        }
+
+        return notificationService.readNotification(userValidation.get(), notificationIdValidation.get()).map(
+                it -> switch (it) {
+                    case NotificationIsNotFound a ->
+                            new ReadNotificationError(List.of(), Optional.of(a), Optional.empty());
+                    case NotificationIsAlreadyRead a ->
+                            new ReadNotificationError(List.of(), Optional.empty(), Optional.of(a));
+                    default -> throw new IllegalStateException("Unexpected value: " + it);
+                }
+        );
     }
 }

@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.acme.domain.entity.Notification;
 import org.acme.domain.entity.NotificationParams;
 import org.jspecify.annotations.NonNull;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class NotificationRepository implements PanacheRepository<NotificationEntity> {
@@ -26,7 +29,7 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
                 .toList();
     }
 
-    public Notification toNotification(NotificationEntity entity) {
+    private Notification toNotification(NotificationEntity entity) {
         NotificationParams params = null;
         try {
             switch (entity.getType()) {
@@ -45,5 +48,17 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
                 entity.getCreatedAt(),
                 entity.getReadAt()
         );
+    }
+
+    public Optional<Notification> getNotificationById(@NonNull Long id, @NonNull Long userId) {
+        return find("id = ?1 and userId = ?2", id, userId).firstResultOptional().map(this::toNotification);
+    }
+
+    @Transactional
+    public int setNotificationReadAtByIdAndUserId(@NonNull OffsetDateTime readAt,
+                                                  @NonNull Long notificationId,
+                                                  @NonNull Long userId
+    ) {
+        return update("set readAt = ?1 where id = ?2 and userId = ?3 and readAt is null", readAt, notificationId, userId);
     }
 }

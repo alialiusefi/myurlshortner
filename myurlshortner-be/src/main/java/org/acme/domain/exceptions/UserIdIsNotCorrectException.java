@@ -1,6 +1,4 @@
-package org.acme.application.exception;
-
-import org.acme.domain.exceptions.DomainException;
+package org.acme.domain.exceptions;
 
 public class UserIdIsNotCorrectException extends DomainException {
     public UserIdIsNotCorrectException(String value) {
