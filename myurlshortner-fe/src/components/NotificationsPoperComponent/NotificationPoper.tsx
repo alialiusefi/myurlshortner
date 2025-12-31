@@ -10,8 +10,8 @@ import {
   Button,
 } from "@mui/material";
 import { ShortenedUrlNotification, ShortenedUrlReachedNViewsNotification } from "./Notification";
-import { GetNotificationsSWR } from "app/api/NotificationApi";
-import { useContext } from "react";
+import { ReadNotification } from "app/api/NotificationApi";
+import { useContext, useEffect, useState } from "react";
 import { UserProvider } from "app/context";
 
 export type NotificationsPopperProps = {
@@ -19,10 +19,11 @@ export type NotificationsPopperProps = {
   open: boolean;
   anchorElem?: HTMLButtonElement;
   close: () => void;
+  mutate: () => any;
 };
 
 export function NotificationsPopper(props: NotificationsPopperProps) {
-  const userId = useContext(UserProvider);
+  const userId = useContext(UserProvider)
   const listComponent = () => {
     if (props.notifications.length == 0) {
       return (
@@ -37,15 +38,23 @@ export function NotificationsPopper(props: NotificationsPopperProps) {
             return (
               <ListItem key={not.id}>
                 <Paper sx={{ p: 1 }}>
-                  <ListItemText
-                    key={not.id}
-                    primary={shortenedUrlReachedNViewNotificationFactory.getTitle(
-                      not,
-                    )}
-                    secondary={shortenedUrlReachedNViewNotificationFactory.getDescription(
-                      not,
-                    )}
-                  />
+                  <Grid container direction="row">
+                    <ListItemText
+                      key={not.id}
+                      primary={shortenedUrlReachedNViewNotificationFactory.getTitle(
+                        not,
+                      )}
+                      secondary={shortenedUrlReachedNViewNotificationFactory.getDescription(
+                        not,
+                      )}
+                    />
+                    <Button disabled={not.read_at != null} onClick={async () => {
+                      await ReadNotification(userId, not.id);
+                      props.mutate();
+                    }}>
+                      Mark as read
+                    </Button>
+                  </Grid>
                 </Paper>
               </ListItem>
             );
