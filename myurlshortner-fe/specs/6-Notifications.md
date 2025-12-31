@@ -1,11 +1,12 @@
 # Notifications
 
-Show the list of notifications when the bell icon on the right side of the app bar is clicked. The bell icon has a badge on unread notifications. 
+Show the list of notifications when the bell icon on the right side of the app bar is clicked. The bell icon has a badge on unread notifications.
 The maximum amount of notifications shown is 5.
 
 Every notification consists of:
-- Title (faded when read)
-- Description (faded when read)
+
+- Title (faded when read otherwise bold)
+- Description
 - Check mark to mark as read. It cannot be unmarked.
 
 ## Notification Types
