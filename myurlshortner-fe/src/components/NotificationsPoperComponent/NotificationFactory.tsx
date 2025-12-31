@@ -18,7 +18,11 @@ class ShortenedUrlReachedNViewNotificationFactory
     notification: ShortenedUrlReachedNViewsNotification,
   ): ReactElement => {
     return (
-      <Typography variant="body1" color="textPrimary">
+      <Typography
+        variant="body1"
+        color="textPrimary"
+        fontWeight={notification.read_at === null ? "bold" : "regular"}
+      >
         Congrats! Your shortened url reached {notification.params.views} views!
       </Typography>
     );

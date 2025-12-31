@@ -10,4 +10,5 @@ public record Notification(
         Long userId,
         OffsetDateTime createdAt,
         OffsetDateTime readAt
-) {}
+) {
+}

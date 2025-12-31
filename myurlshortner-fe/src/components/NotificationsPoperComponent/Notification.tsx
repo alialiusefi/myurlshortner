@@ -13,9 +13,11 @@ export class ShortenedUrlReachedNViewsNotification
   id: number;
   type: NotificationType;
   params: ShortenedUrlReachedNViewsParams;
+  read_at: string | null;
 }
 
 export interface ShortenedUrlNotification {
   id: number;
   type: NotificationType;
+  read_at: string | null;
 }
