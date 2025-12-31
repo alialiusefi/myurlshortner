@@ -7,7 +7,7 @@ Every notification consists of:
 
 - Title (faded when read otherwise bold)
 - Description
-- Check mark to mark as read. It cannot be unmarked.
+- "Mark as read" button to mark the notification as read. It cannot be unmarked.
 
 ## Notification Types
 

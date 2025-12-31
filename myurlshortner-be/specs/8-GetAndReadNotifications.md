@@ -52,7 +52,7 @@ Read a specific notification by the same user.
 
 Authorization: 
 User-Id: 1
-PUT /notifications/{id}/read
+PUT /notifications/{id}
 No Request Body
 
 ## Response
@@ -73,7 +73,18 @@ No Response Body
     },
     {
       "code": "NOTIFICATION_ID_IS_NOT_CORRECT",
-      "message": "The provided user id value %s is not correct. It must be a number above 0"
+      "message": "The provided notification id value %s is not correct. It must be a number above 0"
+    }
+  ]
+}
+```
+409 Conflict
+```json
+{
+  "errors": [
+    { 
+      "code": "NOTIFICATION_IS_ALREADY_READ",
+      "message": "The notification is already read."
     }
   ]
 }

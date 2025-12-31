@@ -53,7 +53,7 @@ export function NotificationsPopper(props: NotificationsPopperProps) {
                         )}
                       />
                       <Button
-                        disabled={not.read_at != null}
+                        disabled={not.read_at !== null}
                         onClick={async () => {
                           await ReadNotification(userId, not.id);
                           props.mutate();

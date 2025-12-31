@@ -34,10 +34,11 @@ public class NotificationServiceTest {
         when(repo.setNotificationReadAtByIdAndUserId(any(OffsetDateTime.class), eq(notification.id()), eq(userId))).thenReturn(1);
         var service = new NotificationServiceImpl(repo);
 
-        service.readNotification(userId, notification.id());
+        var result = service.readNotification(userId, notification.id());
 
         verify(repo).getNotificationById(notification.id(), userId);
         verify(repo).setNotificationReadAtByIdAndUserId(any(OffsetDateTime.class), eq(notification.id()), eq(userId));
+        assert result.isEmpty();
     }
 
     @Test
