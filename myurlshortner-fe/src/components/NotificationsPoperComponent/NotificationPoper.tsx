@@ -14,7 +14,7 @@ import {
   ShortenedUrlReachedNViewsNotification,
 } from "./Notification";
 import { ReadNotification } from "app/api/NotificationApi";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { UserProvider } from "app/context";
 
 export type NotificationsPopperProps = {
