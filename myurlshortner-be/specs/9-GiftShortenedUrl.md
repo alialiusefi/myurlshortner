@@ -9,8 +9,7 @@ Authorization:
 User-Id: 1
 POST {hostname}/shortened-urls/{uid}/gift-request
 {
-    "target_user_id": 2,
-    "unique_identifier": "abcdabcd12"
+    "target_user_id": 2
 }
 ```
 
@@ -47,15 +46,15 @@ POST {hostname}/shortened-urls/{uid}/gift-request
     },
     {
       "code": "UNIQUE_ID_CONTAINS_INVALID_CHARACTERS",
-      "details": "Unique identifier contains invalid characters."
+      "message": "Unique identifier contains invalid characters."
     },
     {
       "code": "UNIQUE_IDENTIFIER_CANNOT_BE_EMPTY",
-      "details": "The unique identifier cannot be empty."
+      "message": "The unique identifier cannot be empty."
     },
     {
       "code": "UNIQUE_IDENTIFIER_IS_TOO_LONG",
-      "details": "Unique identifier is too long."
+      "message": "Unique identifier is too long."
     }
   ]
 }

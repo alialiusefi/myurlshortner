@@ -1,0 +1,52 @@
+package org.acme.application.controller.giftrequest;
+
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
+import org.acme.application.controller.error.ErrorResponse;
+import org.acme.application.usecases.GiftRequestUseCases;
+import org.acme.domain.exceptions.giftrequest.CreateGiftRequestError;
+
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.acme.application.controller.Constants.USER_ID_HEADER_KEY;
+
+@Path("/shortened-urls/{uniqueIdentifier}/gift-requests")
+public class GiftRequestController {
+    private final GiftRequestUseCases useCases;
+
+    public GiftRequestController(GiftRequestUseCases useCases) {
+        this.useCases = useCases;
+    }
+
+    @POST
+    @Consumes(APPLICATION_JSON)
+    public Response createAGiftRequest(
+            @HeaderParam(USER_ID_HEADER_KEY) String userId,
+            @PathParam("uniqueIdentifier") String uniqueIdentifier,
+            CreateGiftRequestRequest request
+    ) {
+        return useCases.createGiftRequest(request, uniqueIdentifier, userId).fold(
+                () -> Response.status(Response.Status.CREATED).build(),
+                error -> {
+                    if (error.shortenedUrlNotFound().isPresent()) {
+                        return Response.status(404).entity(ErrorResponse.buildFromDomainError(error.shortenedUrlNotFound().get())).build();
+                    }
+                    if (error.opError().isPresent()) {
+                        switch (error.opError().get()) {
+                            case CreateGiftRequestError.GiftRequestTargetUserCannotBeTheSourceUser a -> {
+                                return Response.status(400).entity(ErrorResponse.buildFromDomainError(a)).build();
+                            }
+                            case CreateGiftRequestError.ShortenedUrlAlreadyHasAGiftRequest a -> {
+                                return Response.status(400).entity(ErrorResponse.buildFromDomainError(a)).build();
+                            }
+                            case CreateGiftRequestError.TargetUserAlreadyHasSuchGiftRequest a -> {
+                                return Response.status(409).entity(ErrorResponse.buildFromDomainError(a)).build();
+                            }
+                            default -> throw new IllegalStateException("Unexpected value: " + error.opError().get());
+                        }
+
+                    }
+                    return Response.status(400).entity(ErrorResponse.buildFromDomainErrors(error.validationErrors())).build();
+                }
+        );
+    }
+}
