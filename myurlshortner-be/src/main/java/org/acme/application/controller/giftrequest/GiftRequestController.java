@@ -17,6 +17,24 @@ public class GiftRequestController {
         this.useCases = useCases;
     }
 
+    @GET
+    @Produces(APPLICATION_JSON)
+    @Path("/awaiting")
+    public Response getAwaitingGiftRequest(
+            @HeaderParam(USER_ID_HEADER_KEY) String userId,
+            @PathParam("uniqueIdentifier") String uniqueIdentifier
+    ) {
+        return useCases.getAwaitingGiftRequest(userId, uniqueIdentifier).fold(
+                (it) -> {
+                    if (it.notFound().isPresent()) {
+                        return Response.status(404).entity(ErrorResponse.buildFromDomainError(it.notFound().get())).build();
+                    }
+                    return Response.status(400).entity(ErrorResponse.buildFromDomainErrors(it.validationError())).build();
+                },
+                (it) -> Response.ok(new GetAwaitingGiftRequestResponse(it.getId(), it.getUpdatedAt())).build()
+        );
+    }
+
     @POST
     @Consumes(APPLICATION_JSON)
     public Response createAGiftRequest(

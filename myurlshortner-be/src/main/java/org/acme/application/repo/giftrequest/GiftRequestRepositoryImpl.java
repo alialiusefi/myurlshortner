@@ -8,6 +8,7 @@ import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.repo.GiftRequestRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -31,11 +32,19 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
         }
     }
 
-    public Optional<GiftRequest> getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(@NonNull String uniqueIdentifier) {
-        return find("uniqueIdentifier = ?1 and status = ?2",
-                uniqueIdentifier,
-                GiftRequest.GiftRequestStatus.AWAITING
-        ).firstResultOptional().map(this::toGiftRequest);
+    public Optional<GiftRequest> getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(@NonNull String uniqueIdentifier, @Nullable Long sourceUserId) {
+        if (sourceUserId == null) {
+            return find("uniqueIdentifier = ?1 and status = ?2",
+                    uniqueIdentifier,
+                    GiftRequest.GiftRequestStatus.AWAITING
+            ).firstResultOptional().map(this::toGiftRequest);
+        } else {
+            return find("uniqueIdentifier = ?1 and status = ?2 and sourceUserId = ?3",
+                    uniqueIdentifier,
+                    GiftRequest.GiftRequestStatus.AWAITING,
+                    sourceUserId
+            ).firstResultOptional().map(this::toGiftRequest);
+        }
     }
 
     public GiftRequest toGiftRequest(GiftRequestEntity entity) {

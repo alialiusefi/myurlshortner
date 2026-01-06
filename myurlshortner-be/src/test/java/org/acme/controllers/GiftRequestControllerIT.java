@@ -53,6 +53,6 @@ public class GiftRequestControllerIT {
                 .post("/shortened-urls/" + uid + "/gift-requests")
                 .then()
                 .statusCode(201);
-        assertThat(repository.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid).isPresent(), Matchers.equalTo(true));
+        assertThat(repository.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null).isPresent(), Matchers.equalTo(true));
     }
 }

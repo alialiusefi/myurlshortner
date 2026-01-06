@@ -25,7 +25,7 @@ public class GiftRequestServiceImpl implements GiftRequestService {
         if (command.shortenedUrl().getUserId().equals(command.targetUserId())) {
             return Option.of(new CreateGiftRequestError.GiftRequestTargetUserCannotBeTheSourceUser(command.targetUserId()));
         }
-        var optionalGiftRequest = repo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(command.shortenedUrl().getPublicIdentifier());
+        var optionalGiftRequest = repo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(command.shortenedUrl().getPublicIdentifier(), null);
         if (optionalGiftRequest.isEmpty()) {
             try {
                 repo.saveGiftRequest(new GiftRequest(
@@ -48,5 +48,10 @@ public class GiftRequestServiceImpl implements GiftRequestService {
                 return Option.of(new CreateGiftRequestError.ShortenedUrlAlreadyHasAGiftRequest(command.shortenedUrl().getPublicIdentifier()));
             }
         }
+    }
+
+    @Override
+    public Option<GiftRequest> getAwaitingGiftRequestByUniqueIdentifier(@NonNull String uniqueIdentifier, @NonNull Long userId) {
+        return Option.ofOptional(repo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uniqueIdentifier, userId));
     }
 }

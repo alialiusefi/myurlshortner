@@ -1,12 +1,16 @@
 package org.acme.application.usecases;
 
+import io.vavr.control.Either;
 import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.application.controller.giftrequest.CreateGiftRequestRequest;
 import org.acme.application.exception.giftrequest.CreateGiftRequestError;
+import org.acme.application.exception.giftrequest.GetAwaitingGiftRequestError;
 import org.acme.domain.command.CreateGiftRequestCommand;
+import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.exceptions.DomainException;
 import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
+import org.acme.domain.exceptions.giftrequest.AwaitingGiftRequestWasNotFound;
 import org.acme.domain.service.GiftRequestService;
 import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.validator.UniqueIdValidator;
@@ -24,6 +28,24 @@ public class GiftRequestUseCases {
     public GiftRequestUseCases(ShortenedUrlService shortenedUrlService, GiftRequestService giftRequestService) {
         this.shortenedUrlService = shortenedUrlService;
         this.giftRequestService = giftRequestService;
+    }
+
+    public Either<GetAwaitingGiftRequestError, GiftRequest> getAwaitingGiftRequest(
+            String userId,
+            String uniqueIdentifier
+    ) {
+        var errors = new ArrayList<DomainException>();
+        UniqueIdValidator.validate(uniqueIdentifier).map(errors::add);
+        var validatedUserId = UserIdValidator.validate(userId).mapLeft(errors::add);
+        if (!errors.isEmpty()) {
+            return Either.left(new GetAwaitingGiftRequestError(Optional.empty(), errors));
+        }
+
+        var result = giftRequestService.getAwaitingGiftRequestByUniqueIdentifier(uniqueIdentifier, validatedUserId.get());
+        if (result.isEmpty()) {
+            return Either.left(new GetAwaitingGiftRequestError(Optional.of(new AwaitingGiftRequestWasNotFound(uniqueIdentifier)), List.of()));
+        }
+        return Either.right(result.get());
     }
 
     public Option<CreateGiftRequestError> createGiftRequest(

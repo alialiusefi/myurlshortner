@@ -34,11 +34,11 @@ public class GiftRequestServiceTest {
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
         var service = new GiftRequestServiceImpl(mockRepo);
-        when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid)).thenReturn(Optional.empty());
+        when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null)).thenReturn(Optional.empty());
         var result = service.createGiftRequest(command);
 
         assert result.isEmpty();
-        verify(mockRepo).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid);
+        verify(mockRepo).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null);
         var captor = ArgumentCaptor.forClass(GiftRequest.class);
         verify(mockRepo).saveGiftRequest(captor.capture());
         assert captor.getValue().getPublicIdentifier().equals(uid); //todo add better checks
@@ -65,13 +65,13 @@ public class GiftRequestServiceTest {
                 OffsetDateTime.now(),
                 null
         );
-        when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid)).thenReturn(Optional.of(giftRequest));
+        when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null)).thenReturn(Optional.of(giftRequest));
 
         var result = service.createGiftRequest(command);
 
         assertThat(result, Matchers.any(Option.class));
         assertThat(result.get(), Matchers.isA(CreateGiftRequestError.TargetUserAlreadyHasSuchGiftRequest.class));
-        verify(mockRepo).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid);
+        verify(mockRepo).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null);
         verify(mockRepo, times(0)).saveGiftRequest(any());
     }
 
@@ -96,13 +96,13 @@ public class GiftRequestServiceTest {
                 OffsetDateTime.now(),
                 null
         );
-        when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid)).thenReturn(Optional.of(giftRequest));
+        when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null)).thenReturn(Optional.of(giftRequest));
 
         var result = service.createGiftRequest(command);
 
         assertThat(result, Matchers.any(Option.class));
         assertThat(result.get(), Matchers.isA(CreateGiftRequestError.ShortenedUrlAlreadyHasAGiftRequest.class));
-        verify(mockRepo).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid);
+        verify(mockRepo).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null);
         verify(mockRepo, times(0)).saveGiftRequest(any());
     }
 
@@ -124,7 +124,7 @@ public class GiftRequestServiceTest {
 
         assertThat(result, Matchers.any(Option.class));
         assertThat(result.get(), Matchers.isA(CreateGiftRequestError.GiftRequestTargetUserCannotBeTheSourceUser.class));
-        verify(mockRepo, times(0)).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid);
+        verify(mockRepo, times(0)).getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null);
         verify(mockRepo, times(0)).saveGiftRequest(any());
     }
 }
