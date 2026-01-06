@@ -7,7 +7,7 @@ A user can send his shortened url as a gift request to another user.
 ```http
 Authorization:
 User-Id: 1
-POST {hostname}/shortened-urls/{uid}/gift-request
+POST {hostname}/shortened-urls/{uid}/gift-requests
 {
     "target_user_id": 2
 }
@@ -81,7 +81,7 @@ Get a pending gift request for the shortened url.
 ```http
 Authorization:
 User-Id: 1
-GET /{hostname}/shortened-urls/{uid}/gift-requests/pending
+GET /{hostname}/shortened-urls/{uid}/gift-requests/awaiting
 ```
 
 ## Responses
@@ -123,8 +123,8 @@ GET /{hostname}/shortened-urls/{uid}/gift-requests/pending
 {
   "errors": [
     {
-      "code": "SHORTENED_URL_WAS_NOT_FOUND",
-      "message": "Cannot find a shortened url with unique identifier %s."
+      "code": "AWAITING_GIFT_REQUEST_WAS_NOT_FOUND",
+      "message": "Cannot find an awaiting gift request for unique identifier %s."
     }
   ]
 }
@@ -137,7 +137,7 @@ GET /{hostname}/shortened-urls/{uid}/gift-requests/pending
 ```http
 Authorization: 
 User-Id: 1
-PUT /{hostname}/shortened-urls/{uid}/gift-requests/{id}/cancel
+PUT /{hostname}/shortened-urls/{uid}/gift-requests/awaiting/{id}/cancel
 {
     "updated_at": "2025-01-01T01:05:12.123+09:00"
 }
@@ -153,7 +153,7 @@ PUT /{hostname}/shortened-urls/{uid}/gift-requests/{id}/cancel
   "errors": [
     {
       "code": "GIFT_REQUEST_WAS_UPDATED",
-      "message": "The gift request was already updated. Please retry with new updated_at."
+      "message": "The gift request was already updated. Please retry."
     }
   ]
 }
