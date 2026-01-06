@@ -137,6 +137,8 @@ GET /{hostname}/shortened-urls/{uid}/gift-requests/awaiting
 ```http
 Authorization: 
 User-Id: 1
+// replace
+PUT /{hostname}/gift-requests/awaiting/{id}/cancel
 PUT /{hostname}/shortened-urls/{uid}/gift-requests/awaiting/{id}/cancel
 {
     "updated_at": "2025-01-01T01:05:12.123+09:00"
@@ -163,6 +165,10 @@ PUT /{hostname}/shortened-urls/{uid}/gift-requests/awaiting/{id}/cancel
 ```json
 {
   "errors": [
+    {
+      "code": "GIFT_REQUEST_ID_IS_NOT_CORRECT",
+      "message": "The provided gift request id %s is not correct. It must be a number above 0"
+    },
     {
       "code": "USER_ID_IS_NOT_CORRECT",
       "message": "The provided user id %s is not correct. It must be a number above 0"

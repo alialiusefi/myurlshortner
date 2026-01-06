@@ -4,8 +4,10 @@ import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.acme.application.repo.exception.DuplicateAwaitingGiftRequestException;
+import org.acme.domain.command.CancelAwaitingGiftRequestCommand;
 import org.acme.domain.command.CreateGiftRequestCommand;
 import org.acme.domain.entity.GiftRequest;
+import org.acme.domain.exceptions.giftrequest.CancelAwaitingGiftRequestError;
 import org.acme.domain.exceptions.giftrequest.CreateGiftRequestError;
 import org.acme.domain.repo.GiftRequestRepository;
 import org.acme.domain.service.GiftRequestService;
@@ -53,5 +55,17 @@ public class GiftRequestServiceImpl implements GiftRequestService {
     @Override
     public Option<GiftRequest> getAwaitingGiftRequestByUniqueIdentifier(@NonNull String uniqueIdentifier, @NonNull Long userId) {
         return Option.ofOptional(repo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uniqueIdentifier, userId));
+    }
+
+    @Override
+    @Transactional
+    public Option<CancelAwaitingGiftRequestError> cancelAwaitingGiftRequest(
+            @NonNull CancelAwaitingGiftRequestCommand command
+    ) {
+
+
+        // select gift_request where id = 1 and status = AWAITING and user_id = 1 / return not found
+        // update gift_request set status = CANCELED where id = 1 and status = AWAITING and updated_at = 1 and user_id = 1 / return had changed
+        return Option.none();
     }
 }

@@ -12,4 +12,6 @@ public interface GiftRequestRepository {
     void saveGiftRequest(@NonNull GiftRequest giftRequest) throws DuplicateAwaitingGiftRequestException;
 
     Optional<GiftRequest> getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(@NonNull String uniqueIdentifier, @Nullable Long sourceUserId);
+
+    Optional<GiftRequest> getGiftRequestById(@NonNull Long id, @Nullable Long sourceUserId);
 }

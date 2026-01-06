@@ -67,4 +67,13 @@ public class GiftRequestController {
                 }
         );
     }
+
+    @PUT
+    @Produces(APPLICATION_JSON)
+    @Path("/awaiting/{id}/cancel")
+    public Response cancelAwaitingGiftRequest(
+            @HeaderParam(USER_ID_HEADER_KEY) String userId
+    ) {
+        return Response.ok().build();
+    }
 }

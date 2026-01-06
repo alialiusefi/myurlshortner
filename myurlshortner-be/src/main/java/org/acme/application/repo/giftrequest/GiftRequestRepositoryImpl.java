@@ -47,6 +47,20 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
         }
     }
 
+    @Override
+    public Optional<GiftRequest> getGiftRequestById(@NonNull Long id, @Nullable Long sourceUserId) {
+        if (sourceUserId == null) {
+            return find("id = ?1",
+                    id
+            ).firstResultOptional().map(this::toGiftRequest);
+        } else {
+            return find("id = ?1 and sourceUserId = ?3",
+                    id,
+                    sourceUserId
+            ).firstResultOptional().map(this::toGiftRequest);
+        }
+    }
+
     public GiftRequest toGiftRequest(GiftRequestEntity entity) {
         GiftRequest request = new GiftRequest(
                 entity.getSourceUserId(),
