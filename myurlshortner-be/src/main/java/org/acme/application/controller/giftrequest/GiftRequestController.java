@@ -9,7 +9,7 @@ import org.acme.domain.exceptions.giftrequest.CreateGiftRequestError;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.acme.application.controller.Constants.USER_ID_HEADER_KEY;
 
-@Path("/shortened-urls/{uniqueIdentifier}/gift-requests")
+@Path("/")
 public class GiftRequestController {
     private final GiftRequestUseCases useCases;
 
@@ -19,7 +19,7 @@ public class GiftRequestController {
 
     @GET
     @Produces(APPLICATION_JSON)
-    @Path("/awaiting")
+    @Path("/shortened-urls/{uniqueIdentifier}/gift-requests/awaiting")
     public Response getAwaitingGiftRequest(
             @HeaderParam(USER_ID_HEADER_KEY) String userId,
             @PathParam("uniqueIdentifier") String uniqueIdentifier
@@ -37,6 +37,7 @@ public class GiftRequestController {
 
     @POST
     @Consumes(APPLICATION_JSON)
+    @Path("/shortened-urls/{uniqueIdentifier}/gift-requests")
     public Response createAGiftRequest(
             @HeaderParam(USER_ID_HEADER_KEY) String userId,
             @PathParam("uniqueIdentifier") String uniqueIdentifier,
@@ -70,10 +71,26 @@ public class GiftRequestController {
 
     @PUT
     @Produces(APPLICATION_JSON)
-    @Path("/awaiting/{id}/cancel")
+    @Path("/gift-requests/awaiting/{id}/cancel")
     public Response cancelAwaitingGiftRequest(
-            @HeaderParam(USER_ID_HEADER_KEY) String userId
+            @HeaderParam(USER_ID_HEADER_KEY) String userId,
+            CancelAwaitingGiftRequestRequest request,
+            @PathParam("id") String id
     ) {
-        return Response.ok().build();
+        return useCases.cancelGiftRequest(
+                request,
+                id,
+                userId
+        ).fold(
+                () -> Response.status(204).build(),
+                (it) -> {
+                    if (it.notFound().isPresent()) {
+                        return Response.status(404).entity(ErrorResponse.buildFromDomainError(it.notFound().get())).build();
+                    } else if (it.wasUpdatedError().isPresent()) {
+                        return Response.status(409).entity(ErrorResponse.buildFromDomainError(it.wasUpdatedError().get())).build();
+                    }
+                    return Response.status(400).entity(ErrorResponse.buildFromDomainErrors(it.validationErrors())).build();
+                }
+        );
     }
 }

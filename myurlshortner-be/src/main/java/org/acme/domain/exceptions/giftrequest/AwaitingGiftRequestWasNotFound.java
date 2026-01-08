@@ -7,4 +7,9 @@ public class AwaitingGiftRequestWasNotFound extends DomainException {
         super("AWAITING_GIFT_REQUEST_WAS_NOT_FOUND",
                 String.format("Cannot find awaiting gift request for unique identifier %s.", uniqueIdentifier));
     }
+
+    public AwaitingGiftRequestWasNotFound(Long id) {
+        super("AWAITING_GIFT_REQUEST_WAS_NOT_FOUND",
+                String.format("Cannot find awaiting gift request with id %s.", id));
+    }
 }

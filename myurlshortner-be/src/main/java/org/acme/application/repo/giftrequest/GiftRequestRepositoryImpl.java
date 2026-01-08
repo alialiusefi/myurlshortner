@@ -1,15 +1,19 @@
 package org.acme.application.repo.giftrequest;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.acme.application.repo.exception.DuplicateAwaitingGiftRequestException;
 import org.acme.domain.entity.GiftRequest;
+import org.acme.domain.exceptions.giftrequest.GiftRequestWasUpdatedException;
 import org.acme.domain.repo.GiftRequestRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -48,17 +52,37 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
     }
 
     @Override
-    public Optional<GiftRequest> getGiftRequestById(@NonNull Long id, @Nullable Long sourceUserId) {
+    public Optional<GiftRequest> getGiftRequestByIdAndStatus(@NonNull Long id, GiftRequest.@NonNull GiftRequestStatus status, @Nullable Long sourceUserId) {
         if (sourceUserId == null) {
-            return find("id = ?1",
-                    id
+            return find("id = ?1 and status = ?2",
+                    id,
+                    status
             ).firstResultOptional().map(this::toGiftRequest);
         } else {
-            return find("id = ?1 and sourceUserId = ?3",
+            return find("id = ?1 and sourceUserId = ?2 and status = ?3",
                     id,
-                    sourceUserId
+                    sourceUserId,
+                    status
             ).firstResultOptional().map(this::toGiftRequest);
         }
+    }
+
+    @Override
+    public Option<GiftRequestWasUpdatedException> updateGiftRequestStatusByIdAndUpdatedAt(@NonNull Long id,
+                                                                                          GiftRequest.@NonNull GiftRequestStatus status,
+                                                                                          @Nullable OffsetDateTime updatedAt) {
+        var criteriaUpdate = getEntityManager().getCriteriaBuilder().createCriteriaUpdate(GiftRequestEntity.class);
+        var root = criteriaUpdate.from(GiftRequestEntity.class);
+
+        criteriaUpdate.set("status", status);
+        criteriaUpdate.set("updatedAt", ZonedDateTime.now());
+        var idPred = root.get("id").equalTo(id);
+        var updatedAtPred = updatedAt == null ? root.get("updatedAt").isNull() : root.get("updatedAt").equalTo(updatedAt);
+        criteriaUpdate.where(idPred, updatedAtPred);
+
+        var query = getEntityManager().createQuery(criteriaUpdate);
+        var res = query.executeUpdate();
+        return res == 0 ? Option.of(new GiftRequestWasUpdatedException()) : Option.none();
     }
 
     public GiftRequest toGiftRequest(GiftRequestEntity entity) {

@@ -83,17 +83,15 @@ public class GiftRequestUseCases {
 
     public Option<CancelAwaitingGiftRequestError> cancelGiftRequest(
             CancelAwaitingGiftRequestRequest request,
-            String uniqueIdentifier,
-            String userId,
-            String giftRequestId
+            String id,
+            String userId
     ) {
         var errors = new ArrayList<DomainException>();
         var userIdValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
-        var giftRequestIdValidation = GiftRequestIdValidator.validate(giftRequestId).mapLeft(errors::add);
-        UniqueIdValidator.validate(uniqueIdentifier).map(errors::add);
-        OffsetDateTime parsedUpdatedAt = null;
+        var giftRequestIdValidation = GiftRequestIdValidator.validate(id).mapLeft(errors::add);
+        OffsetDateTime nullableUpdatedAt = null;
         try {
-            parsedUpdatedAt = OffsetDateTime.parse(request.updatedAt());
+            nullableUpdatedAt = request.updatedAt() != null ? OffsetDateTime.parse(request.updatedAt()) : null;
         } catch (DateTimeParseException e) {
             errors.add(new UpdatedAtIsNotCorrectException(request.updatedAt()));
         }
@@ -102,19 +100,20 @@ public class GiftRequestUseCases {
             return Option.of(new CancelAwaitingGiftRequestError(Optional.empty(), Optional.empty(), errors));
         }
 
-        var giftRequest = repo.getGiftRequestById(giftRequestIdValidation.get(), userIdValidation.get());
+        var giftRequest = repo.getGiftRequestByIdAndStatus(giftRequestIdValidation.get(), GiftRequest.GiftRequestStatus.AWAITING, userIdValidation.get());
 
-        if (giftRequest.isEmpty() || !giftRequest.get().getPublicIdentifier().equals(giftRequestId)) {
+        if (giftRequest.isEmpty()) {
             return Option.of(
                     new CancelAwaitingGiftRequestError(
-                            Optional.of(new AwaitingGiftRequestWasNotFound(uniqueIdentifier)), Optional.empty(), List.of()
+                            Optional.of(new AwaitingGiftRequestWasNotFound(giftRequestIdValidation.get())),
+                            Optional.empty(),
+                            List.of()
                     )
             );
         }
 
-        giftRequestService.cancelAwaitingGiftRequest(
-                new CancelAwaitingGiftRequestCommand(giftRequest.get(), userIdValidation.get(), parsedUpdatedAt)
-        );
-        return Option.none();
+        return giftRequestService.cancelAwaitingGiftRequest(
+                new CancelAwaitingGiftRequestCommand(giftRequest.get(), userIdValidation.get(), nullableUpdatedAt)
+        ).map(it -> new CancelAwaitingGiftRequestError(Optional.empty(), Optional.of(it.wasUpdatedError()), List.of()));
     }
 }

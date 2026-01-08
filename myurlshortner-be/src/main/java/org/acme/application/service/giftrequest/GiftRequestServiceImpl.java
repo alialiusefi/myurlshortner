@@ -62,10 +62,6 @@ public class GiftRequestServiceImpl implements GiftRequestService {
     public Option<CancelAwaitingGiftRequestError> cancelAwaitingGiftRequest(
             @NonNull CancelAwaitingGiftRequestCommand command
     ) {
-
-
-        // select gift_request where id = 1 and status = AWAITING and user_id = 1 / return not found
-        // update gift_request set status = CANCELED where id = 1 and status = AWAITING and updated_at = 1 and user_id = 1 / return had changed
-        return Option.none();
+        return repo.updateGiftRequestStatusByIdAndUpdatedAt(command.giftRequest().getId(), GiftRequest.GiftRequestStatus.CANCELED, command.updatedAt()).map(CancelAwaitingGiftRequestError::new);
     }
 }

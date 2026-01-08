@@ -6,10 +6,7 @@ import org.acme.domain.command.CreateGiftRequestCommand;
 import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.exceptions.giftrequest.CancelAwaitingGiftRequestError;
 import org.acme.domain.exceptions.giftrequest.CreateGiftRequestError;
-import org.acme.domain.exceptions.giftrequest.GiftRequestWasUpdatedException;
 import org.jspecify.annotations.NonNull;
-
-import java.time.OffsetDateTime;
 
 public interface GiftRequestService {
     Option<CreateGiftRequestError> createGiftRequest(@NonNull CreateGiftRequestCommand command);

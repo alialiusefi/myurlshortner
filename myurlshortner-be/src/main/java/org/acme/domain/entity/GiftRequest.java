@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class GiftRequest {
     public enum GiftRequestStatus {
-        AWAITING, ACCEPTED, DECLINED
+        AWAITING, ACCEPTED, CANCELED, DECLINED
     }
 
     private Long id;
