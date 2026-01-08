@@ -73,15 +73,15 @@ POST {hostname}/shortened-urls/{uid}/gift-requests
 ```
 
 ---
-# Get Gift Request
+# Get Awaiting Gift Request
 
-Get a pending gift request for the shortened url.
+Get a awaiting gift request for the shortened url.
 
 ## Request
 ```http
 Authorization:
 User-Id: 1
-GET /{hostname}/shortened-urls/{uid}/gift-requests/awaiting
+GET {hostname}/shortened-urls/{uid}/gift-requests/awaiting
 ```
 
 ## Responses
@@ -137,9 +137,7 @@ GET /{hostname}/shortened-urls/{uid}/gift-requests/awaiting
 ```http
 Authorization: 
 User-Id: 1
-// replace
-PUT /{hostname}/gift-requests/awaiting/{id}/cancel
-PUT /{hostname}/shortened-urls/{uid}/gift-requests/awaiting/{id}/cancel
+PUT {hostname}/gift-requests/awaiting/{id}/cancel
 {
     "updated_at": "2025-01-01T01:05:12.123+09:00"
 }
