@@ -20,9 +20,9 @@ import java.util.Optional;
 public class GiftRequestRepositoryImpl implements GiftRequestRepository, PanacheRepository<GiftRequestEntity> {
 
     @Transactional
-    public void saveGiftRequest(@NonNull GiftRequest giftRequest) throws DuplicateAwaitingGiftRequestException {
+    public Long saveGiftRequest(@NonNull GiftRequest giftRequest) throws DuplicateAwaitingGiftRequestException {
         try {
-            persist(new GiftRequestEntity(
+            var entity = new GiftRequestEntity(
                     giftRequest.getId(),
                     giftRequest.getPublicIdentifier(),
                     giftRequest.getSourceUserId(),
@@ -30,7 +30,9 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
                     giftRequest.getStatus(),
                     giftRequest.getCreatedAt(),
                     giftRequest.getUpdatedAt()
-            ));
+            );
+            persist(entity);
+            return entity.getId();
         } catch (ConstraintViolationException e) {
             throw new DuplicateAwaitingGiftRequestException(giftRequest.getPublicIdentifier());
         }
@@ -83,6 +85,12 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
         var query = getEntityManager().createQuery(criteriaUpdate);
         var res = query.executeUpdate();
         return res == 0 ? Option.of(new GiftRequestWasUpdatedException()) : Option.none();
+    }
+
+    @Override
+    @Transactional
+    public void cleanup() {
+        deleteAll();
     }
 
     public GiftRequest toGiftRequest(GiftRequestEntity entity) {
