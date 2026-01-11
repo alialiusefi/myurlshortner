@@ -23,7 +23,7 @@ http://{hostname}/browse/{uniqueIdentifier}/info
   - Redirects the user back to the browse page.
 
 - Gift Button
-  - Opens a modal with a form to create a gift request of the current shortened url to a user. 
+  - Opens a modal with a form to create a gift request of the current shortened url to a user.
 
 - Title: Info
   - Your unique identifier: {unique_identifier}

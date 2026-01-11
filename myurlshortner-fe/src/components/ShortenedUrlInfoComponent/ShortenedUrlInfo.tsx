@@ -5,11 +5,23 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { redirect } from "next/navigation";
 import ShortenedUrlHistory from "components/ShortenedUrlHistoryComponent/ShortenedUrlHistory";
 import ShortenedUrlInfoCard from "components/ShortenedUrlInfoCardComponent/ShortenedUrlInfoCard";
+import { useContext, useState } from "react";
+import { GiftShortenedURLDialog } from "./GiftShortenedUrlDialog";
+import { GiftShortenedUrlButton } from "./GiftShortenedUrlButton";
+import { GetAwaitingGiftRequestSWR } from "app/api/GiftRequestApi";
+import { UserProvider } from "app/context";
 
 export default function ShortenedUrlInfo(params: {
   uniqueId: string;
   now: string;
 }) {
+  const userId = useContext(UserProvider);
+  const [openGiftShortenedURLDialog, setOpenGiftShortenedURLDialog] =
+    useState<boolean>(false);
+  const { data, isLoading, mutate } = GetAwaitingGiftRequestSWR(
+    params.uniqueId,
+    userId,
+  );
   return (
     <Grid
       container
@@ -17,7 +29,7 @@ export default function ShortenedUrlInfo(params: {
       rowSpacing={3}
       direction="column"
     >
-      <Grid>
+      <Grid container direction="row" columnSpacing={2}>
         <Button
           variant="contained"
           startIcon={<ArrowBackIcon />}
@@ -25,6 +37,21 @@ export default function ShortenedUrlInfo(params: {
         >
           Back
         </Button>
+        <GiftShortenedUrlButton
+          mutateAwaitingGiftRequest={() => mutate()}
+          giftRequestId={data?.id}
+          giftRequestUpdatedAt={data?.updated_at}
+          uniqueIdentifier={params.uniqueId}
+          openDialog={() => setOpenGiftShortenedURLDialog((e) => !e)}
+        />
+        <GiftShortenedURLDialog
+          mutateAwaitingGiftRequest={() => mutate()}
+          isOpen={openGiftShortenedURLDialog}
+          uniqueIdentifier={params.uniqueId}
+          close={() => {
+            setOpenGiftShortenedURLDialog((e) => !e);
+          }}
+        />
       </Grid>
       <Grid>
         <ShortenedUrlInfoCard uniqueId={params.uniqueId} />
