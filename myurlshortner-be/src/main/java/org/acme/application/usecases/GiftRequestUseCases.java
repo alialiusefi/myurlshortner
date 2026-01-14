@@ -21,6 +21,8 @@ import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.validator.GiftRequestIdValidator;
 import org.acme.domain.validator.UniqueIdValidator;
 import org.acme.domain.validator.UserIdValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
@@ -33,6 +35,7 @@ public class GiftRequestUseCases {
     private final ShortenedUrlService shortenedUrlService;
     private final GiftRequestService giftRequestService;
     private final GiftRequestRepository repo;
+    private final static Logger logger = LoggerFactory.getLogger(GiftRequestUseCases.class);
 
     public GiftRequestUseCases(ShortenedUrlService shortenedUrlService, GiftRequestService giftRequestService, GiftRequestRepository repo) {
         this.shortenedUrlService = shortenedUrlService;
@@ -115,5 +118,23 @@ public class GiftRequestUseCases {
         return giftRequestService.cancelAwaitingGiftRequest(
                 new CancelAwaitingGiftRequestCommand(giftRequest.get(), userIdValidation.get(), nullableUpdatedAt)
         ).map(it -> new CancelAwaitingGiftRequestError(Optional.empty(), Optional.of(it.wasUpdatedError()), List.of()));
+    }
+
+    public void cancelOutdatedAwaitingGiftRequestJobs() {
+        var giftRequests = repo.findAwaitingGiftRequestWhereCreatedAtIsLessThanHoursFromDateTime(
+                10,
+                24,
+                OffsetDateTime.now()
+        );
+        var count = 0;
+        for (GiftRequest i: giftRequests) {
+            var error = giftRequestService.cancelExpiredGiftRequest(i);
+            if (!error.isEmpty()) {
+                logger.error("Cannot cancel expired gift request with id={}, error={}.", i.getId(), error.get());
+            } else {
+                count++;
+            }
+        }
+        logger.info("Canceled {} gift requests", count);
     }
 }

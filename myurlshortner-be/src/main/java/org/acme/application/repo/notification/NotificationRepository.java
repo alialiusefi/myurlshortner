@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.acme.domain.entity.Notification;
 import org.acme.domain.entity.NotificationParams;
+import org.acme.domain.entity.NotificationType;
 import org.jspecify.annotations.NonNull;
 
 import java.time.OffsetDateTime;
@@ -80,5 +81,15 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Unexpected JSON error!", e);
         }
+    }
+
+    @Transactional
+    public void deleteNotificationByGiftRequestIdParam(Long giftRequestIdParam) {
+        var query = getEntityManager().createNativeQuery(
+                "delete from notifications where params->>'gift_request_id' = ?1 and type = ?2"
+        );
+        query.setParameter(1, giftRequestIdParam.toString());
+        query.setParameter(2, NotificationType.GIFT_REQUEST_TO_TARGET_USER.name());
+        query.executeUpdate();
     }
 }

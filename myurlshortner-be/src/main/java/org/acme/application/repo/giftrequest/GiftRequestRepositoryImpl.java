@@ -16,6 +16,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -78,6 +79,27 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
                     status
             ).firstResultOptional().map(this::toGiftRequest);
         }
+    }
+
+    public List<GiftRequest> findAwaitingGiftRequestWhereCreatedAtIsLessThanHoursFromDateTime(
+            @NonNull Integer size,
+            @NonNull Integer hours,
+            @NonNull OffsetDateTime datetime
+    ) {
+        var query = getEntityManager().createNativeQuery(
+                """
+                        select id, unique_identifier, source_user_id, target_user_id, status, created_at, updated_at
+                        from gift_request
+                        where status = ?1 and ?2 - created_at >= interval '24 hours'
+                        limit ?3
+                        """.stripIndent(),
+                GiftRequestEntity.class
+        );
+        query.setParameter(1, GiftRequest.GiftRequestStatus.AWAITING.name());
+        query.setParameter(2, OffsetDateTime.now());
+        query.setParameter(3, size);
+        List<GiftRequestEntity> results = query.getResultList();
+        return results.stream().map(this::toGiftRequest).toList();
     }
 
     @Override
