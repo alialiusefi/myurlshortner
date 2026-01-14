@@ -35,6 +35,8 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
             switch (entity.getType()) {
                 case SHORTENED_URL_REACHED_N_VIEWS ->
                         params = mapper.readValue(entity.getParams(), NotificationParams.ShortenedUrlReachedNViewsParams.class);
+                case GIFT_REQUEST_TO_TARGET_USER ->
+                        params = mapper.readValue(entity.getParams(), NotificationParams.GiftRequestToTargetUserParams.class);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -60,5 +62,23 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
                                                   @NonNull Long userId
     ) {
         return update("set readAt = ?1 where id = ?2 and userId = ?3 and readAt is null", readAt, notificationId, userId);
+    }
+
+    @Transactional
+    public void saveNotification(Notification notification) {
+        try {
+            var entity = new NotificationEntity(
+                    notification.id(),
+                    notification.uniqueIdentifier(),
+                    notification.type(),
+                    mapper.writeValueAsString(notification.params()),
+                    notification.userId(),
+                    notification.createdAt(),
+                    notification.readAt()
+            );
+            persist(entity);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Unexpected JSON error!", e);
+        }
     }
 }

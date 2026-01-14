@@ -26,4 +26,30 @@ public interface NotificationParams {
             this.views = views;
         }
     }
+
+    class GiftRequestToTargetUserParams implements NotificationParams {
+        String uniqueIdentifier;
+        Long giftRequestId;
+
+        public GiftRequestToTargetUserParams(String uniqueIdentifier, Long giftRequestId) {
+            this.uniqueIdentifier = uniqueIdentifier;
+            this.giftRequestId = giftRequestId;
+        }
+
+        public String getUniqueIdentifier() {
+            return uniqueIdentifier;
+        }
+
+        public void setUniqueIdentifier(String uniqueIdentifier) {
+            this.uniqueIdentifier = uniqueIdentifier;
+        }
+
+        public Long getGiftRequestId() {
+            return giftRequestId;
+        }
+
+        public void setGiftRequestId(Long giftRequestId) {
+            this.giftRequestId = giftRequestId;
+        }
+    }
 }

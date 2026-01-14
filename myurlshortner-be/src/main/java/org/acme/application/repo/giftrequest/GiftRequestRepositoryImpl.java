@@ -1,8 +1,10 @@
 package org.acme.application.repo.giftrequest;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.acme.application.repo.exception.DuplicateAwaitingGiftRequestException;
 import org.acme.domain.entity.GiftRequest;
@@ -38,19 +40,28 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
         }
     }
 
-    public Optional<GiftRequest> getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(@NonNull String uniqueIdentifier, @Nullable Long sourceUserId) {
+    public Optional<GiftRequest> getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(
+            @NonNull String uniqueIdentifier,
+            @Nullable Long sourceUserId,
+            boolean readLock
+    ) {
+        PanacheQuery<GiftRequestEntity> query;
         if (sourceUserId == null) {
-            return find("uniqueIdentifier = ?1 and status = ?2",
+            query = find("uniqueIdentifier = ?1 and status = ?2",
                     uniqueIdentifier,
                     GiftRequest.GiftRequestStatus.AWAITING
-            ).firstResultOptional().map(this::toGiftRequest);
+            );
         } else {
-            return find("uniqueIdentifier = ?1 and status = ?2 and sourceUserId = ?3",
+            query = find("uniqueIdentifier = ?1 and status = ?2 and sourceUserId = ?3",
                     uniqueIdentifier,
                     GiftRequest.GiftRequestStatus.AWAITING,
                     sourceUserId
-            ).firstResultOptional().map(this::toGiftRequest);
+            );
         }
+        if (readLock) {
+            query.withLock(LockModeType.PESSIMISTIC_READ);
+        }
+        return query.firstResultOptional().map(this::toGiftRequest);
     }
 
     @Override
@@ -70,6 +81,7 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
     }
 
     @Override
+    @Transactional
     public Option<GiftRequestWasUpdatedException> updateGiftRequestStatusByIdAndUpdatedAt(@NonNull Long id,
                                                                                           GiftRequest.@NonNull GiftRequestStatus status,
                                                                                           @Nullable OffsetDateTime updatedAt) {
