@@ -17,6 +17,7 @@ import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.exceptions.url.*;
 import org.acme.domain.projection.AvailableShortenedUrl;
+import org.acme.domain.repo.GiftRequestRepository;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
@@ -44,18 +45,21 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     private final ShortenedUrlEventRepository eventStore;
     private final KafkaUrlPublisher publisher;
     private final ShortenedUrlCache cache;
+    private final GiftRequestRepository giftRequestRepo;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     ShortenedUrlServiceImpl(
             ShortenedUrlRepository repo,
             ShortenedUrlEventRepository eventStore,
             KafkaUrlPublisher publisher,
-            ShortenedUrlCache cache
+            ShortenedUrlCache cache,
+            GiftRequestRepository giftRequestRepo
     ) {
         this.repo = repo;
         this.eventStore = eventStore;
         this.publisher = publisher;
         this.cache = cache;
+        this.giftRequestRepo = giftRequestRepo;
     }
 
     @Override
@@ -76,6 +80,29 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     @Override
     public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier, @Nullable Long userId) {
         return getShortenedUrlFromEvents(uniqueIdentifier, userId);
+    }
+
+    @Override
+    public Optional<ShortenedUrl> getShortenedUrlInfo(@NonNull String uniqueIdentifier, @Nullable Long userId) {
+        var optionalUrl = getShortenedUrlFromEvents(uniqueIdentifier, null);
+        if (userId != null) {
+            if (optionalUrl.isPresent()) {
+                if (optionalUrl.get().getUserId().equals(userId)) {
+                    return optionalUrl;
+                } else {
+                    var optionalGiftRequest = giftRequestRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(
+                            uniqueIdentifier,
+                            null,
+                            false
+                    );
+                    if (optionalGiftRequest.isPresent() && optionalGiftRequest.get().getTargetUserId().equals(userId)) {
+                        return optionalUrl;
+                    }
+                    return Optional.empty();
+                }
+            }
+        }
+        return optionalUrl;
     }
 
     @Override

@@ -159,7 +159,7 @@ public class ShortenedUrlUseCases {
                 return Either.left(new GetShortenedUrlError(errors));
             }
 
-            return Option.ofOptional(service.getShortenedUrl(uniqueIdentifier, userIdValidation.get())).toEither(
+            return Option.ofOptional(service.getShortenedUrlInfo(uniqueIdentifier, userIdValidation.get())).toEither(
                     new GetShortenedUrlError(new ShortenedUrlIsNotFoundException())
             );
         } else {

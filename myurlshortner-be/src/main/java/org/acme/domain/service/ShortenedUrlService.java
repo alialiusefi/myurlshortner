@@ -21,6 +21,8 @@ public interface ShortenedUrlService {
 
     Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier, @Nullable Long userId);
 
+    Optional<ShortenedUrl> getShortenedUrlInfo(@NonNull String uniqueIdentifier, @Nullable Long userId);
+
     Optional<ShortenedUrl> getShortenedUrlFromEvents(@NonNull String uniqueIdentifier, @Nullable Long userId);
 
     Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(@NonNull CreateShortenedUrlCommand command);
