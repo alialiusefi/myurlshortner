@@ -113,10 +113,6 @@ public class ShortenedUrlUseCases {
             Integer size,
             String fromDateTime
     ) {
-        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier, null);
-        if (maybeShortenedUrl.isEmpty()) {
-            return Either.left(new GetShortenedUrlHistoryError(new ShortenedUrlIsNotFoundException()));
-        }
         List<ApplicationException> errors = new ArrayList<>();
         if (offset == null || offset < 0) {
             errors.add(new OffsetIsNotCorrectException(offset));
@@ -134,7 +130,10 @@ public class ShortenedUrlUseCases {
         if (userIdValidation.isLeft()) {
             errors.add(new ApplicationException(userIdValidation.getLeft()));
         }
-
+        var maybeShortenedUrl = service.getShortenedUrl(uniqueIdentifier, userIdValidation.get());
+        if (maybeShortenedUrl.isEmpty()) {
+            return Either.left(new GetShortenedUrlHistoryError(new ShortenedUrlIsNotFoundException()));
+        }
         if (errors.isEmpty()) {
             return Either.right(service.getShortenedUrlHistory(uniqueIdentifier, offset, size, parsed, userIdValidation.get()));
         } else {
