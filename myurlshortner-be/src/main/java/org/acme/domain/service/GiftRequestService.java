@@ -15,4 +15,6 @@ public interface GiftRequestService {
             @NonNull String uniqueIdentifier, @NonNull Long userId);
 
     Option<CancelAwaitingGiftRequestError> cancelAwaitingGiftRequest(@NonNull CancelAwaitingGiftRequestCommand command);
+
+    Option<CancelAwaitingGiftRequestError> cancelExpiredGiftRequest(@NonNull GiftRequest giftRequest);
 }

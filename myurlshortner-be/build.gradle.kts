@@ -23,6 +23,7 @@ dependencies {
     implementation(libs.quarkus.apicurioregistry.avro)
     implementation(libs.quarkus.hibernate)
     implementation(libs.quarkus.jdbc.postgres)
+    implementation(libs.quarkus.scheduler)
     implementation(libs.vavr.core)
     implementation(libs.jspecify.core)
     implementation(libs.quarkus.health)

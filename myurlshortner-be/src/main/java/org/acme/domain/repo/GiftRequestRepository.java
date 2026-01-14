@@ -8,6 +8,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface GiftRequestRepository {
@@ -19,6 +20,12 @@ public interface GiftRequestRepository {
     Optional<GiftRequest> getGiftRequestByIdAndStatus(@NonNull Long id, GiftRequest.@NonNull GiftRequestStatus status, @Nullable Long sourceUserId);
 
     Option<GiftRequestWasUpdatedException> updateGiftRequestStatusByIdAndUpdatedAt(@NonNull Long id, GiftRequest.@NonNull GiftRequestStatus status, @Nullable OffsetDateTime updatedAt);
+
+    List<GiftRequest> findAwaitingGiftRequestWhereCreatedAtIsLessThanHoursFromDateTime(
+            @NonNull Integer size,
+            @NonNull Integer hours,
+            @NonNull OffsetDateTime datetime
+    );
 
     void cleanup();
 }
