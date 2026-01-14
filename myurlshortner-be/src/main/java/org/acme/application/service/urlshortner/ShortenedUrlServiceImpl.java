@@ -93,7 +93,15 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                     )
             );
         };
-        return userId == null ? cache.getByKey(uniqueIdentifier, fromDb) : cache.getByKeyAndUserId(uniqueIdentifier, userId, fromDb);
+        var optionalUrl = cache.getByKey(uniqueIdentifier, fromDb);
+        if (userId != null) {
+            if (optionalUrl.isPresent()) {
+                if (optionalUrl.get().getUserId().equals(userId)) {
+                    return optionalUrl;
+                }
+            }
+        }
+        return optionalUrl;
     }
 
     @Override
