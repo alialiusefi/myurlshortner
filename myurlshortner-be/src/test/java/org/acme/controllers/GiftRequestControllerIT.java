@@ -11,6 +11,7 @@ import org.acme.application.controller.Constants;
 import org.acme.application.controller.giftrequest.GetAwaitingGiftRequestResponse;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.application.repo.exception.DuplicateAwaitingGiftRequestException;
+import org.acme.application.repo.notification.NotificationRepository;
 import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
@@ -39,6 +40,9 @@ public class GiftRequestControllerIT {
 
     @Inject
     GiftRequestRepository repository;
+
+    @Inject
+    NotificationRepository notificationRepository;
 
     @Inject
     ObjectMapper mapper;
@@ -78,7 +82,8 @@ public class GiftRequestControllerIT {
                 .post("/shortened-urls/" + uid + "/gift-requests")
                 .then()
                 .statusCode(201);
-        assertThat(repository.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null).isPresent(), Matchers.equalTo(true));
+        assertThat(repository.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null, false).isPresent(), Matchers.equalTo(true));
+        assertThat(notificationRepository.getLatestNotificationsByUserId(2L, 1), Matchers.hasSize(1));
     }
 
     @Test
