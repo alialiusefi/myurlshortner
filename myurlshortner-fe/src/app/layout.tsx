@@ -5,7 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./ui/theme";
 import "./ui/global.css";
-import MyUrlShorterAppBar from "components/appbar/MyUrlShortnerAppBar";
+import MyUrlShorterAppBar from "components/AppBarComponent/AppBar";
 import { UserProvider } from "./context";
 
 export default function RootLayout({
