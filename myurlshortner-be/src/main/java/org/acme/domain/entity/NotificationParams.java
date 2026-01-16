@@ -30,10 +30,20 @@ public interface NotificationParams {
     class GiftRequestToTargetUserParams implements NotificationParams {
         String uniqueIdentifier;
         Long giftRequestId;
+        Long sourceUserId;
 
-        public GiftRequestToTargetUserParams(String uniqueIdentifier, Long giftRequestId) {
+        public GiftRequestToTargetUserParams(String uniqueIdentifier, Long giftRequestId, Long sourceUserId) {
             this.uniqueIdentifier = uniqueIdentifier;
             this.giftRequestId = giftRequestId;
+            this.sourceUserId = sourceUserId;
+        }
+
+        public Long getSourceUserId() {
+            return sourceUserId;
+        }
+
+        public void setSourceUserId(Long sourceUserId) {
+            this.sourceUserId = sourceUserId;
         }
 
         public String getUniqueIdentifier() {

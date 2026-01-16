@@ -53,7 +53,8 @@ public class GiftRequestServiceImpl implements GiftRequestService {
                                 NotificationType.GIFT_REQUEST_TO_TARGET_USER,
                                 new NotificationParams.GiftRequestToTargetUserParams(
                                         command.shortenedUrl().getPublicIdentifier(),
-                                        giftRequestId
+                                        giftRequestId,
+                                        command.shortenedUrl().getUserId()
                                 ),
                                 command.targetUserId(),
                                 OffsetDateTime.now(),
@@ -84,7 +85,12 @@ public class GiftRequestServiceImpl implements GiftRequestService {
     public Option<CancelAwaitingGiftRequestError> cancelAwaitingGiftRequest(
             @NonNull CancelAwaitingGiftRequestCommand command
     ) {
-        return repo.updateGiftRequestStatusByIdAndUpdatedAt(command.giftRequest().getId(), GiftRequest.GiftRequestStatus.CANCELED, command.updatedAt()).map(CancelAwaitingGiftRequestError::new);
+        var error = repo.updateGiftRequestStatusByIdAndUpdatedAt(command.giftRequest().getId(), GiftRequest.GiftRequestStatus.CANCELED, command.updatedAt()).map(CancelAwaitingGiftRequestError::new);
+        if (!error.isEmpty()) {
+            return error;
+        }
+        notificationRepository.deleteNotificationByGiftRequestIdParam(command.giftRequest().getId());
+        return Option.none();
     }
 
     @Transactional

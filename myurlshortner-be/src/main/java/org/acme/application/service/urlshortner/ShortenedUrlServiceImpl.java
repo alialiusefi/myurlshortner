@@ -125,6 +125,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             if (optionalUrl.isPresent()) {
                 if (optionalUrl.get().getUserId().equals(userId)) {
                     return optionalUrl;
+                } else {
+                    return Optional.empty();
                 }
             }
         }
