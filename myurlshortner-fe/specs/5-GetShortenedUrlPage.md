@@ -1,10 +1,10 @@
-# Get shortened url info
+# Get shortened url page
 
 Time: 1 day
 
 ### User flow
 
-When the user is directed to the info page, the user can:
+When the user is directed to the page, the user can:
 
 1. See the info of a shortened url.
 2. View the history of the shortened url.

@@ -15,3 +15,9 @@ Every notification consists of:
 
 - Title: Congrats! Your shortened url reached 10 views!
 - Description: Your shortened url with id **abcdabcd11**(links to info page) has reached 10 views!
+
+2. Target User received shortened url gift request
+
+- Title: You have received a shortened url gift request!
+- Description: The user with id **1** have sent you a shortened url with id **abcdabcd11**.
+- Action button: The action button opens a modal with shortened url info and to accept/reject or exit.
