@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 
 public record CancelAwaitingGiftRequestCommand(
         @NonNull GiftRequest giftRequest,
-        @NonNull Long userId,
         @Nullable OffsetDateTime updatedAt
 ) {
 }
