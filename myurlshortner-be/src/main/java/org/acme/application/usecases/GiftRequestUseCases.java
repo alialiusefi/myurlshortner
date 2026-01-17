@@ -126,15 +126,14 @@ public class GiftRequestUseCases {
                 24,
                 OffsetDateTime.now()
         );
-        var count = 0;
-        for (GiftRequest i: giftRequests) {
+        var count = giftRequests.stream().reduce(0, (prev, i) -> {
             var error = giftRequestService.cancelAwaitingGiftRequest(new CancelAwaitingGiftRequestCommand(i, i.getUpdatedAt()));
             if (!error.isEmpty()) {
                 logger.error("Cannot cancel expired gift request with id={}, error={}.", i.getId(), error.get());
-            } else {
-                count++;
+                return prev;
             }
-        }
+            return prev + 1;
+        }, Integer::sum);
         logger.info("Canceled {} gift requests", count);
     }
 }
