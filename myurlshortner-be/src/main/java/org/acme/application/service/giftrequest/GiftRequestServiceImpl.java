@@ -85,25 +85,15 @@ public class GiftRequestServiceImpl implements GiftRequestService {
     public Option<CancelAwaitingGiftRequestError> cancelAwaitingGiftRequest(
             @NonNull CancelAwaitingGiftRequestCommand command
     ) {
-        var error = repo.updateGiftRequestStatusByIdAndUpdatedAt(command.giftRequest().getId(), GiftRequest.GiftRequestStatus.CANCELED, command.updatedAt()).map(CancelAwaitingGiftRequestError::new);
-        if (!error.isEmpty()) {
-            return error;
-        }
-        notificationRepository.deleteNotificationByGiftRequestIdParam(command.giftRequest().getId());
-        return Option.none();
-    }
-
-    @Transactional
-    public Option<CancelAwaitingGiftRequestError> cancelExpiredGiftRequest(@NonNull GiftRequest giftRequest) {
         var error = repo.updateGiftRequestStatusByIdAndUpdatedAt(
-                giftRequest.getId(),
+                command.giftRequest().getId(),
                 GiftRequest.GiftRequestStatus.CANCELED,
-                giftRequest.getUpdatedAt()
+                command.updatedAt()
         ).map(CancelAwaitingGiftRequestError::new);
         if (!error.isEmpty()) {
             return error;
         }
-        notificationRepository.deleteNotificationByGiftRequestIdParam(giftRequest.getId());
+        notificationRepository.deleteNotificationByGiftRequestIdParam(command.giftRequest().getId());
         return Option.none();
     }
 }

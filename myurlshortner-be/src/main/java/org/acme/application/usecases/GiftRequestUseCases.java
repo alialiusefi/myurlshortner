@@ -116,7 +116,7 @@ public class GiftRequestUseCases {
         }
 
         return giftRequestService.cancelAwaitingGiftRequest(
-                new CancelAwaitingGiftRequestCommand(giftRequest.get(), userIdValidation.get(), nullableUpdatedAt)
+                new CancelAwaitingGiftRequestCommand(giftRequest.get(), nullableUpdatedAt)
         ).map(it -> new CancelAwaitingGiftRequestError(Optional.empty(), Optional.of(it.wasUpdatedError()), List.of()));
     }
 
@@ -128,7 +128,7 @@ public class GiftRequestUseCases {
         );
         var count = 0;
         for (GiftRequest i: giftRequests) {
-            var error = giftRequestService.cancelExpiredGiftRequest(i);
+            var error = giftRequestService.cancelAwaitingGiftRequest(new CancelAwaitingGiftRequestCommand(i, i.getUpdatedAt()));
             if (!error.isEmpty()) {
                 logger.error("Cannot cancel expired gift request with id={}, error={}.", i.getId(), error.get());
             } else {
