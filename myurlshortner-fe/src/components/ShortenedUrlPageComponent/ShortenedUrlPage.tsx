@@ -1,5 +1,5 @@
 "use client";
-import { Grid } from "@mui/material";
+import { Grid, Paper } from "@mui/material";
 import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { redirect } from "next/navigation";
@@ -18,10 +18,7 @@ export default function ShortenedUrlPage(params: {
   const userId = useContext(UserProvider);
   const [openGiftShortenedURLDialog, setOpenGiftShortenedURLDialog] =
     useState<boolean>(false);
-  const { data, mutate } = GetAwaitingGiftRequestSWR(
-    params.uniqueId,
-    userId,
-  );
+  const { data, mutate } = GetAwaitingGiftRequestSWR(params.uniqueId, userId);
   return (
     <Grid
       container
@@ -54,7 +51,9 @@ export default function ShortenedUrlPage(params: {
         />
       </Grid>
       <Grid>
-        <ShortenedUrlInfoCard uniqueId={params.uniqueId} />
+        <Paper>
+          <ShortenedUrlInfoCard uniqueId={params.uniqueId} />
+        </Paper>
       </Grid>
       <Grid>
         <ShortenedUrlHistory uniqueId={params.uniqueId} now={params.now} />
