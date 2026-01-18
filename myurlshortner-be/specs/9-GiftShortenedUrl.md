@@ -172,16 +172,8 @@ PUT {hostname}/gift-requests/awaiting/{id}/cancel
       "message": "The provided user id %s is not correct. It must be a number above 0"
     },
     {
-      "code": "UNIQUE_ID_CONTAINS_INVALID_CHARACTERS",
-      "message": "Unique identifier contains invalid characters."
-    },
-    {
-      "code": "UNIQUE_IDENTIFIER_CANNOT_BE_EMPTY",
-      "message": "The unique identifier cannot be empty."
-    },
-    {
-      "code": "UNIQUE_IDENTIFIER_IS_TOO_LONG",
-      "message": "Unique identifier is too long."
+      "code": "UPDATED_AT_IS_NOT_CORRECT",
+      "message": "The provided updated_at datetime '%s' is not correct"
     }
   ]
 }
@@ -195,6 +187,128 @@ PUT {hostname}/gift-requests/awaiting/{id}/cancel
       "code": "SHORTENED_URL_WAS_NOT_FOUND",
       "message": "Cannot find a shortened url with unique identifier %s."
     },
+    {
+      "code": "AWAITING_GIFT_REQUEST_WAS_NOT_FOUND",
+      "message": "Cannot find an awaiting gift request with id %s."
+    },
+    {
+      "code": "UPDATED_AT_IS_NOT_CORRECT",
+      "message": "The provided updated_at datetime '%s' is not correct"
+    }
+  ]
+}
+```
+
+---
+# Accept Gift Request
+
+## Requests
+```http
+Authorization:
+User-Id: 2
+PUT /gift-requests/awaiting/{id}/accept
+{
+    "updated_at": null
+}
+```
+
+## Responses
+204 No Content
+
+400 Bad Request
+```json
+{
+  "errors": [
+    {
+      "code": "GIFT_REQUEST_ID_IS_NOT_CORRECT",
+      "message": "The provided gift request id %s is not correct. It must be a number above 0"
+    },
+    {
+      "code": "USER_ID_IS_NOT_CORRECT",
+      "message": "The provided user id %s is not correct. It must be a number above 0"
+    },
+    {
+      "code": "UPDATED_AT_IS_NOT_CORRECT",
+      "message": "The provided updated_at datetime '%s' is not correct"
+    }
+  ]
+}
+```
+
+409 Conflict
+```json
+{
+  "errors": [
+    {
+      "code": "GIFT_REQUEST_WAS_UPDATED",
+      "message": "The gift request was already updated. Please retry."
+    }
+  ]
+}
+```
+
+404 Not Found
+```json
+{
+  "errors": [
+    {
+      "code": "AWAITING_GIFT_REQUEST_WAS_NOT_FOUND",
+      "message": "Cannot find an awaiting gift request with id %s."
+    }
+  ]
+}
+```
+
+---
+# Decline Gift Request
+```http
+Authorization:
+User-Id: 2
+PUT /gift-requests/awaiting/{id}/decline
+{
+    "updated_at": null
+}
+```
+
+## Responses
+204 No Content
+
+400 Bad Request
+```json
+{
+  "errors": [
+    {
+      "code": "GIFT_REQUEST_ID_IS_NOT_CORRECT",
+      "message": "The provided gift request id %s is not correct. It must be a number above 0"
+    },
+    {
+      "code": "USER_ID_IS_NOT_CORRECT",
+      "message": "The provided user id %s is not correct. It must be a number above 0"
+    },
+    {
+      "code": "UPDATED_AT_IS_NOT_CORRECT",
+      "message": "The provided updated_at datetime '%s' is not correct"
+    }
+  ]
+}
+```
+
+409 Conflict
+```json
+{
+  "errors": [
+    {
+      "code": "GIFT_REQUEST_WAS_UPDATED",
+      "message": "The gift request was already updated. Please retry."
+    }
+  ]
+}
+```
+
+404 Not Found
+```json
+{
+  "errors": [
     {
       "code": "AWAITING_GIFT_REQUEST_WAS_NOT_FOUND",
       "message": "Cannot find an awaiting gift request with id %s."
