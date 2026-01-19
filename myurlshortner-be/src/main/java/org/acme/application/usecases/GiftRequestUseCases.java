@@ -3,11 +3,14 @@ package org.acme.application.usecases;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.acme.application.controller.giftrequest.AcceptAwaitingGiftRequest;
 import org.acme.application.controller.giftrequest.CancelAwaitingGiftRequestRequest;
 import org.acme.application.controller.giftrequest.CreateGiftRequestRequest;
+import org.acme.application.exception.giftrequest.AcceptGiftRequestError;
 import org.acme.application.exception.giftrequest.CancelAwaitingGiftRequestError;
 import org.acme.application.exception.giftrequest.CreateGiftRequestError;
 import org.acme.application.exception.giftrequest.GetAwaitingGiftRequestError;
+import org.acme.domain.command.AcceptAwaitingGiftRequestCommand;
 import org.acme.domain.command.CancelAwaitingGiftRequestCommand;
 import org.acme.domain.command.CreateGiftRequestCommand;
 import org.acme.domain.entity.GiftRequest;
@@ -118,6 +121,46 @@ public class GiftRequestUseCases {
         return giftRequestService.cancelAwaitingGiftRequest(
                 new CancelAwaitingGiftRequestCommand(giftRequest.get(), nullableUpdatedAt)
         ).map(it -> new CancelAwaitingGiftRequestError(Optional.empty(), Optional.of(it.wasUpdatedError()), List.of()));
+    }
+
+    public Option<AcceptGiftRequestError> acceptGiftRequest(
+            AcceptAwaitingGiftRequest request,
+            String userId,
+            String giftRequestId
+    ) {
+        var errors = new ArrayList<DomainException>();
+        var userIdValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
+        var giftRequestIdValidation = GiftRequestIdValidator.validate(giftRequestId).mapLeft(errors::add);
+        OffsetDateTime nullableUpdatedAt = null;
+        try {
+            nullableUpdatedAt = request.updatedAt() != null ? OffsetDateTime.parse(request.updatedAt()) : null;
+        } catch (DateTimeParseException e) {
+            errors.add(new UpdatedAtIsNotCorrectException(request.updatedAt()));
+        }
+
+        if (!errors.isEmpty()) {
+            return Option.of(new AcceptGiftRequestError(Option.none(), errors, Option.none()));
+        }
+
+        var giftRequest = repo.getGiftRequestByIdAndStatusAndTargetUserId(
+                giftRequestIdValidation.get(),
+                GiftRequest.GiftRequestStatus.AWAITING,
+                userIdValidation.get()
+        );
+        if (giftRequest.isEmpty()) {
+            return Option.of(new AcceptGiftRequestError(Option.of(new AwaitingGiftRequestWasNotFound(giftRequestIdValidation.get())), List.of(), Option.none()));
+        }
+
+        var error = giftRequestService.acceptAwaitingGiftRequest(
+                new AcceptAwaitingGiftRequestCommand(
+                        giftRequestIdValidation.get(),
+                        nullableUpdatedAt
+                )
+        );
+        if (!error.isEmpty()) {
+            return Option.of(new AcceptGiftRequestError(Option.none(), List.of(), Option.of(error.get())));
+        }
+        return Option.none();
     }
 
     public void cancelOutdatedAwaitingGiftRequestJobs() {

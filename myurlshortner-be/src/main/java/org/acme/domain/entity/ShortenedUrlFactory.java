@@ -2,6 +2,7 @@ package org.acme.domain.entity;
 
 import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.jspecify.annotations.Nullable;
 
@@ -30,6 +31,11 @@ public class ShortenedUrlFactory {
                     if (state != null) {
                         state.setOriginalUrl(updated.newOriginalUrl());
                         state.setUpdatedAt(updated.updatedAt());
+                    }
+                }
+                case V1UserGiftedShortenedUrlEvent gifted -> {
+                    if (state != null) {
+                        state.giftShortenedUrl(gifted);
                     }
                 }
             }

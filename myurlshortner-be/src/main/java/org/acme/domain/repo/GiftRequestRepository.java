@@ -19,7 +19,18 @@ public interface GiftRequestRepository {
 
     Optional<GiftRequest> getGiftRequestByIdAndStatus(@NonNull Long id, GiftRequest.@NonNull GiftRequestStatus status, @Nullable Long sourceUserId);
 
-    Option<GiftRequestWasUpdatedException> updateGiftRequestStatusByIdAndUpdatedAt(@NonNull Long id, GiftRequest.@NonNull GiftRequestStatus status, @Nullable OffsetDateTime updatedAt);
+    Optional<GiftRequest> getGiftRequestByIdAndStatusAndTargetUserId(
+            @NonNull Long id,
+            GiftRequest.@NonNull GiftRequestStatus status,
+            @Nullable Long targetUserId
+    );
+
+    // todo throw exception instead
+    Option<GiftRequestWasUpdatedException> updateGiftRequestStatusByIdAndUpdatedAt(
+            @NonNull Long id,
+            GiftRequest.@NonNull GiftRequestStatus status,
+            @Nullable OffsetDateTime updatedAt
+    );
 
     List<GiftRequest> findAwaitingGiftRequestWhereCreatedAtIsLessThanHoursFromDateTime(
             @NonNull Integer size,

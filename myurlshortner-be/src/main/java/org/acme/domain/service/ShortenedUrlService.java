@@ -43,4 +43,6 @@ public interface ShortenedUrlService {
             @NonNull OffsetDateTime from,
             @NonNull Long userId
     );
+
+    void giftShortenedUrl(String publicIdentifier, Long targetUserId);
 }
