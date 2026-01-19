@@ -42,6 +42,7 @@ GET {hostname}/notifications
       "params": {
         "unique_identifier": "abcdabcd11",
         "target_user_id": 2,
+        "gift_request_id": 1,
         "status": "ACCEPTED" // | "DECLINED" | "EXPIRED"
       }
     }

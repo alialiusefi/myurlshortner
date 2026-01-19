@@ -38,6 +38,8 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
                         params = mapper.readValue(entity.getParams(), NotificationParams.ShortenedUrlReachedNViewsParams.class);
                 case GIFT_REQUEST_TO_TARGET_USER ->
                         params = mapper.readValue(entity.getParams(), NotificationParams.GiftRequestToTargetUserParams.class);
+                case GIFT_REQUEST_RESPONSE_TO_SOURCE_USER ->
+                        params = mapper.readValue(entity.getParams(), NotificationParams.GiftRequestResponseToSourceUserParams.class);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

@@ -1,6 +1,7 @@
 package org.acme.service;
 
 import io.vavr.control.Option;
+import jakarta.transaction.TransactionManager;
 import org.acme.application.repo.exception.DuplicateAwaitingGiftRequestException;
 import org.acme.application.repo.notification.NotificationRepository;
 import org.acme.application.service.giftrequest.GiftRequestServiceImpl;
@@ -9,6 +10,7 @@ import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.exceptions.giftrequest.CreateGiftRequestError;
 import org.acme.domain.repo.GiftRequestRepository;
+import org.acme.domain.service.ShortenedUrlService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,7 +37,9 @@ public class GiftRequestServiceTest {
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
         var mockNotificationRepo = mock(NotificationRepository.class);
-        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo);
+        var shortenedUrlService = mock(ShortenedUrlService.class);
+        var transactionManager = mock(TransactionManager.class);
+        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo, shortenedUrlService, transactionManager);
         when(mockRepo.getGiftRequestByUniqueIdentifierAndStatusIsAwaiting(uid, null, true)).thenReturn(Optional.empty());
         var result = service.createGiftRequest(command);
 
@@ -60,7 +64,9 @@ public class GiftRequestServiceTest {
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
         var mockNotificationRepo = mock(NotificationRepository.class);
-        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo);
+        var shortenedUrlService = mock(ShortenedUrlService.class);
+        var transactionManager = mock(TransactionManager.class);
+        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo, shortenedUrlService, transactionManager);
         var giftRequest = new GiftRequest(
                 userSourceId,
                 userTargetId,
@@ -92,7 +98,9 @@ public class GiftRequestServiceTest {
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
         var mockNotificationRepo = mock(NotificationRepository.class);
-        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo);
+        var shortenedUrlService = mock(ShortenedUrlService.class);
+        var transactionManager = mock(TransactionManager.class);
+        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo, shortenedUrlService, transactionManager);
         var giftRequest = new GiftRequest(
                 userSourceId,
                 3L,
@@ -124,7 +132,9 @@ public class GiftRequestServiceTest {
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
         var mockNotificationRepo = mock(NotificationRepository.class);
-        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo);
+        var shortenedUrlService = mock(ShortenedUrlService.class);
+        var transactionManager = mock(TransactionManager.class);
+        var service = new GiftRequestServiceImpl(mockRepo, mockNotificationRepo, shortenedUrlService, transactionManager);
 
         var result = service.createGiftRequest(command);
 

@@ -2,6 +2,7 @@ package org.acme.domain.events;
 
 import org.acme.domain.entity.ShortenedUrl;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public class ShortenedUrlEventEnvelopFactory {
@@ -23,6 +24,7 @@ public class ShortenedUrlEventEnvelopFactory {
         );
     }
 
+    // todo update code to apply changes here for factory class
     public static ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> createV1UpdatedOriginalUrlEvent(
             ShortenedUrl url
     ) {
@@ -36,6 +38,26 @@ public class ShortenedUrlEventEnvelopFactory {
                         url.getOriginalUrl(),
                         url.getUpdatedAt(),
                         url.getUserId()
+                )
+        );
+    }
+
+    public static ShortenedUrlEventEnvelop<V1UserGiftedShortenedUrlEvent> createV1CreateUserGiftedShortenedUrlEvent(
+            ShortenedUrl url,
+            Long targetUserId
+    ) {
+        var newCreatedAt = OffsetDateTime.now();
+        return new ShortenedUrlEventEnvelop<>(
+                UUID.randomUUID(),
+                1,
+                ShortenedUrlRecordType.USER_GIFTED_SHORTENED_URL,
+                newCreatedAt,
+                new V1UserGiftedShortenedUrlEvent(
+                        url.getPublicIdentifier(),
+                        newCreatedAt,
+                        url.getOriginalUrl(),
+                        url.getUserId(),
+                        targetUserId
                 )
         );
     }
