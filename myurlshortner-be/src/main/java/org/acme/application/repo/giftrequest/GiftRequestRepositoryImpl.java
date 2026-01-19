@@ -81,6 +81,26 @@ public class GiftRequestRepositoryImpl implements GiftRequestRepository, Panache
         }
     }
 
+    @Override
+    public Optional<GiftRequest> getGiftRequestByIdAndStatusAndTargetUserId(
+            @NonNull Long id,
+            GiftRequest.@NonNull GiftRequestStatus status,
+            @Nullable Long targetUserId
+    ) {
+        if (targetUserId == null) {
+            return find("id = ?1 and status = ?2",
+                    id,
+                    status
+            ).firstResultOptional().map(this::toGiftRequest);
+        } else {
+            return find("id = ?1 and targetUserId = ?2 and status = ?3",
+                    id,
+                    targetUserId,
+                    status
+            ).firstResultOptional().map(this::toGiftRequest);
+        }
+    }
+
     public List<GiftRequest> findAwaitingGiftRequestWhereCreatedAtIsLessThanHoursFromDateTime(
             @NonNull Integer size,
             @NonNull Integer hours,

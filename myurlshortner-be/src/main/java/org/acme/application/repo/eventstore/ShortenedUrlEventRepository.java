@@ -3,18 +3,22 @@ package org.acme.application.repo.eventstore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.panache.common.Page;
+import io.vavr.control.Option;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import org.acme.domain.events.*;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.OffsetDateTime;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
+import static org.acme.domain.events.ShortenedUrlRecordType.USER_GIFTED_SHORTENED_URL;
 
 @ApplicationScoped
+//todo rename to EventRepository
 public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedUrlEventEntity> {
     private final ObjectMapper mapper;
 
@@ -25,10 +29,6 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
     @Transactional
     public void cleanup() {
         deleteAll();
-    }
-
-    public Optional<ShortenedUrlEventEnvelop<?>> getShortenedUrlEventByEventId(UUID eventId) {
-        return find("eventId = ?1", eventId).firstResultOptional().map(this::toShortenedUrlEvent);
     }
 
     public Optional<ShortenedUrlEventEnvelop<?>> getLatestShortenedUrlEventByIdAndType(String uniqueIdentifier, ShortenedUrlRecordType recordType) {
@@ -66,25 +66,64 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                             )
                     );
                 }
+
+                case V1UserGiftedShortenedUrlEvent giftEvent -> {
+                    var jsonString = mapper.writeValueAsString(giftEvent);
+                    persist(
+                            new ShortenedUrlEventEntity(
+                                    envelop.getMetadata().getEventId(),
+                                    giftEvent.uniqueIdentifier(),
+                                    embeddedMetadata,
+                                    jsonString
+                            )
+                    );
+                }
             }
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Incorrect json provided", e);
         }
     }
 
-    public List<? extends ShortenedUrlEvent> getShortenedUrlEventsOrderedByDateTimeDesc(
+    public List<? extends ShortenedUrlEvent> getShortenedUrlEventsFromDateTimeToDateTimeOrderedByDateTimeDesc(
             @NonNull String uniqueIdentifier,
             @NonNull Integer offset,
             @NonNull Integer size,
-            @NonNull OffsetDateTime from
+            @NonNull OffsetDateTime from,
+            @Nullable OffsetDateTime to
     ) {
-        return find("uniqueIdentifier = ?1 and metadata.eventDateTime <= ?2 order by metadata.eventDateTime desc", uniqueIdentifier, from)
-                .range(offset, (offset + size) - 1)
-                .list()
-                .stream()
-                .map(this::toShortenedUrlEvent)
-                .map(ShortenedUrlEventEnvelop::getEvent)
-                .toList();
+        var builder = getEntityManager().getCriteriaBuilder();
+        var criteriaQuery = builder.createQuery(ShortenedUrlEventEntity.class);
+        var root = criteriaQuery.from(ShortenedUrlEventEntity.class);
+        var predicates = new ArrayList<Predicate>() {{
+            add(root.get("uniqueIdentifier").equalTo(uniqueIdentifier));
+            add(builder.lessThanOrEqualTo(root.get("metadata").get("eventDateTime"), from));
+            if (to != null) {
+                add(builder.greaterThanOrEqualTo(root.get("metadata").get("eventDateTime"), to));
+            }
+        }};
+        criteriaQuery = criteriaQuery.where(predicates).orderBy(
+                builder.desc(root.get("metadata").get("eventDateTime"))
+        );
+        var query = getEntityManager()
+                .createQuery(criteriaQuery)
+                .setFirstResult(offset)
+                .setMaxResults(size);
+        return query.getResultStream().map(this::toShortenedUrlEvent).map(ShortenedUrlEventEnvelop::getEvent).toList();
+    }
+
+    public Option<ShortenedUrlEventEnvelop<?>> getLatestGiftedShortenedUrlEvent(
+            String uid
+    ) {
+        return Option.ofOptional(
+                find(
+                        "uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc",
+                        uid,
+                        USER_GIFTED_SHORTENED_URL
+                )
+                        .page(Page.ofSize(1))
+                        .firstResultOptional()
+                        .map(this::toShortenedUrlEvent)
+        );
     }
 
     public Iterator<List<? extends ShortenedUrlEvent>> iteratorUntilLatest(int batchSize, String uniqueIdentifier) {
@@ -126,6 +165,12 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
                             mapper.readValue(dbEntity.getEvent(), V1UserUpdatedOriginalUrlEvent.class)
+                    );
+                }
+                case USER_GIFTED_SHORTENED_URL -> {
+                    return new ShortenedUrlEventEnvelop<>(
+                            meta,
+                            mapper.readValue(dbEntity.getEvent(), V1UserGiftedShortenedUrlEvent.class)
                     );
                 }
                 default -> throw new IllegalStateException("Unsupported event type!");
