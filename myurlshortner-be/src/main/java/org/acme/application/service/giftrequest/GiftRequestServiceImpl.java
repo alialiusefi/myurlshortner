@@ -10,6 +10,7 @@ import org.acme.application.repo.notification.NotificationRepository;
 import org.acme.domain.command.AcceptAwaitingGiftRequestCommand;
 import org.acme.domain.command.CancelAwaitingGiftRequestCommand;
 import org.acme.domain.command.CreateGiftRequestCommand;
+import org.acme.domain.command.DeclineAwaitingGiftRequestCommand;
 import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.entity.Notification;
 import org.acme.domain.entity.NotificationParams;
@@ -122,7 +123,7 @@ public class GiftRequestServiceImpl implements GiftRequestService {
         }
         notificationRepository.saveNotification(
                 new Notification(
-                        command.giftRequest().getId(),
+                        null,
                         command.giftRequest().getPublicIdentifier(),
                         NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER,
                         new NotificationParams.GiftRequestResponseToSourceUserParams(
@@ -179,6 +180,44 @@ public class GiftRequestServiceImpl implements GiftRequestService {
                                 giftRequest.getPublicIdentifier()
                         ),
                         giftRequest.getSourceUserId(),
+                        OffsetDateTime.now(),
+                        null
+                )
+        );
+        return Option.none();
+    }
+
+    @Override
+    @Transactional
+    public Option<GiftRequestWasUpdatedException> declineAwaitingGiftRequest(
+            @NonNull DeclineAwaitingGiftRequestCommand command
+    ) {
+        notificationRepository.deleteGiftRequestToTargetUserNotificationByGiftRequestIdParam(command.giftRequest().getId());
+        var error = repo.updateGiftRequestStatusByIdAndUpdatedAt(
+                command.giftRequest().getId(),
+                GiftRequest.GiftRequestStatus.DECLINED,
+                command.updatedAt()
+        );
+        if (!error.isEmpty()) {
+            try {
+                manager.getTransaction().rollback();
+                return error;
+            } catch (SystemException r) {
+                throw new IllegalStateException("Unexpected error");
+            }
+        }
+        notificationRepository.saveNotification(
+                new Notification(
+                        null,
+                        command.giftRequest().getPublicIdentifier(),
+                        NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER,
+                        new NotificationParams.GiftRequestResponseToSourceUserParams(
+                                command.giftRequest().getId(),
+                                command.giftRequest().getTargetUserId(),
+                                NotificationParams.GiftRequestResponseToSourceUserParams.GiftRequestResponseToSourceUserType.DECLINED,
+                                command.giftRequest().getPublicIdentifier()
+                        ),
+                        command.giftRequest().getSourceUserId(),
                         OffsetDateTime.now(),
                         null
                 )
