@@ -29,6 +29,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
+    // todo Option<DomainException> -> Option<ReadNotificationError>
     public Option<DomainException> readNotification(@NonNull Long userId, @NonNull Long notificationId) {
         var maybeNotification = this.notificationRepository.getNotificationById(notificationId, userId);
         if (maybeNotification.isPresent()) {

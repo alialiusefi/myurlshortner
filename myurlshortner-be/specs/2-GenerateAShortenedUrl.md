@@ -55,7 +55,11 @@ Authorization:
     {
       "code": "UNIQUE_IDENTIFIER_IS_TOO_LONG",
       "details": "Unique identifier is too long."
-    }
+    },
+    {
+      "code": "UNIQUE_ID_CONTAINS_INVALID_CHARACTERS",
+      "details": "Unique identifier contains invalid characters."
+    },
     {
       "code": "URL_FORMAT_IS_NOT_CORRECT",
       "details": "The url '%s' provided is not correct."

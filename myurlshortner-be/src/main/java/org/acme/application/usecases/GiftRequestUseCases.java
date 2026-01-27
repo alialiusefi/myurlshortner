@@ -1,0 +1,210 @@
+package org.acme.application.usecases;
+
+import io.vavr.control.Either;
+import io.vavr.control.Option;
+import jakarta.enterprise.context.ApplicationScoped;
+import org.acme.application.controller.giftrequest.AcceptAwaitingGiftRequest;
+import org.acme.application.controller.giftrequest.CancelAwaitingGiftRequestRequest;
+import org.acme.application.controller.giftrequest.CreateGiftRequestRequest;
+import org.acme.application.exception.giftrequest.*;
+import org.acme.domain.command.AcceptAwaitingGiftRequestCommand;
+import org.acme.domain.command.CancelAwaitingGiftRequestCommand;
+import org.acme.domain.command.CreateGiftRequestCommand;
+import org.acme.domain.command.DeclineAwaitingGiftRequestCommand;
+import org.acme.domain.entity.GiftRequest;
+import org.acme.domain.exceptions.DomainException;
+import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
+import org.acme.domain.exceptions.UpdatedAtIsNotCorrectException;
+import org.acme.domain.exceptions.giftrequest.AwaitingGiftRequestWasNotFound;
+import org.acme.domain.repo.GiftRequestRepository;
+import org.acme.domain.service.GiftRequestService;
+import org.acme.domain.service.ShortenedUrlService;
+import org.acme.domain.validator.GiftRequestIdValidator;
+import org.acme.domain.validator.UniqueIdValidator;
+import org.acme.domain.validator.UserIdValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@ApplicationScoped
+public class GiftRequestUseCases {
+    private final ShortenedUrlService shortenedUrlService;
+    private final GiftRequestService giftRequestService;
+    private final GiftRequestRepository repo;
+    private final static Logger logger = LoggerFactory.getLogger(GiftRequestUseCases.class);
+
+    public GiftRequestUseCases(ShortenedUrlService shortenedUrlService, GiftRequestService giftRequestService, GiftRequestRepository repo) {
+        this.shortenedUrlService = shortenedUrlService;
+        this.giftRequestService = giftRequestService;
+        this.repo = repo;
+    }
+
+    public Either<GetAwaitingGiftRequestError, GiftRequest> getAwaitingGiftRequest(
+            String userId,
+            String uniqueIdentifier
+    ) {
+        var errors = new ArrayList<DomainException>();
+        UniqueIdValidator.validate(uniqueIdentifier).map(errors::add);
+        var validatedUserId = UserIdValidator.validate(userId).mapLeft(errors::add);
+        if (!errors.isEmpty()) {
+            return Either.left(new GetAwaitingGiftRequestError(Optional.empty(), errors));
+        }
+
+        var result = giftRequestService.getAwaitingGiftRequestByUniqueIdentifier(uniqueIdentifier, validatedUserId.get());
+        if (result.isEmpty()) {
+            return Either.left(new GetAwaitingGiftRequestError(Optional.of(new AwaitingGiftRequestWasNotFound(uniqueIdentifier)), List.of()));
+        }
+        return Either.right(result.get());
+    }
+
+    public Option<CreateGiftRequestError> createGiftRequest(
+            CreateGiftRequestRequest request,
+            String uniqueIdentifier,
+            String sourceUserId
+    ) {
+        var errors = new ArrayList<DomainException>();
+        var validatedSourceUserId = UserIdValidator.validate(sourceUserId).mapLeft(errors::add);
+        var validatedTargetUserId = UserIdValidator.validate(request.targetUserId()).mapLeft(errors::add);
+        UniqueIdValidator.validate(uniqueIdentifier).map(errors::add);
+        if (!errors.isEmpty()) {
+            return Option.of(
+                    new CreateGiftRequestError(Optional.empty(), Optional.empty(), errors)
+            );
+        }
+        var foundShortenedUrl = shortenedUrlService.getShortenedUrl(uniqueIdentifier, validatedSourceUserId.get());
+        if (foundShortenedUrl.isEmpty()) {
+            return Option.of(new CreateGiftRequestError(Optional.of(new ShortenedUrlIsNotFoundException()), Optional.empty(), List.of()));
+        }
+        return this.giftRequestService.createGiftRequest(
+                new CreateGiftRequestCommand(foundShortenedUrl.get(), validatedTargetUserId.get())
+        ).map(err -> new CreateGiftRequestError(Optional.empty(), Optional.of(err), List.of()));
+    }
+
+    public Option<CancelAwaitingGiftRequestError> cancelGiftRequest(
+            CancelAwaitingGiftRequestRequest request,
+            String id,
+            String userId
+    ) {
+        var errors = new ArrayList<DomainException>();
+        var userIdValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
+        var giftRequestIdValidation = GiftRequestIdValidator.validate(id).mapLeft(errors::add);
+        OffsetDateTime nullableUpdatedAt = null;
+        try {
+            nullableUpdatedAt = request.updatedAt() != null ? OffsetDateTime.parse(request.updatedAt()) : null;
+        } catch (DateTimeParseException e) {
+            errors.add(new UpdatedAtIsNotCorrectException(request.updatedAt()));
+        }
+
+        if (!errors.isEmpty()) {
+            return Option.of(new CancelAwaitingGiftRequestError(Optional.empty(), Optional.empty(), errors));
+        }
+
+        var giftRequest = repo.getGiftRequestByIdAndStatus(giftRequestIdValidation.get(), GiftRequest.GiftRequestStatus.AWAITING, userIdValidation.get());
+
+        if (giftRequest.isEmpty()) {
+            return Option.of(
+                    new CancelAwaitingGiftRequestError(
+                            Optional.of(new AwaitingGiftRequestWasNotFound(giftRequestIdValidation.get())),
+                            Optional.empty(),
+                            List.of()
+                    )
+            );
+        }
+
+        return giftRequestService.cancelAwaitingGiftRequest(
+                new CancelAwaitingGiftRequestCommand(giftRequest.get(), nullableUpdatedAt)
+        ).map(it -> new CancelAwaitingGiftRequestError(Optional.empty(), Optional.of(it.wasUpdatedError()), List.of()));
+    }
+
+    public Option<AcceptGiftRequestError> acceptGiftRequest(
+            AcceptAwaitingGiftRequest request,
+            String userId,
+            String giftRequestId
+    ) {
+        var errors = new ArrayList<DomainException>();
+        var userIdValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
+        var giftRequestIdValidation = GiftRequestIdValidator.validate(giftRequestId).mapLeft(errors::add);
+        OffsetDateTime nullableUpdatedAt = null;
+        try {
+            nullableUpdatedAt = request.updatedAt() != null ? OffsetDateTime.parse(request.updatedAt()) : null;
+        } catch (DateTimeParseException e) {
+            errors.add(new UpdatedAtIsNotCorrectException(request.updatedAt()));
+        }
+
+        if (!errors.isEmpty()) {
+            return Option.of(new AcceptGiftRequestError(Option.none(), errors, Option.none()));
+        }
+
+        var giftRequest = repo.getGiftRequestByIdAndStatusAndTargetUserId(
+                giftRequestIdValidation.get(),
+                GiftRequest.GiftRequestStatus.AWAITING,
+                userIdValidation.get()
+        );
+        if (giftRequest.isEmpty()) {
+            return Option.of(new AcceptGiftRequestError(Option.of(new AwaitingGiftRequestWasNotFound(giftRequestIdValidation.get())), List.of(), Option.none()));
+        }
+
+        var error = giftRequestService.acceptAwaitingGiftRequest(
+                new AcceptAwaitingGiftRequestCommand(
+                        giftRequestIdValidation.get(),
+                        nullableUpdatedAt
+                )
+        );
+        if (!error.isEmpty()) {
+            return Option.of(new AcceptGiftRequestError(Option.none(), List.of(), Option.of(error.get())));
+        }
+        return Option.none();
+    }
+
+    public Option<DeclineGiftRequestError> declineGiftRequest(String userId, String id) {
+        var errors = new ArrayList<DomainException>();
+        var userIdValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
+        var giftRequestIdValidation = GiftRequestIdValidator.validate(id).mapLeft(errors::add);
+
+        if (!errors.isEmpty()) {
+            return Option.of(new DeclineGiftRequestError(Option.none(), errors, Option.none()));
+        }
+
+        var giftRequest = repo.getGiftRequestByIdAndStatusAndTargetUserId(
+                giftRequestIdValidation.get(),
+                GiftRequest.GiftRequestStatus.AWAITING,
+                userIdValidation.get()
+        );
+        if (giftRequest.isEmpty()) {
+            return Option.of(new DeclineGiftRequestError(Option.of(new AwaitingGiftRequestWasNotFound(giftRequestIdValidation.get())), List.of(), Option.none()));
+        }
+
+        var error = giftRequestService.declineAwaitingGiftRequest(
+                new DeclineAwaitingGiftRequestCommand(
+                        giftRequest.get(),
+                        null
+                )
+        );
+        if (!error.isEmpty()) {
+            return Option.of(new DeclineGiftRequestError(Option.none(), List.of(), Option.of(error.get())));
+        }
+        return Option.none();
+    }
+
+    public void cancelOutdatedAwaitingGiftRequestJobs() {
+        var giftRequests = repo.findAwaitingGiftRequestWhereCreatedAtIsLessThanHoursFromDateTime(
+                10,
+                24,
+                OffsetDateTime.now()
+        );
+        var count = giftRequests.stream().reduce(0, (prev, i) -> {
+            var error = giftRequestService.cancelExpiredGiftRequest(new CancelAwaitingGiftRequestCommand(i, i.getUpdatedAt()));
+            if (!error.isEmpty()) {
+                logger.error("Cannot cancel expired gift request with id={}, error={}.", i.getId(), error.get());
+                return prev;
+            }
+            return prev + 1;
+        }, Integer::sum);
+        logger.info("Canceled {} gift requests", count);
+    }
+}

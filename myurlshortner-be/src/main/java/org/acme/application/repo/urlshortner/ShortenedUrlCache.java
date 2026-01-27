@@ -42,18 +42,6 @@ public class ShortenedUrlCache {
         }
     }
 
-    public Optional<ShortenedUrl> getByKeyAndUserId(String uid, Long userId, Supplier<Optional<ShortenedUrl>> fromDb) {
-        var optionalUrl = getByKey(uid, fromDb);
-        if (optionalUrl.isPresent()) {
-            if (optionalUrl.get().getUserId().equals(userId)) {
-                return optionalUrl;
-            } else {
-                return Optional.empty();
-            }
-        }
-        return optionalUrl;
-    }
-
     public void put(String uid, ShortenedUrl shortenedUrl) {
         api.jsonSet(uid, shortenedUrl);
     }

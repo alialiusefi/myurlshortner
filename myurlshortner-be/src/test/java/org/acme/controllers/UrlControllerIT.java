@@ -3,11 +3,12 @@ package org.acme.controllers;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
+import org.acme.application.repo.urlshortner.ShortenedUrlRepositoryImpl;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
-import org.acme.domain.repo.ShortenedUrlRepository;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -18,10 +19,16 @@ import static io.restassured.RestAssured.given;
 public class UrlControllerIT {
 
     @Inject
-    public ShortenedUrlRepository repo;
+    public ShortenedUrlRepositoryImpl repo;
 
     @Inject
     public ShortenedUrlEventRepository eventStore;
+
+    @BeforeEach
+    void cleanup() {
+        repo.cleanup();
+        eventStore.cleanup();
+    }
 
     @Test
     void shouldReturnTemporaryRedirect() throws SaveShortenedUrlConflictError {

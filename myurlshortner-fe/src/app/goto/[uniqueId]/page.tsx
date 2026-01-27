@@ -1,4 +1,4 @@
-import Redirecting from "components/redirectingComponent/Redirecting";
+import Redirecting from "components/RedirectingComponent/Redirecting";
 import { getOriginalUrl } from "app/api/UrlApi";
 import { headers } from "next/headers";
 

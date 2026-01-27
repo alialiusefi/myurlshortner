@@ -17,7 +17,7 @@ import { useSearchParams } from "next/navigation";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
-import UpdateShortenedUrlDialog from "../UpdateShortenedUrlDialog/UpdateShortenedUrlDialog";
+import UpdateShortenedUrlDialog from "./UpdateShortenedUrlDialog";
 import CircleIcon from "@mui/icons-material/Circle";
 import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";

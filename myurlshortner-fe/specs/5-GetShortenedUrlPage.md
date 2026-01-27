@@ -1,10 +1,10 @@
-# Get shortened url info
+# Get shortened url page
 
 Time: 1 day
 
 ### User flow
 
-When the user is directed to the info page, the user can:
+When the user is directed to the page, the user can:
 
 1. See the info of a shortened url.
 2. View the history of the shortened url.
@@ -21,6 +21,9 @@ http://{hostname}/browse/{uniqueIdentifier}/info
 
 - Back Button
   - Redirects the user back to the browse page.
+
+- Gift Button
+  - Opens a modal with a form to create a gift request of the current shortened url to a user.
 
 - Title: Info
   - Your unique identifier: {unique_identifier}

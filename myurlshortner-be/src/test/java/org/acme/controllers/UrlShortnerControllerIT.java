@@ -57,7 +57,7 @@ class UrlShortnerControllerIT {
     JsonPathConfig config = JsonPathConfig.jsonPathConfig().with().jackson2ObjectMapperFactory(factory);
 
     @BeforeEach
-    void cleanup() throws SaveShortenedUrlConflictError {
+    void cleanup() {
         repo.cleanup();
         eventStore.cleanup();
     }
@@ -344,7 +344,7 @@ class UrlShortnerControllerIT {
     void testGetShortenedUrl() throws SaveShortenedUrlConflictError {
         var userId = 1L;
         var url = "youtube.com";
-        var uid = "abcdefghi2";
+        var uid = "abcdefgh45";
         var entity = new ShortenedUrl(URI.create(url), uid, userId);
         repo.insertShortenedUrl(entity);
 

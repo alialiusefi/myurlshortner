@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
 import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -170,6 +171,11 @@ public class UrlShortnerController {
                                             new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
                                                     event.newOriginalUrl().toString(),
                                                     event.updatedAt()
+                                            );
+                                    case V1UserGiftedShortenedUrlEvent event ->
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
+                                                    event.originalUrl().toString(),
+                                                    event.createdAt()
                                             );
                                 }).toList())
                         ).build()

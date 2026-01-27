@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.acme.domain.entity.Notification;
 import org.acme.domain.entity.NotificationParams;
+import org.acme.domain.entity.NotificationType;
 import org.jspecify.annotations.NonNull;
 
 import java.time.OffsetDateTime;
@@ -35,6 +36,10 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
             switch (entity.getType()) {
                 case SHORTENED_URL_REACHED_N_VIEWS ->
                         params = mapper.readValue(entity.getParams(), NotificationParams.ShortenedUrlReachedNViewsParams.class);
+                case GIFT_REQUEST_TO_TARGET_USER ->
+                        params = mapper.readValue(entity.getParams(), NotificationParams.GiftRequestToTargetUserParams.class);
+                case GIFT_REQUEST_RESPONSE_TO_SOURCE_USER ->
+                        params = mapper.readValue(entity.getParams(), NotificationParams.GiftRequestResponseToSourceUserParams.class);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -60,5 +65,33 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
                                                   @NonNull Long userId
     ) {
         return update("set readAt = ?1 where id = ?2 and userId = ?3 and readAt is null", readAt, notificationId, userId);
+    }
+
+    @Transactional
+    public void saveNotification(Notification notification) {
+        try {
+            var entity = new NotificationEntity(
+                    notification.id(),
+                    notification.uniqueIdentifier(),
+                    notification.type(),
+                    mapper.writeValueAsString(notification.params()),
+                    notification.userId(),
+                    notification.createdAt(),
+                    notification.readAt()
+            );
+            persist(entity);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Unexpected JSON error!", e);
+        }
+    }
+
+    @Transactional
+    public void deleteGiftRequestToTargetUserNotificationByGiftRequestIdParam(Long giftRequestIdParam) {
+        var query = getEntityManager().createNativeQuery(
+                "delete from notifications where params->>'gift_request_id' = ?1 and type = ?2"
+        );
+        query.setParameter(1, giftRequestIdParam.toString());
+        query.setParameter(2, NotificationType.GIFT_REQUEST_TO_TARGET_USER.name());
+        query.executeUpdate();
     }
 }
