@@ -44,14 +44,16 @@ export const GetShortenedUrlInfoFetch = async (
     .catch(() => null);
 };
 
+export const GetAvailableUrlsPath = () => {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL
+  return `${serverUrl}/shortened-urls`
+}
 export const GetAvailableUrlsSWR = (
   page: number,
   size: number,
   order: string,
   userId: number,
-  refreshInterval: number = 0,
 ) => {
-  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const fetcher = (url) =>
     fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(
       async (res) => {
@@ -71,9 +73,8 @@ export const GetAvailableUrlsSWR = (
       },
     );
   return useSWR(
-    `${serverUrl}/shortened-urls?page=${page}&size=${size}&order=${order}`,
-    fetcher,
-    { refreshInterval: refreshInterval },
+    `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`,
+    fetcher
   );
 };
 
