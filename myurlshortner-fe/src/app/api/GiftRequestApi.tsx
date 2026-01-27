@@ -118,3 +118,55 @@ export function CancelAwaitingGiftRequestFetch(
     }
   });
 }
+
+export function AcceptAwaitingGiftRequestFetch(giftRequestId: number, userId: number) {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  const requestBody = {
+    updated_at: null,
+  };
+  return fetch(`${serverUrl}/gift-requests/awaiting/${giftRequestId}/accept`, {
+    method: "PUT",
+    headers: {
+      ...buildUserIdHeader(userId),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  }).then(async (res) => {
+    if (res.ok) {
+      return res;
+    } else {
+      const parsed = (await res.json()) as ErrorResponse;
+      if (res.status == 409) {
+        return parsed.errors.find(
+          (it) => it.code === "GIFT_REQUEST_WAS_UPDATED",
+        );
+      }
+      console.error("Unexpected BE response!");
+      return parsed;
+    }
+  });
+}
+
+export function DeclineAwaitingGiftRequestFetch(giftRequestId: number, userId: number) {
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  return fetch(`${serverUrl}/gift-requests/awaiting/${giftRequestId}/decline`, {
+    method: "PUT",
+    headers: {
+      ...buildUserIdHeader(userId),
+      "Content-Type": "application/json",
+    },
+  }).then(async (res) => {
+    if (res.ok) {
+      return res;
+    } else {
+      const parsed = (await res.json()) as ErrorResponse;
+      if (res.status == 409) {
+        return parsed.errors.find(
+          (it) => it.code === "GIFT_REQUEST_WAS_UPDATED",
+        );
+      }
+      console.error("Unexpected BE response!");
+      return parsed;
+    }
+  });
+}

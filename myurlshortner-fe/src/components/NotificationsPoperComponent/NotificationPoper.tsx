@@ -69,7 +69,6 @@ export function NotificationsPopper(props: NotificationsPopperProps) {
                           onCancel={() => setOpenActionDialog((e) => !e)}
                           onAction={async () => {
                             setOpenActionDialog((e) => !e);
-                            await ReadNotification(userId, not.id);
                             props.mutate();
                             props.close();
                           }}
