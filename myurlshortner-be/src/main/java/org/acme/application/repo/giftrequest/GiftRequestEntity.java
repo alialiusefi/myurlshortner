@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 @Table(name = "gift_request")
 public class GiftRequestEntity {
     @Id
-    @GeneratedValue(generator = "gift_request_id_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String uniqueIdentifier;
     private Long sourceUserId;
