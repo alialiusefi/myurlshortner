@@ -1,12 +1,15 @@
 import { Button, Dialog, Grid, Typography } from "@mui/material";
 import { GiftRequestToTargetUserNotification } from "./Notification";
 import ShortenedUrlInfoCard from "components/ShortenedUrlInfoCardComponent/ShortenedUrlInfoCard";
-import { AcceptAwaitingGiftRequestFetch, DeclineAwaitingGiftRequestFetch } from "app/api/GiftRequestApi";
+import {
+  AcceptAwaitingGiftRequestFetch,
+  DeclineAwaitingGiftRequestFetch,
+} from "app/api/GiftRequestApi";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
 import { ReadNotification } from "app/api/NotificationApi";
 import { mutate } from "swr";
-import { GetAvailableUrlsPath } from "../../app/api/UrlsApi"
+import { GetAvailableUrlsPath } from "../../app/api/UrlsApi";
 
 interface GiftRequestToTargetUserActionModalParams {
   isOpen: boolean;
@@ -41,20 +44,37 @@ export default function GiftRequestToTargetUserActionModal(
           columnGap={2}
           sx={{ justifyContent: "center", alignItems: "center" }}
         >
-          <Button variant="contained" color="success" onClick={async () => {
-            await ReadNotification(userId, params.notification.id)
-            await AcceptAwaitingGiftRequestFetch(params.notification.params.gift_request_id, userId)
-            mutate(key => typeof key === 'string' && key.startsWith(GetAvailableUrlsPath()))
-            params.onAction()
-          }
-          }>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={async () => {
+              await ReadNotification(userId, params.notification.id);
+              await AcceptAwaitingGiftRequestFetch(
+                params.notification.params.gift_request_id,
+                userId,
+              );
+              mutate(
+                (key) =>
+                  typeof key === "string" &&
+                  key.startsWith(GetAvailableUrlsPath()),
+              );
+              params.onAction();
+            }}
+          >
             Accept
           </Button>
-          <Button variant="contained" color="error" onClick={async () => {
-            await ReadNotification(userId, params.notification.id)
-            await DeclineAwaitingGiftRequestFetch(params.notification.params.gift_request_id, userId)
-            params.onAction()
-          }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              await ReadNotification(userId, params.notification.id);
+              await DeclineAwaitingGiftRequestFetch(
+                params.notification.params.gift_request_id,
+                userId,
+              );
+              params.onAction();
+            }}
+          >
             Decline
           </Button>
           <Button variant="contained" onClick={params.onCancel}>
