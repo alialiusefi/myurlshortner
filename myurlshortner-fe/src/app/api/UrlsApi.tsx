@@ -45,9 +45,9 @@ export const GetShortenedUrlInfoFetch = async (
 };
 
 export const GetAvailableUrlsPath = () => {
-  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL
-  return `${serverUrl}/shortened-urls`
-}
+  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
+  return `${serverUrl}/shortened-urls`;
+};
 export const GetAvailableUrlsSWR = (
   page: number,
   size: number,
@@ -74,7 +74,7 @@ export const GetAvailableUrlsSWR = (
     );
   return useSWR(
     `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`,
-    fetcher
+    fetcher,
   );
 };
 

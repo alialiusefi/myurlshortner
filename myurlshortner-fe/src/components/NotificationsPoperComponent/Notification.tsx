@@ -1,7 +1,7 @@
 export enum NotificationType {
   SHORTENED_URL_REACHED_N_VIEWS = "SHORTENED_URL_REACHED_N_VIEWS",
   GIFT_REQUEST_TO_TARGET_USER = "GIFT_REQUEST_TO_TARGET_USER",
-  GIFT_REQUEST_RESPONSE_TO_SOURCE_USER = "GIFT_REQUEST_RESPONSE_TO_SOURCE_USER"
+  GIFT_REQUEST_RESPONSE_TO_SOURCE_USER = "GIFT_REQUEST_RESPONSE_TO_SOURCE_USER",
 }
 
 export interface ShortenedUrlNotification {
@@ -15,7 +15,8 @@ export type ShortenedUrlReachedNViewsParams = {
   views: number;
 };
 export class ShortenedUrlReachedNViewsNotification
-  implements ShortenedUrlNotification {
+  implements ShortenedUrlNotification
+{
   id: number;
   type: NotificationType;
   params: ShortenedUrlReachedNViewsParams;
@@ -28,7 +29,8 @@ export type GiftRequestToTargetUserParams = {
   source_user_id: number;
 };
 export class GiftRequestToTargetUserNotification
-  implements ShortenedUrlNotification {
+  implements ShortenedUrlNotification
+{
   id: number;
   type: NotificationType;
   params: GiftRequestToTargetUserParams;
@@ -36,17 +38,19 @@ export class GiftRequestToTargetUserNotification
 }
 
 export enum GiftRequestResponseToSourceUserParamsType {
-  ACCEPTED = 'ACCEPTED',
-  DECLINED = 'DECLINED',
-  EXPIRED = 'EXPIRED'
+  ACCEPTED = "ACCEPTED",
+  DECLINED = "DECLINED",
+  EXPIRED = "EXPIRED",
 }
 export type GiftRequestResponseToSourceUserParams = {
-  gift_request_id: string,
-  target_user_id: number,
-  unique_identifier: string,
-  type: GiftRequestResponseToSourceUserParamsType
-}
-export class GiftRequestResponseToSourceUserNotification implements ShortenedUrlNotification {
+  gift_request_id: string;
+  target_user_id: number;
+  unique_identifier: string;
+  type: GiftRequestResponseToSourceUserParamsType;
+};
+export class GiftRequestResponseToSourceUserNotification
+  implements ShortenedUrlNotification
+{
   id: number;
   type: NotificationType;
   params: GiftRequestResponseToSourceUserParams;
