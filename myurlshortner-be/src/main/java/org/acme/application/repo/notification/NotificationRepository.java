@@ -86,7 +86,7 @@ public class NotificationRepository implements PanacheRepository<NotificationEnt
     }
 
     @Transactional
-    public void deleteNotificationByGiftRequestIdParam(Long giftRequestIdParam) {
+    public void deleteGiftRequestToTargetUserNotificationByGiftRequestIdParam(Long giftRequestIdParam) {
         var query = getEntityManager().createNativeQuery(
                 "delete from notifications where params->>'gift_request_id' = ?1 and type = ?2"
         );
