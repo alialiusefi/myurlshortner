@@ -18,7 +18,7 @@ export default function RootLayout({
     const cookieValue =
       document.cookie
         .split("; ")
-        .find((a) => a.startsWith("UserId"))
+        .find((a) => a.startsWith("User-Id"))
         ?.split("=")[1] ?? "1";
     setUserId(parseInt(cookieValue));
   }, []);
