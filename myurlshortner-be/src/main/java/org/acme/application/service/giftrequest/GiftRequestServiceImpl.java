@@ -58,7 +58,7 @@ public class GiftRequestServiceImpl implements GiftRequestService {
                         command.targetUserId(),
                         command.shortenedUrl().getPublicIdentifier(),
                         GiftRequest.GiftRequestStatus.AWAITING,
-                        command.shortenedUrl().getCreatedAt(),
+                        OffsetDateTime.now(),
                         null
                 ));
                 notificationRepository.saveNotification(
