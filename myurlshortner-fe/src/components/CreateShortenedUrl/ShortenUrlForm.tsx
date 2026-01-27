@@ -15,7 +15,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
-import { apiErrorSnackBar } from "components/utility/ApiErrorSnackBar";
+import { apiErrorSnackBar } from "components/Utility/ApiErrorSnackBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Paper from "@mui/material/Paper";

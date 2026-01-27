@@ -25,6 +25,26 @@ GET {hostname}/notifications
         "views": 10
       },
       "read_at": "2021-01-01T15:20:33.000+09:00" // nullable
+    },
+    {
+      "id": 2,
+      "type": "GIFT_REQUEST_TO_TARGET_USER",
+      "params": {
+        "unique_identifier": "abcdabcd11",
+        "gift_request_id": 1,
+        "source_user_id": 2
+      },
+      "read_at": "2021-01-01T15:20:33.000+09:00" // nullable
+    },
+    {
+      "id": 3,
+      "type": "GIFT_REQUEST_RESPONSE_TO_SOURCE_USER",
+      "params": {
+        "unique_identifier": "abcdabcd11",
+        "target_user_id": 2,
+        "gift_request_id": 1,
+        "status": "ACCEPTED" // | "DECLINED" | "EXPIRED"
+      }
     }
   ]
 }

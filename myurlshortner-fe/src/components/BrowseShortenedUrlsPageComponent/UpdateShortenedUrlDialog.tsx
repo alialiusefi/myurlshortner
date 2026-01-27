@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import { useContext, useState } from "react";
 import { updateShortenedUrl } from "app/api/UrlShortnerApi";
-import { apiErrorSnackBar } from "../utility/ApiErrorSnackBar";
+import { apiErrorSnackBar } from "../Utility/ApiErrorSnackBar";
 import { ErrorResponse } from "app/api/Errors";
 import { UserProvider } from "app/context";
 

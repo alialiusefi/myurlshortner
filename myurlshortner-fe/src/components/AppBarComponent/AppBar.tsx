@@ -40,20 +40,17 @@ export default function MyUrlShorterAppBar() {
               setAnchorElement(event.currentTarget);
             }}
           >
-            {data?.data.filter((it) => it.read_at === null).length === 0 ?
-              (
+            {data?.data.filter((it) => it.read_at === null).length === 0 ? (
+              <NotificationsIcon />
+            ) : (
+              <Badge
+                badgeContent={
+                  data?.data.filter((it) => it.read_at === null).length
+                }
+              >
                 <NotificationsIcon />
-              ) :
-              (
-                <Badge
-                  badgeContent={
-                    data?.data.filter((it) => it.read_at === null).length
-                  }
-                >
-                  <NotificationsIcon />
-                </Badge>
-              )
-            }
+              </Badge>
+            )}
           </IconButton>
           <NotificationsPopper
             notifications={isLoading || data == null ? [] : data.data}

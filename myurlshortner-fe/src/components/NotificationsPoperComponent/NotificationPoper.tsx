@@ -1,5 +1,5 @@
 import Popper from "@mui/material/Popper";
-import { shortenedUrlReachedNViewNotificationFactory } from "components/NotificationsPoperComponent/NotificationFactory";
+import { delegator } from "components/NotificationsPoperComponent/NotificationFactory";
 import {
   ListItem,
   Paper,
@@ -11,12 +11,13 @@ import {
 } from "@mui/material";
 import {
   ShortenedUrlNotification,
-  ShortenedUrlReachedNViewsNotification,
+  NotificationType,
+  GiftRequestToTargetUserNotification,
 } from "./Notification";
 import { ReadNotification } from "app/api/NotificationApi";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { UserProvider } from "app/context";
-
+import GiftRequestToTargetUserActionModal from "../NotificationsPoperComponent/GiftRequestToTargetUserActionModal";
 export type NotificationsPopperProps = {
   notifications: ShortenedUrlNotification[];
   open: boolean;
@@ -27,6 +28,7 @@ export type NotificationsPopperProps = {
 
 export function NotificationsPopper(props: NotificationsPopperProps) {
   const userId = useContext(UserProvider);
+  const [openActionDialog, setOpenActionDialog] = useState(false);
   const listComponent = () => {
     if (props.notifications.length == 0) {
       return (
@@ -37,36 +39,52 @@ export function NotificationsPopper(props: NotificationsPopperProps) {
     } else {
       return (
         <List sx={{ overflow: "auto", maxHeight: 300 }}>
-          {props.notifications.map(
-            (not: ShortenedUrlReachedNViewsNotification) => {
-              return (
-                <ListItem key={not.id}>
-                  <Paper sx={{ p: 1 }}>
-                    <Grid container direction="row">
-                      <ListItemText
-                        key={not.id}
-                        primary={shortenedUrlReachedNViewNotificationFactory.getTitle(
-                          not,
-                        )}
-                        secondary={shortenedUrlReachedNViewNotificationFactory.getDescription(
-                          not,
-                        )}
-                      />
-                      <Button
-                        disabled={not.read_at !== null}
-                        onClick={async () => {
-                          await ReadNotification(userId, not.id);
-                          props.mutate();
-                        }}
-                      >
-                        Mark as read
-                      </Button>
-                    </Grid>
-                  </Paper>
-                </ListItem>
-              );
-            },
-          )}
+          {props.notifications.map((not: ShortenedUrlNotification) => {
+            return (
+              <ListItem key={not.id}>
+                <Paper sx={{ p: 1 }}>
+                  <Grid container direction="row">
+                    <ListItemText
+                      key={not.id}
+                      primary={delegator.getTitle(not)}
+                      secondary={delegator.getDescription(not)}
+                    />
+                    <Button
+                      disabled={not.read_at !== null}
+                      onClick={async () => {
+                        await ReadNotification(userId, not.id);
+                        props.mutate();
+                      }}
+                    >
+                      Mark as read
+                    </Button>
+                    {not.type ===
+                    NotificationType.GIFT_REQUEST_TO_TARGET_USER ? (
+                      <div>
+                        <Button onClick={() => setOpenActionDialog((e) => !e)}>
+                          Action
+                        </Button>
+                        <GiftRequestToTargetUserActionModal
+                          isOpen={openActionDialog}
+                          onCancel={() => setOpenActionDialog((e) => !e)}
+                          onAction={async () => {
+                            setOpenActionDialog((e) => !e);
+                            props.mutate();
+                            props.close();
+                          }}
+                          notification={
+                            not as GiftRequestToTargetUserNotification
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                  </Grid>
+                </Paper>
+              </ListItem>
+            );
+          })}
         </List>
       );
     }

@@ -5,7 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./ui/theme";
 import "./ui/global.css";
-import MyUrlShorterAppBar from "components/appbar/MyUrlShortnerAppBar";
+import MyUrlShorterAppBar from "components/AppBarComponent/AppBar";
 import { UserProvider } from "./context";
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
     const cookieValue =
       document.cookie
         .split("; ")
-        .find((a) => a.startsWith("UserId"))
+        .find((a) => a.startsWith("User-Id"))
         ?.split("=")[1] ?? "1";
     setUserId(parseInt(cookieValue));
   }, []);

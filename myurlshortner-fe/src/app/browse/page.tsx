@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid";
-import ShortnetedUrlsTable from "components/ShortenedUrlsTableComponent/ShortenedUrlsTable";
+import ShortnetedUrlsTable from "components/BrowseShortenedUrlsPageComponent/ShortenedUrlsTable";
 import { Suspense } from "react";
 
 export default async function Browse() {
