@@ -6,13 +6,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.application.controller.giftrequest.AcceptAwaitingGiftRequest;
 import org.acme.application.controller.giftrequest.CancelAwaitingGiftRequestRequest;
 import org.acme.application.controller.giftrequest.CreateGiftRequestRequest;
-import org.acme.application.exception.giftrequest.AcceptGiftRequestError;
-import org.acme.application.exception.giftrequest.CancelAwaitingGiftRequestError;
-import org.acme.application.exception.giftrequest.CreateGiftRequestError;
-import org.acme.application.exception.giftrequest.GetAwaitingGiftRequestError;
+import org.acme.application.exception.giftrequest.*;
 import org.acme.domain.command.AcceptAwaitingGiftRequestCommand;
 import org.acme.domain.command.CancelAwaitingGiftRequestCommand;
 import org.acme.domain.command.CreateGiftRequestCommand;
+import org.acme.domain.command.DeclineAwaitingGiftRequestCommand;
 import org.acme.domain.entity.GiftRequest;
 import org.acme.domain.exceptions.DomainException;
 import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
@@ -159,6 +157,36 @@ public class GiftRequestUseCases {
         );
         if (!error.isEmpty()) {
             return Option.of(new AcceptGiftRequestError(Option.none(), List.of(), Option.of(error.get())));
+        }
+        return Option.none();
+    }
+
+    public Option<DeclineGiftRequestError> declineGiftRequest(String userId, String id) {
+        var errors = new ArrayList<DomainException>();
+        var userIdValidation = UserIdValidator.validate(userId).mapLeft(errors::add);
+        var giftRequestIdValidation = GiftRequestIdValidator.validate(id).mapLeft(errors::add);
+
+        if (!errors.isEmpty()) {
+            return Option.of(new DeclineGiftRequestError(Option.none(), errors, Option.none()));
+        }
+
+        var giftRequest = repo.getGiftRequestByIdAndStatusAndTargetUserId(
+                giftRequestIdValidation.get(),
+                GiftRequest.GiftRequestStatus.AWAITING,
+                userIdValidation.get()
+        );
+        if (giftRequest.isEmpty()) {
+            return Option.of(new DeclineGiftRequestError(Option.of(new AwaitingGiftRequestWasNotFound(giftRequestIdValidation.get())), List.of(), Option.none()));
+        }
+
+        var error = giftRequestService.declineAwaitingGiftRequest(
+                new DeclineAwaitingGiftRequestCommand(
+                        giftRequest.get(),
+                        null
+                )
+        );
+        if (!error.isEmpty()) {
+            return Option.of(new DeclineGiftRequestError(Option.none(), List.of(), Option.of(error.get())));
         }
         return Option.none();
     }

@@ -114,4 +114,27 @@ public class GiftRequestController {
                 }
         );
     }
+
+    @PUT
+    @Produces(APPLICATION_JSON)
+    @Path("/gift-requests/awaiting/{id}/decline")
+    public Response declineAwaitingGiftRequest(
+            @HeaderParam(USER_ID_HEADER_KEY) String userId,
+            @PathParam("id") String id
+    ) {
+        return useCases.declineGiftRequest(
+                userId,
+                id
+        ).fold(
+                () -> Response.noContent().build(),
+                (it) -> {
+                    if (!it.notFoundError().isEmpty()) {
+                        return Response.status(404).entity(ErrorResponse.buildFromDomainError(it.notFoundError().get())).build();
+                    } else if (!it.wasUpdatedError().isEmpty()) {
+                        return Response.status(409).entity(ErrorResponse.buildFromDomainError(it.wasUpdatedError().get())).build();
+                    }
+                    return Response.status(400).entity(ErrorResponse.buildFromDomainErrors(it.validationErrors())).build();
+                }
+        );
+    }
 }
