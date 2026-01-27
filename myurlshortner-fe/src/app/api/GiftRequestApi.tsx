@@ -119,7 +119,10 @@ export function CancelAwaitingGiftRequestFetch(
   });
 }
 
-export function AcceptAwaitingGiftRequestFetch(giftRequestId: number, userId: number) {
+export function AcceptAwaitingGiftRequestFetch(
+  giftRequestId: number,
+  userId: number,
+) {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   const requestBody = {
     updated_at: null,
@@ -147,7 +150,10 @@ export function AcceptAwaitingGiftRequestFetch(giftRequestId: number, userId: nu
   });
 }
 
-export function DeclineAwaitingGiftRequestFetch(giftRequestId: number, userId: number) {
+export function DeclineAwaitingGiftRequestFetch(
+  giftRequestId: number,
+  userId: number,
+) {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
   return fetch(`${serverUrl}/gift-requests/awaiting/${giftRequestId}/decline`, {
     method: "PUT",

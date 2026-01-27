@@ -28,5 +28,5 @@ Every notification consists of:
   - Your gift request of shortened url with id **abcdabcd11** to user id 2 was accepted.
   - Your gift request of shortened url with id **abcdabcd11** to user id 2 was declined.
   - Your gift request of shortened url with id **abcdabcd11** to user id 2 has expired after 24 hours.
-- Description: 
+- Description:
   - empty
