@@ -170,7 +170,7 @@ public class GiftRequestUseCases {
                 OffsetDateTime.now()
         );
         var count = giftRequests.stream().reduce(0, (prev, i) -> {
-            var error = giftRequestService.cancelAwaitingGiftRequest(new CancelAwaitingGiftRequestCommand(i, i.getUpdatedAt()));
+            var error = giftRequestService.cancelExpiredGiftRequest(new CancelAwaitingGiftRequestCommand(i, i.getUpdatedAt()));
             if (!error.isEmpty()) {
                 logger.error("Cannot cancel expired gift request with id={}, error={}.", i.getId(), error.get());
                 return prev;

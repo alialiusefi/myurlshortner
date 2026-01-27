@@ -107,7 +107,35 @@ public class GiftRequestServiceImpl implements GiftRequestService {
         if (!error.isEmpty()) {
             return error;
         }
-        notificationRepository.deleteNotificationByGiftRequestIdParam(command.giftRequest().getId());
+        notificationRepository.deleteGiftRequestToTargetUserNotificationByGiftRequestIdParam(command.giftRequest().getId());
+        return Option.none();
+    }
+
+    @Override
+    @Transactional
+    public Option<CancelAwaitingGiftRequestError> cancelExpiredGiftRequest(
+            @NonNull CancelAwaitingGiftRequestCommand command
+    ) {
+        var error = cancelAwaitingGiftRequest(command);
+        if (!error.isEmpty()) {
+            return error;
+        }
+        notificationRepository.saveNotification(
+                new Notification(
+                        command.giftRequest().getId(),
+                        command.giftRequest().getPublicIdentifier(),
+                        NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER,
+                        new NotificationParams.GiftRequestResponseToSourceUserParams(
+                                command.giftRequest().getId(),
+                                command.giftRequest().getTargetUserId(),
+                                NotificationParams.GiftRequestResponseToSourceUserParams.GiftRequestResponseToSourceUserType.EXPIRED,
+                                command.giftRequest().getPublicIdentifier()
+                        ),
+                        command.giftRequest().getSourceUserId(),
+                        OffsetDateTime.now(),
+                        null
+                )
+        );
         return Option.none();
     }
 
@@ -125,7 +153,7 @@ public class GiftRequestServiceImpl implements GiftRequestService {
                 giftRequest.getPublicIdentifier(),
                 giftRequest.getTargetUserId()
         );
-        notificationRepository.deleteNotificationByGiftRequestIdParam(command.giftRequestId());
+        notificationRepository.deleteGiftRequestToTargetUserNotificationByGiftRequestIdParam(command.giftRequestId());
         var error = repo.updateGiftRequestStatusByIdAndUpdatedAt(
                 giftRequest.getId(),
                 GiftRequest.GiftRequestStatus.ACCEPTED,
@@ -140,20 +168,20 @@ public class GiftRequestServiceImpl implements GiftRequestService {
             }
         }
         notificationRepository.saveNotification(
-            new Notification(
-                    null,
-                    giftRequest.getPublicIdentifier(),
-                    NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER,
-                    new NotificationParams.GiftRequestResponseToSourceUserParams(
-                            giftRequest.getId(),
-                            giftRequest.getTargetUserId(),
-                            NotificationParams.GiftRequestResponseToSourceUserParams.GiftRequestResponseToSourceUserType.ACCEPTED,
-                            giftRequest.getPublicIdentifier()
-                    ),
-                    giftRequest.getSourceUserId(),
-                    OffsetDateTime.now(),
-                    null
-            )
+                new Notification(
+                        null,
+                        giftRequest.getPublicIdentifier(),
+                        NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER,
+                        new NotificationParams.GiftRequestResponseToSourceUserParams(
+                                giftRequest.getId(),
+                                giftRequest.getTargetUserId(),
+                                NotificationParams.GiftRequestResponseToSourceUserParams.GiftRequestResponseToSourceUserType.ACCEPTED,
+                                giftRequest.getPublicIdentifier()
+                        ),
+                        giftRequest.getSourceUserId(),
+                        OffsetDateTime.now(),
+                        null
+                )
         );
         return Option.none();
     }
