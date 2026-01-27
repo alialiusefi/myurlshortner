@@ -13,7 +13,8 @@ import java.util.Objects;
 @Table(name = "notifications")
 public class NotificationEntity extends PanacheEntityBase {
     @Id
-    @GeneratedValue(generator = "notifications_id_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_generator")
+    @SequenceGenerator(name="notification_generator", sequenceName = "notifications_id_seq", allocationSize=1)
     private Long id;
     private String uniqueIdentifier;
     @Enumerated(EnumType.STRING)
