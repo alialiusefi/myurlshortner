@@ -18,6 +18,7 @@ import { ReadNotification } from "app/api/NotificationApi";
 import { useContext, useState } from "react";
 import { UserProvider } from "app/context";
 import GiftRequestToTargetUserActionModal from "../NotificationsPoperComponent/GiftRequestToTargetUserActionModal";
+
 export type NotificationsPopperProps = {
   notifications: ShortenedUrlNotification[];
   open: boolean;
