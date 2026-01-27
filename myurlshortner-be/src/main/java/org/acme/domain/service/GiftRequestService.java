@@ -18,5 +18,7 @@ public interface GiftRequestService {
 
     Option<CancelAwaitingGiftRequestError> cancelAwaitingGiftRequest(@NonNull CancelAwaitingGiftRequestCommand command);
 
+    Option<CancelAwaitingGiftRequestError> cancelExpiredGiftRequest(@NonNull CancelAwaitingGiftRequestCommand command);
+
     Option<GiftRequestWasUpdatedException> acceptAwaitingGiftRequest(@NonNull AcceptAwaitingGiftRequestCommand command);
 }
