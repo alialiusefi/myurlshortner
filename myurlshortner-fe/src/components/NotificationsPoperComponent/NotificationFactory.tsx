@@ -5,6 +5,8 @@ import {
   ShortenedUrlNotification,
   GiftRequestToTargetUserNotification,
   NotificationType,
+  GiftRequestResponseToSourceUserNotification,
+  GiftRequestResponseToSourceUserParamsType,
 } from "./Notification";
 
 interface ShortenedUrlNotificationComponentFactory {
@@ -14,8 +16,7 @@ interface ShortenedUrlNotificationComponentFactory {
 
 // todo use map
 class ShortenedUrlNotificationComponentFactoryDelegator
-  implements ShortenedUrlNotificationComponentFactory
-{
+  implements ShortenedUrlNotificationComponentFactory {
   getTitle(notification: ShortenedUrlNotification): ReactElement {
     if (notification.type === NotificationType.SHORTENED_URL_REACHED_N_VIEWS) {
       return shortenedUrlReachedNViewNotificationFactory.getTitle(
@@ -25,6 +26,11 @@ class ShortenedUrlNotificationComponentFactoryDelegator
     if (notification.type === NotificationType.GIFT_REQUEST_TO_TARGET_USER) {
       return giftRequestToTargetUserNotificationFactory.getTitle(
         notification as GiftRequestToTargetUserNotification,
+      );
+    }
+    if (notification.type === NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER) {
+      return giftRequestResponseToSourceUserNotificationFactory.getTitle(
+        notification as GiftRequestResponseToSourceUserNotification
       );
     }
   }
@@ -40,14 +46,75 @@ class ShortenedUrlNotificationComponentFactoryDelegator
         notification as GiftRequestToTargetUserNotification,
       );
     }
+    if (notification.type === NotificationType.GIFT_REQUEST_RESPONSE_TO_SOURCE_USER) {
+      return giftRequestResponseToSourceUserNotificationFactory.getDescription(
+        notification as GiftRequestResponseToSourceUserNotification
+      );
+    }
   }
 }
 export const delegator =
   new ShortenedUrlNotificationComponentFactoryDelegator();
 
+class GiftRequestResponseToSourceUserNotificationFactory implements ShortenedUrlNotificationComponentFactory {
+  getTitle(notification: GiftRequestResponseToSourceUserNotification): ReactElement {
+    switch (notification.params.type) {
+      case GiftRequestResponseToSourceUserParamsType.ACCEPTED: return (
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          fontWeight={notification.read_at === null ? "bold" : "regular"}
+        >
+          Your gift request of shortened url with id {
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              href={redirectUrl(notification.params.unique_identifier)}
+              underline="always"
+              title="Go to target url"
+            >
+              {notification.params.unique_identifier}
+            </Link>
+          } to user id {notification.params.target_user_id} was accepted.
+        </Typography>
+      );
+      case GiftRequestResponseToSourceUserParamsType.DECLINED: return (
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          fontWeight={notification.read_at === null ? "bold" : "regular"}
+        >
+          Your gift request of shortened url with id {
+            <Link href={pathToInfoPage(notification.params.unique_identifier)}>
+              {notification.params.unique_identifier}
+            </Link>
+          } to user id {notification.params.target_user_id} was declined.
+        </Typography>
+      );
+      case GiftRequestResponseToSourceUserParamsType.EXPIRED: return (
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          fontWeight={notification.read_at === null ? "bold" : "regular"}
+        >
+          Your gift request of shortened url with id {
+            <Link href={pathToInfoPage(notification.params.unique_identifier)}>
+              {notification.params.unique_identifier}
+            </Link>
+          } to user id {notification.params.target_user_id} has expired after 24 hours.
+        </Typography>
+      );
+    }
+  }
+
+  getDescription(notification: GiftRequestResponseToSourceUserNotification): ReactElement {
+    return (<></>);
+  }
+}
+const giftRequestResponseToSourceUserNotificationFactory = new GiftRequestResponseToSourceUserNotificationFactory()
+
 class GiftRequestToTargetUserNotificationFactory
-  implements ShortenedUrlNotificationComponentFactory
-{
+  implements ShortenedUrlNotificationComponentFactory {
   getTitle(notification: GiftRequestToTargetUserNotification): ReactElement {
     return (
       <Typography
@@ -63,7 +130,6 @@ class GiftRequestToTargetUserNotificationFactory
   getDescription(
     notification: GiftRequestToTargetUserNotification,
   ): ReactElement {
-    const url = `${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/goto/${notification.params.unique_identifier}`;
     return (
       <Typography variant="caption" color="textSecondary">
         The user with id {notification.params.source_user_id} have sent you a
@@ -72,7 +138,7 @@ class GiftRequestToTargetUserNotificationFactory
           <Link
             target="_blank"
             rel="noopener noreferrer"
-            href={url}
+            href={redirectUrl(notification.params.unique_identifier)}
             underline="always"
             title="Go to target url"
           >
@@ -88,8 +154,7 @@ export const giftRequestToTargetUserNotificationFactory =
   new GiftRequestToTargetUserNotificationFactory();
 
 class ShortenedUrlReachedNViewNotificationFactory
-  implements ShortenedUrlNotificationComponentFactory
-{
+  implements ShortenedUrlNotificationComponentFactory {
   getTitle = (
     notification: ShortenedUrlReachedNViewsNotification,
   ): ReactElement => {
@@ -107,12 +172,11 @@ class ShortenedUrlReachedNViewNotificationFactory
   getDescription = (
     notification: ShortenedUrlReachedNViewsNotification,
   ): ReactElement => {
-    const pathToInfoPage = `/browse/${notification.params.unique_identifier}/info`;
     return (
       <Typography variant="caption" color="textSecondary">
         Your shortened url with id{" "}
         {
-          <Link href={pathToInfoPage}>
+          <Link href={pathToInfoPage(notification.params.unique_identifier)}>
             {notification.params.unique_identifier}
           </Link>
         }{" "}
@@ -121,6 +185,9 @@ class ShortenedUrlReachedNViewNotificationFactory
     );
   };
 }
-
 export const shortenedUrlReachedNViewNotificationFactory =
   new ShortenedUrlReachedNViewNotificationFactory();
+
+
+const pathToInfoPage = (uid: string) => `/browse/${uid}/info`;
+const redirectUrl = (uid: string) => `${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/goto/${uid}`;
