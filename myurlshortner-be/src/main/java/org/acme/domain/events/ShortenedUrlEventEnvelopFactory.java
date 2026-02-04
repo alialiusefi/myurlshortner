@@ -2,6 +2,7 @@ package org.acme.domain.events;
 
 import org.acme.domain.entity.ShortenedUrl;
 
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -24,19 +25,20 @@ public class ShortenedUrlEventEnvelopFactory {
         );
     }
 
-    // todo update code to apply changes here for factory class
     public static ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> createV1UpdatedOriginalUrlEvent(
-            ShortenedUrl url
+            ShortenedUrl url,
+            URI newTargetUrl
     ) {
+        var createdAt = OffsetDateTime.now();
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
                 1,
                 ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL,
-                url.getUpdatedAt(),
+                createdAt,
                 new V1UserUpdatedOriginalUrlEvent(
                         url.getPublicIdentifier(),
-                        url.getOriginalUrl(),
-                        url.getUpdatedAt(),
+                        newTargetUrl,
+                        createdAt,
                         url.getUserId()
                 )
         );
@@ -58,6 +60,25 @@ public class ShortenedUrlEventEnvelopFactory {
                         url.getOriginalUrl(),
                         url.getUserId(),
                         targetUserId
+                )
+        );
+    }
+
+    public static ShortenedUrlEventEnvelop<V1UserUpdatedTitleEvent> createV1UpdatedTitleEvent(
+            ShortenedUrl url,
+            String title
+    ) {
+        var newCreatedAt = OffsetDateTime.now();
+        return new ShortenedUrlEventEnvelop<>(
+                UUID.randomUUID(),
+                1,
+                ShortenedUrlRecordType.USER_UPDATED_TITLE,
+                newCreatedAt,
+                new V1UserUpdatedTitleEvent(
+                        url.getPublicIdentifier(),
+                        title,
+                        newCreatedAt,
+                        url.getUserId()
                 )
         );
     }

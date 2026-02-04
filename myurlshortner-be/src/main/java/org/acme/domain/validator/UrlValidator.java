@@ -15,6 +15,9 @@ public class UrlValidator {
     private final static String REGEX = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
 
     public static Either<List<UrlValidationException>, URI> validateUrl(String hostname, String url) {
+        if (url == null) {
+            return Either.left(List.of(new UrlValidationException.UrlIsEmptyException()));
+        }
         if (url.isBlank()) {
             return Either.left(List.of(new UrlValidationException.UrlIsEmptyException()));
         }

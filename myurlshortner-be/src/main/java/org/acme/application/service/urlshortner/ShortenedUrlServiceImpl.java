@@ -8,11 +8,15 @@ import org.acme.application.kafka.KafkaUrlPublisher;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.application.repo.urlshortner.ShortenedUrlCache;
 import org.acme.domain.command.CreateShortenedUrlCommand;
-import org.acme.domain.command.UpdateOriginalUrlCommand;
+import org.acme.domain.command.PatchShortenedUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.entity.ShortenedUrlFactory;
-import org.acme.domain.events.*;
-import org.acme.domain.exceptions.url.*;
+import org.acme.domain.events.ShortenedUrlEvent;
+import org.acme.domain.events.ShortenedUrlEventEnvelop;
+import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
+import org.acme.domain.exceptions.url.ShortenUrlError;
+import org.acme.domain.exceptions.url.UniqueIdentifierAlreadyExists;
+import org.acme.domain.exceptions.url.UrlValidationException;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.GiftRequestRepository;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
@@ -176,30 +180,30 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         return repo.listAvailableShortenedUrls(page, size, isAscending, userId);
     }
 
-    @Override
     @Transactional
-    public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(@NonNull UpdateOriginalUrlCommand command) {
-        var maybeShortenedUrl = this.getShortenedUrl(command.uniqueIdentifier(), command.userId());
-        if (maybeShortenedUrl.isEmpty()) {
-            return Either.left(UpdateOriginalUrlError.createFromOperationError(new UpdateOriginalUrlException.ShortenedUrlIsNotFound()));
+    @Override
+    public ShortenedUrl patchShortenedUrl(PatchShortenedUrlCommand command) {
+        var existingVersion = command.shortenedUrl().getUpdatedAt();
+        var current = command.shortenedUrl();
+        if (command.isEnabled().isSet() && !current.isEnabled().equals(command.isEnabled().value())) {
+            current.setIsEnabled(command.isEnabled().value());
+            current.setUpdatedAt(OffsetDateTime.now());
         }
-        Either<List<UrlValidationException>, URI> urlEither = UrlValidator.validateUrl(hostname, command.newOriginalUrl());
-        if (urlEither.isLeft()) {
-            return Either.left(UpdateOriginalUrlError.createFromValidationErrors(urlEither.getLeft()));
+        if (command.url().isSet() && !current.getOriginalUrl().equals(command.url().value())) {
+            var event = ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(command.shortenedUrl(), command.url().value());
+            current.updateOriginalUrl(event.getEvent());
+            eventStore.insertEvent(event);
         }
-
-        return Either.right(maybeShortenedUrl.map(url -> {
-            OffsetDateTime existingVersion = url.getUpdatedAt();
-            boolean originalUrlHasChanged = !url.getOriginalUrl().equals(urlEither.get());
-            url.updateOriginalUrl(urlEither.get(), command.isEnabled());
-            repo.updateShortenedUrl(url, existingVersion);
-            if (originalUrlHasChanged) {
-                ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> event = ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(url);
-                eventStore.insertEvent(event);
-            }
-            cache.put(command.uniqueIdentifier(), url);
-            return url;
-        }).get());
+        if (command.title().isSet() && !current.getTitle().equals(command.title().value())) {
+            var event = ShortenedUrlEventEnvelopFactory.createV1UpdatedTitleEvent(command.shortenedUrl(), command.title().value());
+            current.updateTitle(event.getEvent());
+            eventStore.insertEvent(event);
+        }
+        if (!current.getUpdatedAt().equals(existingVersion)) {
+            repo.updateShortenedUrl(current, existingVersion);
+            cache.put(command.shortenedUrl().getPublicIdentifier(), current);
+        }
+        return current;
     }
 
 
@@ -212,8 +216,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                 targetUserId
         );
         shortenedUrl.giftShortenedUrl(giftEvent.getEvent());
-        repo.updateShortenedUrl(shortenedUrl, existingVersion);
         eventStore.insertEvent(giftEvent);
+        repo.updateShortenedUrl(shortenedUrl, existingVersion);
         cache.put(uid, shortenedUrl);
     }
 

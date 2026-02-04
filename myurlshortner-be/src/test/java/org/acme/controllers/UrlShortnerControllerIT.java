@@ -66,8 +66,8 @@ class UrlShortnerControllerIT {
     void testGetUrlsEndpoint() throws SaveShortenedUrlConflictError {
         var datetime = OffsetDateTime.now();
         var datetime2 = OffsetDateTime.now();
-        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true, 1L));
-        repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime2, datetime2, false, 1L));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true, 1L, "test1"));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime2, datetime2, false, 1L, "test2"));
         var result = given()
                 .when().get("/shortened-urls?page=1&size=10")
                 .then()
@@ -76,8 +76,8 @@ class UrlShortnerControllerIT {
         var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
         assertThat(data, Matchers.not(Matchers.empty()));
         assertThat(data, Matchers.contains(
-                new UrlList.UrlRow("https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false),
-                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true)
+                new UrlList.UrlRow("https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false, "test2"),
+                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true, "test1")
         ));
     }
 
@@ -179,7 +179,7 @@ class UrlShortnerControllerIT {
                 .when()
                 .patch(String.format("/shortened-urls/%s", uid))
                 .then()
-                .statusCode(204);
+                .statusCode(200);
 
         var found = repo.getShortenedUrl(uid, userId);
         var event = eventStore.getLatestShortenedUrlEventByIdAndType(uid, ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL);
@@ -218,7 +218,7 @@ class UrlShortnerControllerIT {
                 .when()
                 .patch(String.format("/shortened-urls/%s", uid))
                 .then()
-                .statusCode(204);
+                .statusCode(200);
 
         var found = repo.getShortenedUrl(uid, userId);
         var event = eventStore.getLatestShortenedUrlEventByIdAndType(uid, ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL);
@@ -242,6 +242,7 @@ class UrlShortnerControllerIT {
         given()
                 .body(body)
                 .contentType(ContentType.JSON)
+                .header(new Header(Constants.USER_ID_HEADER_KEY, "1"))
                 .when()
                 .patch("/shortened-urls/abcdabcd12")
                 .then()
@@ -300,16 +301,16 @@ class UrlShortnerControllerIT {
                         entity
                 )
         );
-        entity.setOriginalUrl(URI.create("abc.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("abc.com")
                 )
         );
-        entity.setOriginalUrl(URI.create("yahoo.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("yahoo.com")
                 )
         );
 
@@ -318,10 +319,10 @@ class UrlShortnerControllerIT {
                 .get("/shortened-urls/" + uid + "/history?offset=1&size=1&from=" + now)
                 .then()
                 .statusCode(200)
-                .extract().jsonPath(config).getList("data", ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow.class);
+                .extract().jsonPath(config).getList("data", ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow.class);
 
         assertThat("Size is correct", response.size() == 1);
-        assertThat("Content is correct", response.getFirst().url().equals("abc.com"));
+        assertThat("Content is correct", response.getFirst().getUrl().equals("abc.com"));
     }
 
     @Test
@@ -353,16 +354,16 @@ class UrlShortnerControllerIT {
                         entity
                 )
         );
-        entity.setOriginalUrl(URI.create("abc.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("abc.com")
                 )
         );
-        entity.setOriginalUrl(URI.create("yahoo.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("yahoo.com")
                 )
         );
         entity.setIsEnabled(false);
@@ -377,7 +378,7 @@ class UrlShortnerControllerIT {
 
         assertThat("Url is correct", response.url().equals("yahoo.com"));
         assertThat("Is Enabled is correct", !response.isEnabled());
-        assertThat("Updated at is correct", response.updatedAt().equals(entity.getUpdatedAt()));
+        assertThat("Updated at is correct", !response.updatedAt().equals(entity.getUpdatedAt()));
         assertThat("Created at is correct", response.createdAt().equals(entity.getCreatedAt()));
     }
 }

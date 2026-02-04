@@ -18,7 +18,6 @@ import java.util.*;
 import static org.acme.domain.events.ShortenedUrlRecordType.USER_GIFTED_SHORTENED_URL;
 
 @ApplicationScoped
-//todo rename to EventRepository
 public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedUrlEventEntity> {
     private final ObjectMapper mapper;
 
@@ -66,13 +65,23 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                             )
                     );
                 }
-
                 case V1UserGiftedShortenedUrlEvent giftEvent -> {
                     var jsonString = mapper.writeValueAsString(giftEvent);
                     persist(
                             new ShortenedUrlEventEntity(
                                     envelop.getMetadata().getEventId(),
                                     giftEvent.uniqueIdentifier(),
+                                    embeddedMetadata,
+                                    jsonString
+                            )
+                    );
+                }
+                case V1UserUpdatedTitleEvent titleEvent -> {
+                    var jsonString = mapper.writeValueAsString(titleEvent);
+                    persist(
+                            new ShortenedUrlEventEntity(
+                                    envelop.getMetadata().getEventId(),
+                                    titleEvent.uniqueIdentifier(),
                                     embeddedMetadata,
                                     jsonString
                             )
@@ -171,6 +180,12 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
                             mapper.readValue(dbEntity.getEvent(), V1UserGiftedShortenedUrlEvent.class)
+                    );
+                }
+                case USER_UPDATED_TITLE -> {
+                    return new ShortenedUrlEventEnvelop<>(
+                            meta,
+                            mapper.readValue(dbEntity.getEvent(), V1UserUpdatedTitleEvent.class)
                     );
                 }
                 default -> throw new IllegalStateException("Unsupported event type!");

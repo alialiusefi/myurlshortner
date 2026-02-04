@@ -17,17 +17,27 @@ public class ShortenedUrlEntity extends PanacheEntityBase {
     private OffsetDateTime updatedAt;
     private Boolean isEnabled;
     private Long userId;
+    private String title;
 
     public ShortenedUrlEntity() {
     }
 
-    public ShortenedUrlEntity(String uniqueIdentifier, String originalUrl, OffsetDateTime createdAt, OffsetDateTime updatedAt, Boolean isEnabled, Long userId) {
+    public ShortenedUrlEntity(
+            String uniqueIdentifier,
+            String originalUrl,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
+            Boolean isEnabled,
+            Long userId,
+            String title
+    ) {
         this.uniqueIdentifier = uniqueIdentifier;
         this.originalUrl = originalUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isEnabled = isEnabled;
         this.userId = userId;
+        this.title = title;
     }
 
     public String getUniqueIdentifier() {
@@ -72,6 +82,14 @@ public class ShortenedUrlEntity extends PanacheEntityBase {
 
     public Long getUserId() {
         return userId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setUserId(Long userId) {

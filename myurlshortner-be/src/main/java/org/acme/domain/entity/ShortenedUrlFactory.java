@@ -1,9 +1,6 @@
 package org.acme.domain.entity;
 
-import org.acme.domain.events.ShortenedUrlEvent;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
-import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
@@ -24,7 +21,8 @@ public class ShortenedUrlFactory {
                             created.createdAt(),
                             created.createdAt(),
                             true,
-                            created.userId()
+                            created.userId(),
+                            null
                     );
                 }
                 case V1UserUpdatedOriginalUrlEvent updated -> {
@@ -36,6 +34,12 @@ public class ShortenedUrlFactory {
                 case V1UserGiftedShortenedUrlEvent gifted -> {
                     if (state != null) {
                         state.giftShortenedUrl(gifted);
+                    }
+                }
+
+                case V1UserUpdatedTitleEvent titleUpdated -> {
+                    if (state != null) {
+                        state.updateTitle(titleUpdated);
                     }
                 }
             }

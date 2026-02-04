@@ -1,27 +1,47 @@
-# Update the original url
+# Update the shortened url
 
 ### Description
 
-Updates an original url in a shortened url.
+Updates a shortened url.
 
 ### Requests
 
 ```http
-POST https://{hostname}/shortened-urls/{uniqueIdentifier}
+PATCH https://{hostname}/shortened-urls/{uniqueIdentifier}
 Content-Type: application/json
 User-Id: 1
 Authorization: 
 {
-  "url": "https://www.newurl.com",
-  "is_enabled": false
+  "url": "https://www.newurl.com", 
+  "is_enabled": false,
+  "title": "sale on paper"
+}
+{
+  "url": "https://www.newurl.com"
+}
+{
+  "title": "sale on paper"
 }
 ```
 
 ### Responses
 
-204 No Content
+200 No Content
+
+```json
+{
+  "unique_identifier": "poiuytrewq",
+  "shortened_url": "http://{hostname}/goto/poiuytrewq",
+  "url": "https://www.google.com?q=rr",
+  "is_enabled": true,
+  "created_at": "2025-01-01T01:05:12.123+09:00",
+  "updated_at": "2025-01-01T01:05:12.123+09:00",
+  "user_id": 1
+}
+```
 
 400 Bad Request
+
 ```json
 {
   "errors": [
@@ -48,10 +68,14 @@ Authorization:
     {
       "code": "URL_CANNOT_BE_A_SHORTENED_URL",
       "details": "The provided url %s cannot be a shortened url."
+    },
+    {
+      "code": "TITLE_IS_NOT_CORRECT",
+      "details": "The title provided is not correct. It cannot exceed 100 characters or be null."
     }
   ]
 }
-``` 
+```
 
 404 NotFound
 No Response Body

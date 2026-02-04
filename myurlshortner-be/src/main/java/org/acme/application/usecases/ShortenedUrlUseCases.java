@@ -4,14 +4,15 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import jakarta.inject.Singleton;
+import org.acme.application.controller.url.PatchShortenedUrlRequest;
 import org.acme.application.controller.url.ShortenUrlRequest;
-import org.acme.application.controller.url.UpdateOriginalUrlRequest;
 import org.acme.application.exception.*;
 import org.acme.application.exception.url.GetAvailableUrlsError;
 import org.acme.application.exception.url.GetShortenedUrlError;
 import org.acme.application.exception.url.GetShortenedUrlHistoryError;
+import org.acme.application.exception.url.PatchShortenedUrlError;
 import org.acme.domain.command.CreateShortenedUrlCommand;
-import org.acme.domain.command.UpdateOriginalUrlCommand;
+import org.acme.domain.command.PatchShortenedUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.ShortenedUrlEvent;
 import org.acme.domain.exceptions.DomainException;
@@ -19,9 +20,11 @@ import org.acme.domain.exceptions.ShortenedUrlIsNotFoundException;
 import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationException;
 import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.acme.domain.exceptions.url.ShortenUrlError;
-import org.acme.domain.exceptions.url.UpdateOriginalUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.service.ShortenedUrlService;
+import org.acme.domain.validator.TitleValidator;
+import org.acme.domain.validator.UniqueIdValidator;
+import org.acme.domain.validator.UrlValidator;
 import org.acme.domain.validator.UserIdValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -37,10 +40,16 @@ public class ShortenedUrlUseCases {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final String apiKey;
     private final ShortenedUrlService service;
+    private final String hostname;
 
-    public ShortenedUrlUseCases(@ConfigProperty(name = "app.apikey") String apiKey, ShortenedUrlService service) {
+    public ShortenedUrlUseCases(
+            @ConfigProperty(name = "app.apikey") String apiKey,
+            ShortenedUrlService service,
+            @ConfigProperty(name = "app.hostname") String hostname
+    ) {
         this.apiKey = apiKey;
         this.service = service;
+        this.hostname = hostname;
     }
 
     public Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(String userId, ShortenUrlRequest request) {
@@ -92,18 +101,45 @@ public class ShortenedUrlUseCases {
         }
     }
 
-    public Either<UpdateOriginalUrlError, ShortenedUrl> updateOriginalUrl(
-            String uniqueIdentifier,
-            UpdateOriginalUrlRequest request,
-            String userId
+    public Either<PatchShortenedUrlError, ShortenedUrl> patchShortenedUrl(
+            PatchShortenedUrlRequest request,
+            String userId,
+            String uniqueIdentifier
     ) {
-        var userIdValidation = UserIdValidator.validate(userId);
-        if (userIdValidation.isLeft()) {
-            return Either.left(new UpdateOriginalUrlError(List.of(userIdValidation.getLeft()), Optional.empty()));
+        var listOfErrors = new ArrayList<DomainException>();
+
+        var validUserId = UserIdValidator.validate(userId).mapLeft(listOfErrors::add);
+        UniqueIdValidator.validate(uniqueIdentifier).map(listOfErrors::add);
+        if (request.title().isSet()) {
+            TitleValidator.validate(request.title().value()).mapLeft(listOfErrors::add);
         }
-        return service.updateOriginalUrl(
-                new UpdateOriginalUrlCommand(uniqueIdentifier, request.url(), request.isEnabled(), userIdValidation.get())
+        if (request.url().isSet()) {
+            UrlValidator.validateUrl(hostname, request.url().value()).mapLeft(listOfErrors::addAll);
+        }
+
+        if (!listOfErrors.isEmpty()) {
+            return Either.left(new PatchShortenedUrlError(Optional.empty(), listOfErrors));
+        }
+
+        var shortenedUrl = service.getShortenedUrl(
+                uniqueIdentifier,
+                validUserId.get()
         );
+        if (shortenedUrl.isEmpty()) {
+            return Either.left(
+                    new PatchShortenedUrlError(Optional.of(new ShortenedUrlIsNotFoundException()), List.of())
+            );
+        }
+
+        return Either.right(service.patchShortenedUrl(
+                new PatchShortenedUrlCommand(
+                        shortenedUrl.get(),
+                        request.url().mapTo((a) -> UrlValidator.validateUrl(hostname, a).get()),
+                        request.isEnabled(),
+                        request.title(),
+                        userId
+                )
+        ));
     }
 
     public Either<GetShortenedUrlHistoryError, List<? extends ShortenedUrlEvent>> getShortenedUrlHistory(
