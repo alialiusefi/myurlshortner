@@ -233,7 +233,7 @@ function Title(params: {
 }) {
   const [title, setTitle] = useState<string>(params.title);
   const isValid = (input: string) => {
-    return input?.length < 100 || input == null;
+    return input == null || input?.length < 100;
   };
   const isEdited = (input: string) => {
     return input !== params.title;
