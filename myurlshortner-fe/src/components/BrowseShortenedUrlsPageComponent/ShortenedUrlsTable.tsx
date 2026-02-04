@@ -232,11 +232,11 @@ function Title(params: {
   updateTitle: (newTitle: string) => void;
 }) {
   const [title, setTitle] = useState<string>(params.title);
-  const isValid = (str: string) => {
-    return str?.length < 100 || str == null;
+  const isValid = (input: string) => {
+    return input?.length < 100 || input == null;
   };
-  const isEdited = (str: string) => {
-    return params.title !== null && str !== params.title;
+  const isEdited = (input: string) => {
+    return input !== params.title;
   };
   return (
     <FormControl>
@@ -247,7 +247,7 @@ function Title(params: {
           hiddenLabel
           variant="outlined"
           size="small"
-          value={title}
+          value={title ?? ""}
           error={!isValid(title)}
           helperText={
             !isValid(title) ? "The provided title exceeds 100 characters" : ""
@@ -255,7 +255,7 @@ function Title(params: {
           onChange={(e) => setTitle(e.target.value)}
         />
         <IconButton
-          disabled={!isEdited(title) || !isValid(params.title)}
+          disabled={!isEdited(title) || !isValid(title)}
           onClick={() => params.updateTitle(title.trim())}
           title="Save"
         >
