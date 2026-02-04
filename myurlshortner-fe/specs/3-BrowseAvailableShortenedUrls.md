@@ -12,6 +12,10 @@ Support pagination by 10 elements.
 
 The following columns are to be supported:
 
+- Is Enabled
+  - Enabled/Disabled state
+- Title
+  - Title ('will be '<empty>' if empty)
 - Shortened Url
   - It is hyperlinked.
 - Original Url

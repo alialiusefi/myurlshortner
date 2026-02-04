@@ -29,7 +29,8 @@ https://{hostname}/shortened-urls?page=1&size=10&order=desc
       "url": "https://www.google.com",
       "shortened_url": "https://{hostname}/goto/nbjgop38vn",
       "created_at": "2025-01-01T01:05:12Z",
-      "access_count": 1
+      "access_count": 1,
+      "title": "re" // nullable
     }
   ],
   "total": 1

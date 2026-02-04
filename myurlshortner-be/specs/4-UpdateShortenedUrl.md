@@ -26,7 +26,7 @@ Authorization:
 
 ### Responses
 
-200 No Content
+200 OK
 
 ```json
 {
@@ -36,7 +36,8 @@ Authorization:
   "is_enabled": true,
   "created_at": "2025-01-01T01:05:12.123+09:00",
   "updated_at": "2025-01-01T01:05:12.123+09:00",
-  "user_id": 1
+  "user_id": 1,
+  "title": "a" // nullable
 }
 ```
 
