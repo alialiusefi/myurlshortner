@@ -57,11 +57,24 @@ export default function ShortenedUrlHistory(params: {
                           {readableTimestamp(comp.event_date_time)}
                         </Typography>
                       </Grid>
-                      <Grid>
-                        <Typography sx={{ p: 2 }}>
-                          Target URL: {<NewTabLink url={comp.url} />}
-                        </Typography>
-                      </Grid>
+                      {comp.url != null ? (
+                        <Grid>
+                          <Typography sx={{ p: 2 }}>
+                            Target URL: {<NewTabLink url={comp.url} />}
+                          </Typography>
+                        </Grid>
+                      ) : (
+                        <></>
+                      )}
+                      {comp.title != null ? (
+                        <Grid>
+                          <Typography sx={{ p: 2 }}>
+                            Title: {comp.title}
+                          </Typography>
+                        </Grid>
+                      ) : (
+                        <></>
+                      )}
                     </Card>
                   </Grid>
                 );

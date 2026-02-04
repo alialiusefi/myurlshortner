@@ -72,14 +72,43 @@ export async function shortenUrlOperaton(
   }
 }
 
+type PatchShortenedUrlResponse = {
+  unique_identifier: string;
+  shortened_url: string;
+  url: string;
+  is_enabled: boolean;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+};
+
 export async function updateShortenedUrl(
   uniqueIdentifier: string,
-  newOriginalUrl: string,
-  isEnabled: boolean,
   userId: number,
-): Promise<ErrorResponse | null> {
+  newOriginalUrl?: string,
+  isEnabled?: boolean,
+  title?: string,
+): Promise<PatchShortenedUrlResponse> {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  const request = new UpdateShortenedUrlRequest(newOriginalUrl, isEnabled);
+  let request = {};
+  if (newOriginalUrl != null) {
+    request = {
+      url: newOriginalUrl,
+    };
+  }
+  if (isEnabled != null) {
+    request = {
+      ...request,
+      is_enabled: isEnabled,
+    };
+  }
+  if (title != null) {
+    request = {
+      ...request,
+      title: title,
+    };
+  }
   const url = `${serverUrl}/shortened-urls/${uniqueIdentifier}`;
   const requestConfig = {
     method: "PATCH",
@@ -90,32 +119,17 @@ export async function updateShortenedUrl(
     },
   };
   return fetch(url, requestConfig)
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         console.error(`Unexpected BE response! code: ${response.status}`);
-        return response.json();
+        return (await response.json()) as ErrorResponse;
       }
-      return null;
-    })
-    .then((json) => {
-      if (json) {
-        return json as ErrorResponse;
-      }
-      return null;
+      return (await response.json()) as PatchShortenedUrlResponse;
     })
     .catch((e) => {
       console.error(`Unexpected error! error: ${e}`);
       return null;
     });
-}
-
-class UpdateShortenedUrlRequest {
-  url: string;
-  is_enabled: boolean;
-  constructor(url: string, is_enabled: boolean) {
-    this.url = url;
-    this.is_enabled = is_enabled;
-  }
 }
 
 class ShortenUrlRequest {

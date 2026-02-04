@@ -34,11 +34,11 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
   const handleApply = async () => {
     const response = await updateShortenedUrl(
       props.uniqueIdentifier,
+      userId,
       newTargetUrl,
       isEnabled,
-      userId,
     );
-    if (response) {
+    if (response instanceof ErrorResponse) {
       setError(response);
     } else {
       setIsOpen(false);

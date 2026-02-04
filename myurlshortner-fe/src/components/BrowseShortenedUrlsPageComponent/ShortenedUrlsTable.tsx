@@ -23,6 +23,11 @@ import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
+import { FormControl, TextField } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import UndoIcon from "@mui/icons-material/Undo";
+import Grid from "@mui/material/Grid";
+import { updateShortenedUrl } from "app/api/UrlShortnerApi";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -88,6 +93,7 @@ export default function ShortnetedUrlsTable() {
           <TableHead>
             <TableRow>
               <TableCell>Status</TableCell>
+              <TableCell>Title</TableCell>
               <TableCell>Shortened URL</TableCell>
               <TableCell>Access Count</TableCell>
               <TableCell>Original URL</TableCell>
@@ -104,7 +110,7 @@ export default function ShortnetedUrlsTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.data.map((one) => (
+            {data?.data.map((one, idx) => (
               <TableRow key={one.shortened_url}>
                 <TableCell>
                   {one.is_enabled ? (
@@ -112,6 +118,41 @@ export default function ShortnetedUrlsTable() {
                   ) : (
                     <CircleIcon sx={{ p: 1, fontSize: 30 }} color="error" />
                   )}
+                </TableCell>
+                <TableCell>
+                  <Title
+                    title={one.title}
+                    updateTitle={async (newTitle: string) => {
+                      const uid = one.shortened_url.substring(
+                        one.shortened_url.indexOf("/goto/") + 6,
+                      );
+                      const updated = await updateShortenedUrl(
+                        uid,
+                        userId,
+                        null,
+                        null,
+                        newTitle,
+                      );
+                      const newOne = {
+                        title: updated.title,
+                        created_at: updated.created_at,
+                        is_enabled: updated.is_enabled,
+                        url: updated.url,
+                        shortened_url: updated.shortened_url,
+                        access_count: one.access_count,
+                      };
+                      const newData = data.data.toSpliced(idx, 1, newOne);
+                      mutate(
+                        () => {
+                          return {
+                            data: newData,
+                            total: data.total,
+                          };
+                        },
+                        { revalidate: false },
+                      );
+                    }}
+                  />
                 </TableCell>
                 <TableCell>
                   <NewTabLink url={one.shortened_url} />
@@ -183,6 +224,52 @@ export default function ShortnetedUrlsTable() {
         </Table>
       </TableContainer>
     </Box>
+  );
+}
+
+function Title(params: {
+  title: string;
+  updateTitle: (newTitle: string) => void;
+}) {
+  const [title, setTitle] = useState<string>(params.title);
+  const isValid = (str: string) => {
+    return str?.length < 100 || str == null;
+  };
+  const isEdited = (str: string) => {
+    return params.title !== null && str !== params.title;
+  };
+  return (
+    <FormControl>
+      <Grid container direction="row">
+        <TextField
+          sx={{ width: 200 }}
+          placeholder="<empty>"
+          hiddenLabel
+          variant="outlined"
+          size="small"
+          value={title}
+          error={!isValid(title)}
+          helperText={
+            !isValid(title) ? "The provided title exceeds 100 characters" : ""
+          }
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <IconButton
+          disabled={!isEdited(title) || !isValid(params.title)}
+          onClick={() => params.updateTitle(title.trim())}
+          title="Save"
+        >
+          <SaveIcon fontSize="small" />
+        </IconButton>
+        <IconButton
+          disabled={!isEdited(title)}
+          onClick={() => setTitle(params.title)}
+          title="Undo"
+        >
+          <UndoIcon fontSize="small" />
+        </IconButton>
+      </Grid>
+    </FormControl>
   );
 }
 
