@@ -16,6 +16,9 @@ The following columns are to be supported:
   - Enabled/Disabled state
 - Title
   - Title ('will be '<empty>' if empty)
+  - Updateable
+  - Undoable
+  - Up to 100 characters
 - Shortened Url
   - It is hyperlinked.
 - Original Url
