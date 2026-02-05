@@ -13,10 +13,13 @@ User-Id: 1
 Authorization: 
 {
   "url": "https://www.google.com",
-  "unique_identifier": "a"
+  "unique_identifier": "abcdabcd11",
+  "title": null
 }
 {
-  "url": "www.google.com"
+  "url": "www.google.com",
+  "unique_identifier": "abcdabcd12",
+  "title": "some timt"
 }
 {
   "url": "google.com"
@@ -31,9 +34,8 @@ Authorization:
 201 Created
 ```json
 {
-  "shortened_url": "https://{hostname}/goto/a"
+  "shortened_url": "https://{hostname}/goto/abcdabcd11"
 }
-
 {
   "shortened_url": "https://{hostname}/goto/wLf16-ft"
 }
@@ -44,6 +46,10 @@ Authorization:
 ```json
 {
   "errors": [
+    {
+      "code": "TITLE_IS_NOT_CORRECT",
+      "details": "The title provided is not correct. It cannot exceed 100 characters."
+    },
     {
       "code": "UNIQUE_IDENTIFIER_ALREADY_EXISTS",
       "details": "The provided unique identifier already exists."

@@ -26,6 +26,7 @@ https://{hostname}/shortened-urls?page=1&size=10&order=desc
 {
   "data": [
     {
+      "unique_identifier": "nbjgop38vn",
       "url": "https://www.google.com",
       "shortened_url": "https://{hostname}/goto/nbjgop38vn",
       "created_at": "2025-01-01T01:05:12Z",
@@ -57,11 +58,3 @@ https://{hostname}/shortened-urls?page=1&size=10&order=desc
   ]
 }
 ```
-
-### Tech Debt
-- Persistence Layer
-  - Table
-  - ORM
-  - Integration test setup
-  - Supporting existing logic
-- Consumer doesnt save unique identifier
