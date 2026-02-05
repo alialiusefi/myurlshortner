@@ -20,7 +20,7 @@ Authorization:
   "url": "https://www.newurl.com"
 }
 {
-  "title": "sale on paper"
+  "title": ""
 }
 ```
 
