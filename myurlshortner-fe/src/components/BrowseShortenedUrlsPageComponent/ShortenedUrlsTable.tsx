@@ -23,7 +23,7 @@ import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
-import { FormControl, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import Grid from "@mui/material/Grid";
@@ -141,11 +141,10 @@ export default function ShortnetedUrlsTable() {
                         shortened_url: updated.shortened_url,
                         access_count: one.access_count,
                       };
-                      const newData = data.data.toSpliced(idx, 1, newOne);
                       mutate(
                         () => {
                           return {
-                            data: newData,
+                            data: data.data.toSpliced(idx, 1, newOne),
                             total: data.total,
                           };
                         },
@@ -228,18 +227,17 @@ export default function ShortnetedUrlsTable() {
 }
 
 function Title(params: {
-  title: string;
+  title?: string;
   updateTitle: (newTitle: string) => void;
 }) {
   const [title, setTitle] = useState<string>(params.title);
-  const isValid = (input: string) => {
+  const isValid = (input?: string) => {
     return input == null || input?.length < 100;
   };
-  const isEdited = (input: string) => {
+  const isEdited = (input?: string) => {
     return input !== params.title;
   };
   return (
-    <FormControl>
       <Grid container direction="row">
         <TextField
           sx={{ width: 200 }}
@@ -269,7 +267,6 @@ function Title(params: {
           <UndoIcon fontSize="small" />
         </IconButton>
       </Grid>
-    </FormControl>
   );
 }
 

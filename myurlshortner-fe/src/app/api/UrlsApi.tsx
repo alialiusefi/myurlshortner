@@ -140,7 +140,7 @@ export class GetAvailableUrlsResponseData {
   created_at: string;
   access_count: number;
   is_enabled: boolean;
-  title: string;
+  title?: string;
 }
 
 export class GetAvailableUrlsResponse {
