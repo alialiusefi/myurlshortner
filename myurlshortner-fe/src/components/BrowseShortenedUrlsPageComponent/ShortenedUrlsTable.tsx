@@ -123,17 +123,15 @@ export default function ShortnetedUrlsTable() {
                   <Title
                     title={one.title}
                     updateTitle={async (newTitle: string) => {
-                      const uid = one.shortened_url.substring(
-                        one.shortened_url.indexOf("/goto/") + 6,
-                      );
                       const updated = await updateShortenedUrl(
-                        uid,
+                        one.unique_identifier,
                         userId,
                         undefined,
                         undefined,
                         newTitle,
                       );
                       const newOne = {
+                        unique_identifier: one.unique_identifier,
                         title: updated.title,
                         created_at: updated.created_at,
                         is_enabled: updated.is_enabled,
@@ -173,9 +171,7 @@ export default function ShortnetedUrlsTable() {
                     {currentSelectedForEdit === one.shortened_url ? (
                       <UpdateShortenedUrlDialog
                         isOpen={currentSelectedForEdit === one.shortened_url}
-                        uniqueIdentifier={one.shortened_url.substring(
-                          one.shortened_url.indexOf("/goto/") + 6,
-                        )}
+                        uniqueIdentifier={one.unique_identifier}
                         originalUrl={one.url}
                         isEnabled={one.is_enabled}
                         onClose={() => {
@@ -192,10 +188,7 @@ export default function ShortnetedUrlsTable() {
                 <TableCell>
                   <Button
                     onClick={() => {
-                      const uid = one?.shortened_url?.substring(
-                        one?.shortened_url?.indexOf("/goto/") + 6,
-                      );
-                      const infoUrl = `/browse/${uid}/info`;
+                      const infoUrl = `/browse/${one.unique_identifier}/info`;
                       redirect(infoUrl);
                     }}
                   >
