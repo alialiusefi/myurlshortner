@@ -37,18 +37,23 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
           {params.uniqueId}
         </Typography>
       </Grid>
+      <Grid>
+        <Typography variant="h5" paddingLeft={2}>
+          Title: {data.title == null || data.title.length == 0 ? ('<empty>') : (data.title)}
+        </Typography>
+      </Grid>
       <Grid container spacing={1} padding={2}>
         <Typography variant="h5">
-          <NewTabLink url={data?.shortened_url} />
+          <NewTabLink url={data.shortened_url} />
         </Typography>
-        {data?.is_enabled ? (
+        {data.is_enabled ? (
           <ArrowForwardIcon fontSize="large" color={"success"} />
         ) : (
           <DoNotDisturbOnIcon fontSize="large" color={"error"} />
         )}
         <Grid size={5}>
           <Typography variant="h5">
-            <NewTabLink url={data?.url} />
+            <NewTabLink url={data.url} />
           </Typography>
         </Grid>
       </Grid>
