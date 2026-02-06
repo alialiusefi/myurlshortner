@@ -129,8 +129,8 @@ export default function ShortnetedUrlsTable() {
                       const updated = await updateShortenedUrl(
                         uid,
                         userId,
-                        null,
-                        null,
+                        undefined,
+                        undefined,
                         newTitle,
                       );
                       const newOne = {
@@ -182,6 +182,7 @@ export default function ShortnetedUrlsTable() {
                           setCurrentSelectedForEdit(null);
                           mutate({ ...data });
                         }}
+                        title={one.title}
                       />
                     ) : (
                       <></>
@@ -238,35 +239,35 @@ function Title(params: {
     return input !== params.title;
   };
   return (
-      <Grid container direction="row">
-        <TextField
-          sx={{ width: 200 }}
-          placeholder="<empty>"
-          hiddenLabel
-          variant="outlined"
-          size="small"
-          value={title ?? ""}
-          error={!isValid(title)}
-          helperText={
-            !isValid(title) ? "The provided title exceeds 100 characters" : ""
-          }
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <IconButton
-          disabled={!isEdited(title) || !isValid(title)}
-          onClick={() => params.updateTitle(title.trim())}
-          title="Save"
-        >
-          <SaveIcon fontSize="small" />
-        </IconButton>
-        <IconButton
-          disabled={!isEdited(title)}
-          onClick={() => setTitle(params.title)}
-          title="Undo"
-        >
-          <UndoIcon fontSize="small" />
-        </IconButton>
-      </Grid>
+    <Grid container direction="row">
+      <TextField
+        sx={{ width: 200 }}
+        placeholder="<empty>"
+        hiddenLabel
+        variant="outlined"
+        size="small"
+        value={title ?? ""}
+        error={!isValid(title)}
+        helperText={
+          !isValid(title) ? "The provided title exceeds 100 characters" : ""
+        }
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <IconButton
+        disabled={!isEdited(title) || !isValid(title)}
+        onClick={() => params.updateTitle(title.trim())}
+        title="Save"
+      >
+        <SaveIcon fontSize="small" />
+      </IconButton>
+      <IconButton
+        disabled={!isEdited(title)}
+        onClick={() => setTitle(params.title)}
+        title="Undo"
+      >
+        <UndoIcon fontSize="small" />
+      </IconButton>
+    </Grid>
   );
 }
 
