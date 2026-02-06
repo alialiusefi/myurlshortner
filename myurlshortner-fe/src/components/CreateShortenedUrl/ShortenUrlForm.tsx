@@ -50,7 +50,7 @@ export default function ShortenUrlForm() {
     setUidInput(uniqueId);
     validateUidExists(uniqueId);
   };
-  const titleIsValid = () => titleInput == null || titleInput.length < 100
+  const titleIsValid = () => titleInput == null || titleInput.length < 100;
   const validateForm = (targetUrl: string, uid?: string): boolean => {
     const urlInputValidation =
       targetUrl.match(
@@ -66,7 +66,7 @@ export default function ShortenUrlForm() {
       targetUrlInput,
       uidInput == null ? data?.unique_identifier : uidInput,
       userId,
-      titleInput == null ? titleInput : titleInput.trim()
+      titleInput == null ? titleInput : titleInput.trim(),
     );
     if (result instanceof ShortenUrlResponse) {
       const shortenedUrl = (result as ShortenUrlResponse).shortened_url;
@@ -125,7 +125,8 @@ export default function ShortenUrlForm() {
   return (
     <Paper sx={{ minWidth: 400, minHeight: 200 }}>
       <Grid container direction="column" rowSpacing={2} padding={2}>
-        <Tabs sx={{ paddingBottom: 2 }}
+        <Tabs
+          sx={{ paddingBottom: 2 }}
           data-testid="tabs-selection"
           value={selectedMode}
           onChange={(e, value) => setSelectedMode(value)}
@@ -152,18 +153,17 @@ export default function ShortenUrlForm() {
               onChange={(e) => setTitleInput(e.target.value)}
               label={"Title"}
               error={!titleIsValid()}
-              helperText={!titleIsValid() ? "Title cannot exceed 100 characters" : "Short text that describes the shortened url"}
+              helperText={
+                !titleIsValid()
+                  ? "Title cannot exceed 100 characters"
+                  : "Short text that describes the shortened url"
+              }
               placeholder="Your Title"
               fullWidth
             />
             <Paper sx={{ padding: 1 }} variant="outlined">
               <Typography>Shortened URL:</Typography>
-              <Grid
-                container
-                direction="row"
-                rowSpacing={3}
-                columnSpacing={1}
-              >
+              <Grid container direction="row" rowSpacing={3} columnSpacing={1}>
                 <Typography alignContent={"center"}>
                   {`${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/`}
                 </Typography>
@@ -172,18 +172,15 @@ export default function ShortenUrlForm() {
                   size="small"
                   label="Unique ID"
                   value={
-                    (uidInput == null ? data?.unique_identifier : uidInput) ?? ""
+                    (uidInput == null ? data?.unique_identifier : uidInput) ??
+                    ""
                   }
-                  onChange={(e) =>
-                    handleUniqueIdChange(e.target.value)
-                  }
+                  onChange={(e) => handleUniqueIdChange(e.target.value)}
                   placeholder="fancyid"
                   slotProps={{
                     htmlInput: { "data-testid": "unique-id-input" },
                   }}
-                  helperText={
-                    uidExists ? "The unique id already exists." : ""
-                  }
+                  helperText={uidExists ? "The unique id already exists." : ""}
                   error={uidExists}
                   required
                 />
@@ -191,8 +188,7 @@ export default function ShortenUrlForm() {
                   data-testid="refresh-button"
                   onClick={async () =>
                     handleUniqueIdChange(
-                      (await GenerateUniqueIdFetch())
-                        .unique_identifier,
+                      (await GenerateUniqueIdFetch()).unique_identifier,
                     )
                   }
                 >

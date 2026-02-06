@@ -20,14 +20,20 @@ type Properties = {
   uniqueIdentifier: string;
   originalUrl: string;
   isEnabled: boolean;
+  title?: string;
   onClose: () => void;
 };
 
 export default function UpdateShortenedUrlDialog(props: Properties) {
   const userId = useContext(UserProvider);
+  const [titleInput, setTitleInput] = useState<string>(props.title);
   const [newTargetUrl, setNewTargetUrl] = useState<string>(props.originalUrl);
+  const isTitleValid = () => titleInput == null || titleInput?.length < 100;
+  const isTargetUrlValid = () =>
+    newTargetUrl.match(
+      /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*)/g,
+    ) != null;
   const [isOpen, setIsOpen] = useState(props.isOpen);
-  const [isValid, setIsValid] = useState(true);
   const [isEnabled, setIsEnabled] = useState<boolean>(props.isEnabled);
   const onCloseCallback = props.onClose;
   const [error, setError] = useState<ErrorResponse>(null);
@@ -37,6 +43,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
       userId,
       newTargetUrl,
       isEnabled,
+      titleInput,
     );
     if (response instanceof ErrorResponse) {
       setError(response);
@@ -45,14 +52,6 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
       setError(null);
       onCloseCallback();
     }
-  };
-  const handleTargetUrlChange = (input) => {
-    const result =
-      input.match(
-        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*)/g,
-      ) != null;
-    setNewTargetUrl(input);
-    setIsValid(result);
   };
   return (
     <Dialog
@@ -70,9 +69,26 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
               id="modal-modal-title"
               variant="h6"
               component="h2"
+              paddingBottom={2}
             >
               Update Shortened URL:
             </Typography>
+          </Grid>
+          <Grid padding={2}>
+            <TextField
+              fullWidth
+              label="Title"
+              onChange={(e) => {
+                setTitleInput(e.target.value);
+              }}
+              value={titleInput ?? ""}
+              error={!isTitleValid()}
+              helperText={
+                !isTitleValid()
+                  ? "The provided title cannot exceed 100 characters"
+                  : ""
+              }
+            />
           </Grid>
           <Grid padding={2}>
             <FormControl fullWidth>
@@ -80,10 +96,8 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
                 label="Target URL"
                 fullWidth
                 value={newTargetUrl}
-                onChange={(e) => {
-                  handleTargetUrlChange(e.target.value);
-                }}
-                error={!isValid}
+                onChange={(e) => setNewTargetUrl(e.target.value)}
+                error={!isTargetUrlValid()}
               />
             </FormControl>
           </Grid>
@@ -92,7 +106,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
               <Button
                 variant="contained"
                 onClick={handleApply}
-                disabled={!isValid}
+                disabled={!isTargetUrlValid() || !isTitleValid()}
               >
                 Apply
               </Button>

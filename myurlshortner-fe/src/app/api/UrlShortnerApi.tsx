@@ -45,7 +45,7 @@ export async function shortenUrlOperaton(
   url: string,
   uid: string,
   userId: number,
-  title?: string
+  title?: string,
 ): Promise<ShortenUrlResponse | ErrorResponse> {
   const request = new ShortenUrlRequest(url, uid, title);
   const requestConfig = {
@@ -84,32 +84,28 @@ type PatchShortenedUrlResponse = {
   user_id: number;
 };
 
+/**
+ * Patch shortened url.
+ * @param uniqueIdentifier Required Field
+ * @param userId Required Field
+ * @param newOriginalUrl Optional by passing 'undefined' otherwise can be 'null' or 'string'
+ * @param isEnabled Optional by passing 'undefined' otherwise can be 'null' or 'string'
+ * @param title Optional by passing 'undefined' otherwise can be 'null' or 'string'
+ * @returns Updated Shortened Url
+ */
 export async function updateShortenedUrl(
   uniqueIdentifier: string,
   userId: number,
-  newOriginalUrl?: string,
-  isEnabled?: boolean,
+  newOriginalUrl: string,
+  isEnabled: boolean,
   title?: string,
 ): Promise<PatchShortenedUrlResponse> {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  let request = {};
-  if (newOriginalUrl != null) {
-    request = {
-      url: newOriginalUrl,
-    };
-  }
-  if (isEnabled != null) {
-    request = {
-      ...request,
-      is_enabled: isEnabled,
-    };
-  }
-  if (title != null) {
-    request = {
-      ...request,
-      title: title,
-    };
-  }
+  const request = {
+    url: newOriginalUrl,
+    is_enabled: isEnabled,
+    title: title,
+  };
   const url = `${serverUrl}/shortened-urls/${uniqueIdentifier}`;
   const requestConfig = {
     method: "PATCH",
