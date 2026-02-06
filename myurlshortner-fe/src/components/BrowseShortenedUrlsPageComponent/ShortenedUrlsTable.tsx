@@ -4,7 +4,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Table from "@mui/material/Table";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TableBody from "@mui/material/TableBody";
@@ -180,7 +180,8 @@ export default function ShortnetedUrlsTable() {
                         isEnabled={one.is_enabled}
                         onClose={() => {
                           setCurrentSelectedForEdit(null);
-                          mutate({ ...data });
+                          console.log("mutatuted")
+                          mutate();
                         }}
                         title={one.title}
                       />
@@ -232,6 +233,10 @@ function Title(params: {
   updateTitle: (newTitle: string) => void;
 }) {
   const [title, setTitle] = useState<string>(params.title);
+  // the mutation will reload the props with new values however it will not update, since title has its own state already,
+  useEffect(() => {
+    setTitle(params.title)
+  }, [params.title])
   const isValid = (input?: string) => {
     return input == null || input?.length < 100;
   };

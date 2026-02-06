@@ -41,9 +41,9 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
     const response = await updateShortenedUrl(
       props.uniqueIdentifier,
       userId,
-      newTargetUrl,
-      isEnabled,
-      titleInput,
+      props.originalUrl !== newTargetUrl ? newTargetUrl : undefined,
+      props.isEnabled !== isEnabled ? isEnabled : undefined,
+      props.title !== titleInput ? titleInput : undefined,
     );
     if (response instanceof ErrorResponse) {
       setError(response);
