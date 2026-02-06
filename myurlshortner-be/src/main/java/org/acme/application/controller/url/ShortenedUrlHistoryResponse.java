@@ -1,5 +1,7 @@
 package org.acme.application.controller.url;
 
+import org.acme.domain.events.ShortenedUrlRecordType;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -8,41 +10,51 @@ public record ShortenedUrlHistoryResponse(
 ) {
     public abstract static class ShortenedUrlHistoryRow {
         OffsetDateTime eventDateTime;
+        ShortenedUrlRecordType type;
 
-        public ShortenedUrlHistoryRow(OffsetDateTime datetime) {
+        public ShortenedUrlHistoryRow(OffsetDateTime datetime, ShortenedUrlRecordType type) {
             this.eventDateTime = datetime;
-        }
-
-        public ShortenedUrlHistoryRow() {
+            this.type = type;
         }
 
         public OffsetDateTime getEventDateTime() {
             return eventDateTime;
         }
 
-        public void setEventDateTime(OffsetDateTime eventDateTime) {
-            this.eventDateTime = eventDateTime;
+        public ShortenedUrlRecordType getType() {
+            return type;
         }
     }
 
-    public static class UrlUpdatedHistoryRow extends ShortenedUrlHistoryRow {
+    public static class ShortenedUrlCreatedHistoryRow extends ShortenedUrlHistoryRow {
         String url;
+        String title;
 
-        UrlUpdatedHistoryRow() {
-            super();
-        }
-
-        UrlUpdatedHistoryRow(String url, OffsetDateTime datetime) {
-            super(datetime);
+        public ShortenedUrlCreatedHistoryRow(OffsetDateTime datetime, String url, String title) {
+            super(datetime, ShortenedUrlRecordType.USER_CREATED_SHORTENED_URL);
             this.url = url;
+            this.title = title;
         }
 
         public String getUrl() {
             return url;
         }
 
-        public void setUrl(String url) {
+        public String getTitle() {
+            return title;
+        }
+    }
+
+    public static class UrlUpdatedHistoryRow extends ShortenedUrlHistoryRow {
+        String url;
+
+        UrlUpdatedHistoryRow(String url, OffsetDateTime datetime) {
+            super(datetime, ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL);
             this.url = url;
+        }
+
+        public String getUrl() {
+            return url;
         }
     }
 
@@ -50,16 +62,12 @@ public record ShortenedUrlHistoryResponse(
         String title;
 
         TitleUpdatedHistoryRow(String title, OffsetDateTime datetime) {
-            super(datetime);
+            super(datetime, ShortenedUrlRecordType.USER_UPDATED_TITLE);
             this.title = title;
         }
 
         public String getTitle() {
             return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
         }
     }
 }
