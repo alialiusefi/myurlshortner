@@ -1,6 +1,7 @@
 "use client";
 import {
   GetShortenedUrlHistorySWR,
+  GetShortenedUrlHistoryRowResponse,
   GetShortenedUrlHistory404Response,
 } from "app/api/UrlsApi";
 import { Grid, Paper, Typography } from "@mui/material";
@@ -49,35 +50,17 @@ export default function ShortenedUrlHistory(params: {
               }}
               data={result}
               itemContent={(index, comp) => {
-                return (
-                  <Grid container direction="column">
-                    <Card variant="outlined">
-                      <Grid>
-                        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
-                          {readableTimestamp(comp.event_date_time)}
-                        </Typography>
-                      </Grid>
-                      {comp.url != null ? (
-                        <Grid>
-                          <Typography sx={{ p: 2 }}>
-                            Target URL: {<NewTabLink url={comp.url} />}
-                          </Typography>
-                        </Grid>
-                      ) : (
-                        <></>
-                      )}
-                      {comp.title != null ? (
-                        <Grid>
-                          <Typography sx={{ p: 2 }}>
-                            Title: {comp.title}
-                          </Typography>
-                        </Grid>
-                      ) : (
-                        <></>
-                      )}
-                    </Card>
-                  </Grid>
-                );
+                switch (comp.type) {
+                  case "USER_UPDATED_TITLE": return (
+                    <TitleUpdatedRow row={comp} />
+                  )
+                  case "USER_UPDATED_ORIGINAL_URL": return (
+                    <TargetUrlUpdatedRow row={comp} />
+                  )
+                  case "USER_CREATED_SHORTENED_URL": return (
+                    <ShortenedUrlCreatedRow row={comp} />
+                  )
+                }
               }}
             />
           }
@@ -85,4 +68,61 @@ export default function ShortenedUrlHistory(params: {
       </Grid>
     </Paper>
   );
+}
+
+const TitleUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => {
+  return (
+    <Card variant="outlined">
+      <Grid>
+        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
+          Title was updated - {readableTimestamp(params.row.event_date_time)}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Title: {params.row.title == null || params.row.title.length == 0 ? ("<empty>") : (params.row.title)}
+        </Typography>
+      </Grid>
+    </Card>
+  )
+}
+
+const ShortenedUrlCreatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => {
+  return (
+    <Card variant="outlined">
+      <Grid>
+        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
+          Created - {readableTimestamp(params.row.event_date_time)}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Target URL: {<NewTabLink url={params.row.url} />}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Title: {params.row.title == null || params.row.title.length == 0 ? ("<empty>") : (params.row.title)}
+        </Typography>
+      </Grid>
+    </Card>
+  )
+}
+
+
+const TargetUrlUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => {
+  return (
+    <Card variant="outlined">
+      <Grid>
+        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
+          Target Url was updated - {readableTimestamp(params.row.event_date_time)}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Target URL: {<NewTabLink url={params.row.url} />}
+        </Typography>
+      </Grid>
+    </Card>
+  )
 }
