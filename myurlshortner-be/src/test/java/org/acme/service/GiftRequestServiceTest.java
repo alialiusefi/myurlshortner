@@ -32,7 +32,8 @@ public class GiftRequestServiceTest {
         var shortenedUrl = new ShortenedUrl(
                 URI.create("google.com"),
                 uid,
-                userSourceId
+                userSourceId,
+                null
         );
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
@@ -59,7 +60,8 @@ public class GiftRequestServiceTest {
         var shortenedUrl = new ShortenedUrl(
                 URI.create("google.com"),
                 uid,
-                userSourceId
+                userSourceId,
+                null
         );
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
@@ -93,7 +95,8 @@ public class GiftRequestServiceTest {
         var shortenedUrl = new ShortenedUrl(
                 URI.create("google.com"),
                 uid,
-                userSourceId
+                userSourceId,
+                null
         );
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);
@@ -127,7 +130,8 @@ public class GiftRequestServiceTest {
         var shortenedUrl = new ShortenedUrl(
                 URI.create("google.com"),
                 uid,
-                userSourceId
+                userSourceId,
+                null
         );
         var command = new CreateGiftRequestCommand(shortenedUrl, userTargetId);
         var mockRepo = mock(GiftRequestRepository.class);

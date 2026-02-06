@@ -1,8 +1,8 @@
 package org.acme.domain.entity;
 
-import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.events.V1UserUpdatedTitleEvent;
+import org.acme.domain.events.V2UserGiftedShortenedUrlEvent;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -20,14 +20,14 @@ public class ShortenedUrl {
     public ShortenedUrl() {
     }
 
-    public ShortenedUrl(URI originalUrl, String publicIdentifier, Long userId) {
+    public ShortenedUrl(URI originalUrl, String publicIdentifier, Long userId, String title) {
         this.originalUrl = originalUrl;
         this.publicIdentifier = publicIdentifier;
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = this.createdAt;
         this.enabled = true;
         this.userId = userId;
-        this.title = "";
+        this.title = title;
     }
 
     public ShortenedUrl(
@@ -57,7 +57,7 @@ public class ShortenedUrl {
         return String.format(format, serviceHostname, publicIdentifier);
     }
 
-    public ShortenedUrl giftShortenedUrl(V1UserGiftedShortenedUrlEvent event) {
+    public ShortenedUrl giftShortenedUrl(V2UserGiftedShortenedUrlEvent event) {
         this.updatedAt = event.createdAt();
         this.createdAt = event.createdAt();
         this.userId = event.targetUserId();

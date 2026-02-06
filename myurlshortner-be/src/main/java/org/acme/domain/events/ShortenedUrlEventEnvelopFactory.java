@@ -7,20 +7,21 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public class ShortenedUrlEventEnvelopFactory {
-    public static ShortenedUrlEventEnvelop<V1UserCreatedShortenedUrlEvent> createV1CreatedShortenUrlEvent(
+    public static ShortenedUrlEventEnvelop<V2UserCreatedShortenedUrlEvent> createV2CreatedShortenUrlEvent(
             ShortenedUrl shortenedUrl
     ) {
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
-                1,
+                2,
                 ShortenedUrlRecordType.USER_CREATED_SHORTENED_URL,
                 shortenedUrl.getCreatedAt(),
-                new V1UserCreatedShortenedUrlEvent(
+                new V2UserCreatedShortenedUrlEvent(
                         shortenedUrl.getPublicIdentifier(),
                         shortenedUrl.getCreatedAt(),
                         shortenedUrl.isEnabled(),
                         shortenedUrl.getOriginalUrl(),
-                        shortenedUrl.getUserId()
+                        shortenedUrl.getUserId(),
+                        shortenedUrl.getTitle()
                 )
         );
     }
@@ -44,22 +45,23 @@ public class ShortenedUrlEventEnvelopFactory {
         );
     }
 
-    public static ShortenedUrlEventEnvelop<V1UserGiftedShortenedUrlEvent> createV1CreateUserGiftedShortenedUrlEvent(
+    public static ShortenedUrlEventEnvelop<V2UserGiftedShortenedUrlEvent> createV2CreateUserGiftedShortenedUrlEvent(
             ShortenedUrl url,
             Long targetUserId
     ) {
         var newCreatedAt = OffsetDateTime.now();
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
-                1,
+                2,
                 ShortenedUrlRecordType.USER_GIFTED_SHORTENED_URL,
                 newCreatedAt,
-                new V1UserGiftedShortenedUrlEvent(
+                new V2UserGiftedShortenedUrlEvent(
                         url.getPublicIdentifier(),
                         newCreatedAt,
                         url.getOriginalUrl(),
                         url.getUserId(),
-                        targetUserId
+                        targetUserId,
+                        url.getTitle()
                 )
         );
     }

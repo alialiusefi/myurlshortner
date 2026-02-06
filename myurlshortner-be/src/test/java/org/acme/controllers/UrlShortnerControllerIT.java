@@ -159,10 +159,10 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "youtube.com";
         var uid = "abcdefghik";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "title");
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -198,10 +198,10 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "https://www.google.com";
         var uid = "abcdefghic";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "");
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -225,6 +225,7 @@ class UrlShortnerControllerIT {
         assertThat("Shortened url exists", found.isPresent());
         var foundShortenedUrl = found.get();
         assertThat("Url has not changed", foundShortenedUrl.getOriginalUrl().equals(URI.create("https://www.google.com")));
+        assertThat("Url has not changed", foundShortenedUrl.getTitle().isEmpty());
         assertThat("Event doesnt exists", event.isEmpty());
         assertThat("Updated at has changed", foundShortenedUrl.getUpdatedAt().isAfter(entity.getUpdatedAt()));
         assertThat("Created at didn't change", foundShortenedUrl.getCreatedAt().isEqual(entity.getCreatedAt()));
@@ -254,10 +255,10 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "youtube.com";
         var uid = "abcdefghik";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, null);
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -293,11 +294,11 @@ class UrlShortnerControllerIT {
         var url = "youtube.com";
         var uid = "abcdefghi2";
         var userId = 1L;
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, null);
         repo.insertShortenedUrl(entity);
 
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -346,11 +347,11 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "youtube.com";
         var uid = "abcdefgh45";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "some");
         repo.insertShortenedUrl(entity);
 
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -377,6 +378,7 @@ class UrlShortnerControllerIT {
                 .extract().jsonPath(config).getObject("", ShortenedUrlResponse.class);
 
         assertThat("Url is correct", response.url().equals("yahoo.com"));
+        assertThat("Url is correct", response.title().equals("some"));
         assertThat("Is Enabled is correct", !response.isEnabled());
         assertThat("Updated at is correct", !response.updatedAt().equals(entity.getUpdatedAt()));
         assertThat("Created at is correct", response.createdAt().equals(entity.getCreatedAt()));

@@ -22,6 +22,7 @@ import org.acme.domain.repo.GiftRequestRepository;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
 import org.acme.domain.service.ShortenedUrlService;
+import org.acme.domain.validator.TitleValidator;
 import org.acme.domain.validator.UniqueIdValidator;
 import org.acme.domain.validator.UrlValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -156,9 +157,22 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                 );
             }
         }
+        if (command.title().isPresent()) {
+            var titleValidation = TitleValidator.validate(command.title().get());
+            if (titleValidation.isLeft()) {
+                return Either.left(
+                        new ShortenUrlError(Optional.empty(), List.of(titleValidation.getLeft()))
+                );
+            }
+        }
 
         String uniqueIdentifier = command.uniqueIdentifier().orElseGet(this::generateUniqueIdentifier);
-        ShortenedUrl shortUrl = new ShortenedUrl(either.get(), uniqueIdentifier, command.userId());
+        ShortenedUrl shortUrl = new ShortenedUrl(
+                either.get(),
+                uniqueIdentifier,
+                command.userId(),
+                command.title().orElse(null)
+        );
         try {
             repo.insertShortenedUrl(shortUrl);
         } catch (SaveShortenedUrlConflictError err) {
@@ -167,7 +181,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
                     List.of()
             ));
         }
-        var event = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortUrl);
+        var event = ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(shortUrl);
         eventStore.insertEvent(event);
         publisher.publishUserCreatedShortenedUrl(shortUrl.getCreatedAt(), shortUrl.getOriginalUrl(), shortUrl.getPublicIdentifier());
         cache.put(uniqueIdentifier, shortUrl);
@@ -194,7 +208,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             current.updateOriginalUrl(event.getEvent());
             eventStore.insertEvent(event);
         }
-        if (command.title().isSet() && !current.getTitle().equals(command.title().value())) {
+        if (command.title().isSet() && (current.getTitle() == null || !current.getTitle().equals(command.title().value()))) {
             var event = ShortenedUrlEventEnvelopFactory.createV1UpdatedTitleEvent(command.shortenedUrl(), command.title().value());
             current.updateTitle(event.getEvent());
             eventStore.insertEvent(event);
@@ -211,7 +225,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     public void giftShortenedUrl(String uid, Long targetUserId) {
         var shortenedUrl = this.getShortenedUrl(uid, null).get();
         var existingVersion = shortenedUrl.getUpdatedAt();
-        var giftEvent = ShortenedUrlEventEnvelopFactory.createV1CreateUserGiftedShortenedUrlEvent(
+        var giftEvent = ShortenedUrlEventEnvelopFactory.createV2CreateUserGiftedShortenedUrlEvent(
                 shortenedUrl,
                 targetUserId
         );

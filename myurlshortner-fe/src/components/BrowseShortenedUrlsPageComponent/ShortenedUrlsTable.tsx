@@ -180,7 +180,6 @@ export default function ShortnetedUrlsTable() {
                         isEnabled={one.is_enabled}
                         onClose={() => {
                           setCurrentSelectedForEdit(null);
-                          console.log("mutatuted")
                           mutate();
                         }}
                         title={one.title}
