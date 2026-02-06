@@ -61,7 +61,8 @@ public class ShortenedUrlUseCases {
                 new CreateShortenedUrlCommand(
                         Optional.ofNullable(request.uniqueIdentifier()),
                         request.url(),
-                        userIdValidation.get()
+                        userIdValidation.get(),
+                        Optional.ofNullable(request.title())
                 )
         );
     }

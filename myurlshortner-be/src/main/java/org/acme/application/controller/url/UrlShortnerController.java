@@ -7,10 +7,10 @@ import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
 import org.acme.application.util.PatchField;
 import org.acme.domain.entity.ShortenedUrl;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.events.V1UserUpdatedTitleEvent;
+import org.acme.domain.events.V2UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V2UserGiftedShortenedUrlEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
@@ -45,7 +45,6 @@ public class UrlShortnerController {
     @Produces(APPLICATION_JSON)
     public Response createShortenedUrl(
             ShortenUrlRequest request,
-            @DefaultValue("1")
             @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
         return this.shortenedUrlUseCases.createShortenedUrl(userIdHeader, request).fold(
@@ -188,7 +187,7 @@ public class UrlShortnerController {
                 events ->
                         Response.ok(new ShortenedUrlHistoryResponse(events.stream().map(e ->
                                 switch (e) {
-                                    case V1UserCreatedShortenedUrlEvent event ->
+                                    case V2UserCreatedShortenedUrlEvent event ->
                                             new ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow(
                                                     event.originalUrl().toString(),
                                                     event.createdAt()
@@ -198,7 +197,7 @@ public class UrlShortnerController {
                                                     event.newOriginalUrl().toString(),
                                                     event.updatedAt()
                                             );
-                                    case V1UserGiftedShortenedUrlEvent event ->
+                                    case V2UserGiftedShortenedUrlEvent event ->
                                             new ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow(
                                                     event.originalUrl().toString(),
                                                     event.createdAt()

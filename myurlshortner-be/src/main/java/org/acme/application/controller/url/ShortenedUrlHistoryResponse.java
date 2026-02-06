@@ -13,7 +13,8 @@ public record ShortenedUrlHistoryResponse(
             this.eventDateTime = datetime;
         }
 
-        public ShortenedUrlHistoryRow() {}
+        public ShortenedUrlHistoryRow() {
+        }
 
         public OffsetDateTime getEventDateTime() {
             return eventDateTime;

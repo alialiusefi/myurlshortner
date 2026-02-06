@@ -42,7 +42,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         var embeddedMetadata = toEmbeddedMetadata(envelop.getMetadata());
         try {
             switch (envelop.getEvent()) {
-                case V1UserCreatedShortenedUrlEvent createdEvent -> {
+                case V2UserCreatedShortenedUrlEvent createdEvent -> {
                     var jsonString = mapper.writeValueAsString(createdEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -65,7 +65,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                             )
                     );
                 }
-                case V1UserGiftedShortenedUrlEvent giftEvent -> {
+                case V2UserGiftedShortenedUrlEvent giftEvent -> {
                     var jsonString = mapper.writeValueAsString(giftEvent);
                     persist(
                             new ShortenedUrlEventEntity(
@@ -166,9 +166,8 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                 case USER_CREATED_SHORTENED_URL -> {
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
-                            mapper.readValue(dbEntity.getEvent(), V1UserCreatedShortenedUrlEvent.class)
+                            mapper.readValue(dbEntity.getEvent(), V2UserCreatedShortenedUrlEvent.class)
                     );
-
                 }
                 case USER_UPDATED_ORIGINAL_URL -> {
                     return new ShortenedUrlEventEnvelop<>(
@@ -179,7 +178,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                 case USER_GIFTED_SHORTENED_URL -> {
                     return new ShortenedUrlEventEnvelop<>(
                             meta,
-                            mapper.readValue(dbEntity.getEvent(), V1UserGiftedShortenedUrlEvent.class)
+                            mapper.readValue(dbEntity.getEvent(), V2UserGiftedShortenedUrlEvent.class)
                     );
                 }
                 case USER_UPDATED_TITLE -> {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public record PatchShortenedUrlError(
-            Optional<ShortenedUrlIsNotFoundException> notFound,
-            List<DomainException> validationErrors
-    ) {
-    }
+        Optional<ShortenedUrlIsNotFoundException> notFound,
+        List<DomainException> validationErrors
+) {
+}

@@ -5,11 +5,12 @@ import org.jspecify.annotations.NonNull;
 import java.net.URI;
 import java.time.OffsetDateTime;
 
-public record V1UserCreatedShortenedUrlEvent(
+public record V2UserGiftedShortenedUrlEvent(
         @NonNull String uniqueIdentifier,
         @NonNull OffsetDateTime createdAt,
-        @NonNull Boolean isEnabled,
         @NonNull URI originalUrl,
-        @NonNull Long userId
+        @NonNull Long sourceUserId,
+        @NonNull Long targetUserId,
+        @NonNull String title
 ) implements ShortenedUrlEvent {
 }

@@ -2,9 +2,9 @@ package org.acme.domain.entity;
 
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.domain.events.ShortenedUrlEventEnvelopFactory;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.events.V1UserUpdatedTitleEvent;
+import org.acme.domain.events.V2UserCreatedShortenedUrlEvent;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -30,7 +30,7 @@ public class ShortenedUrlFactoryTest {
                 1L,
                 "test"
         );
-        List created = List.of(ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortenedUrl).getEvent());
+        List created = List.of(ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(shortenedUrl).getEvent());
         var iterator = Mockito.mock(ShortenedUrlEventRepository.ShortenedUrlEventIterator.class); // the factory relies on the api of the iterator
         Mockito.when(iterator.hasNext()).thenReturn(true).thenReturn(false);
         Mockito.when(iterator.next()).thenReturn(created);
@@ -52,7 +52,7 @@ public class ShortenedUrlFactoryTest {
                 1L,
                 "test"
         );
-        V1UserCreatedShortenedUrlEvent created = ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(shortenedUrl).getEvent();
+        V2UserCreatedShortenedUrlEvent created = ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(shortenedUrl).getEvent();
         List events1 = List.of(created);
 
         V1UserUpdatedOriginalUrlEvent updated = ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(shortenedUrl, URI.create("www.example.com")).getEvent();

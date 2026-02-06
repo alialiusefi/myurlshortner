@@ -65,8 +65,8 @@ public class GiftRequestControllerIT {
         var url = "youtube.com";
         var uid = "abcdefghi2";
         var userId = 1L;
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
-        eventStore.insertEvent(ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(entity));
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "noe");
+        eventStore.insertEvent(ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(entity));
         shortenedUrlRepository.insertShortenedUrl(entity);
 
         given()
