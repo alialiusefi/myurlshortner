@@ -188,9 +188,10 @@ public class UrlShortnerController {
                         Response.ok(new ShortenedUrlHistoryResponse(events.stream().map(e ->
                                 switch (e) {
                                     case V2UserCreatedShortenedUrlEvent event ->
-                                            new ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow(
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlCreatedHistoryRow(
+                                                    event.createdAt(),
                                                     event.originalUrl().toString(),
-                                                    event.createdAt()
+                                                    event.title()
                                             );
                                     case V1UserUpdatedOriginalUrlEvent event ->
                                             new ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow(
@@ -198,9 +199,10 @@ public class UrlShortnerController {
                                                     event.updatedAt()
                                             );
                                     case V2UserGiftedShortenedUrlEvent event ->
-                                            new ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow(
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlCreatedHistoryRow(
+                                                    event.createdAt(),
                                                     event.originalUrl().toString(),
-                                                    event.createdAt()
+                                                    event.title()
                                             );
                                     case V1UserUpdatedTitleEvent event ->
                                             new ShortenedUrlHistoryResponse.TitleUpdatedHistoryRow(
