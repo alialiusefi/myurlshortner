@@ -8,9 +8,7 @@ export default function Page() {
       direction="column"
       sx={{ justifyContent: "center", alignItems: "center", height: "500px" }}
     >
-      <Grid>
         <ShortenUrlForm />
-      </Grid>
     </Grid>
   );
 }
