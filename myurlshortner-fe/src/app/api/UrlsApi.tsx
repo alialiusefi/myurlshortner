@@ -137,6 +137,7 @@ export class GetShortenedUrlHistoryResponse {
 export class GetShortenedUrlHistory404Response {}
 
 export class GetAvailableUrlsResponseData {
+  unique_identifier: string;
   url: string;
   shortened_url: string;
   created_at: string;
