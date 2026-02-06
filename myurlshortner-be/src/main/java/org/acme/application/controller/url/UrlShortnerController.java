@@ -81,6 +81,7 @@ public class UrlShortnerController {
                     var results = success._2.stream()
                             .map(
                                     row -> new UrlList.UrlRow(
+                                            row.uniqueIdentifier(),
                                             row.originalUrl().toString(),
                                             row.shortenedUrl(hostname),
                                             row.accessCount(),
