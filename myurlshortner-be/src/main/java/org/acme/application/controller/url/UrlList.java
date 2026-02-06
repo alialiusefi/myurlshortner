@@ -8,6 +8,7 @@ public record UrlList(
         Long total
 ) {
     public record UrlRow(
+            String uniqueIdentifier,
             String url,
             String shortenedUrl,
             Long accessCount,
