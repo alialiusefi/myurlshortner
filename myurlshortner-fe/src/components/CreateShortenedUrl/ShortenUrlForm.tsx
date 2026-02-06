@@ -7,8 +7,6 @@ import {
 } from "../../app/api/UrlShortnerApi";
 import { ErrorResponse } from "../../app/api/Errors";
 import Button from "@mui/material/Button";
-import FormGroup from "@mui/material/FormGroup";
-import FormControl from "@mui/material/FormControl";
 import { useContext, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
@@ -38,6 +36,7 @@ export default function ShortenUrlForm() {
     errorResponse: null,
     shortenedUrl: "",
   });
+  const [titleInput, setTitleInput] = useState<string>(null);
   const [openModalUrlState, setOpenModalUrlState] = useState(false);
   const [uidExists, setUidExists] = useState(false);
   const userId = useContext(UserProvider);
@@ -51,14 +50,14 @@ export default function ShortenUrlForm() {
     setUidInput(uniqueId);
     validateUidExists(uniqueId);
   };
-
+  const titleIsValid = () => titleInput == null || titleInput.length < 100
   const validateForm = (targetUrl: string, uid?: string): boolean => {
     const urlInputValidation =
       targetUrl.match(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*)/g,
       ) != null;
     const uidInputValidation = uid?.match(/^[a-zA-Z0-9-]{1,10}$/) != null;
-    return urlInputValidation && uidInputValidation;
+    return urlInputValidation && uidInputValidation && titleIsValid();
   };
 
   const handleSubmit = async () => {
@@ -67,6 +66,7 @@ export default function ShortenUrlForm() {
       targetUrlInput,
       uidInput == null ? data?.unique_identifier : uidInput,
       userId,
+      titleInput == null ? titleInput : titleInput.trim()
     );
     if (result instanceof ShortenUrlResponse) {
       const shortenedUrl = (result as ShortenUrlResponse).shortened_url;
@@ -145,52 +145,62 @@ export default function ShortenUrlForm() {
           in={selectedMode == CUSTOM_TYPE_VALUE}
           hidden={selectedMode == AUTO_TYPE_VALUE}
         >
-          <Paper sx={{ padding: 1 }} variant="outlined">
-            <Typography>Shortened URL:</Typography>
-            <Grid
-              container
-              direction="row"
-              rowSpacing={3}
-              columnSpacing={1}
-            >
-              <Typography alignContent={"center"}>
-                {`${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/`}
-              </Typography>
-              <TextField
-                type="text"
-                size="small"
-                label="Unique ID"
-                value={
-                  uidInput == null
-                    ? data?.unique_identifier
-                    : uidInput
-                }
-                onChange={(e) =>
-                  handleUniqueIdChange(e.target.value)
-                }
-                placeholder="fancyid"
-                slotProps={{
-                  htmlInput: { "data-testid": "unique-id-input" },
-                }}
-                helperText={
-                  uidExists ? "The unique id already exists." : ""
-                }
-                error={uidExists}
-                required
-              />
-              <Button
-                data-testid="refresh-button"
-                onClick={async () =>
-                  handleUniqueIdChange(
-                    (await GenerateUniqueIdFetch())
-                      .unique_identifier,
-                  )
-                }
+          <Box>
+            <TextField
+              value={titleInput ?? ""}
+              sx={{ paddingBottom: 2 }}
+              onChange={(e) => setTitleInput(e.target.value)}
+              label={"Title"}
+              error={!titleIsValid()}
+              helperText={!titleIsValid() ? "Title cannot exceed 100 characters" : "Short text that describes the shortened url"}
+              placeholder="Your Title"
+              fullWidth
+            />
+            <Paper sx={{ padding: 1 }} variant="outlined">
+              <Typography>Shortened URL:</Typography>
+              <Grid
+                container
+                direction="row"
+                rowSpacing={3}
+                columnSpacing={1}
               >
-                <RefreshIcon />
-              </Button>
-            </Grid>
-          </Paper>
+                <Typography alignContent={"center"}>
+                  {`${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/`}
+                </Typography>
+                <TextField
+                  type="text"
+                  size="small"
+                  label="Unique ID"
+                  value={
+                    (uidInput == null ? data?.unique_identifier : uidInput) ?? ""
+                  }
+                  onChange={(e) =>
+                    handleUniqueIdChange(e.target.value)
+                  }
+                  placeholder="fancyid"
+                  slotProps={{
+                    htmlInput: { "data-testid": "unique-id-input" },
+                  }}
+                  helperText={
+                    uidExists ? "The unique id already exists." : ""
+                  }
+                  error={uidExists}
+                  required
+                />
+                <Button
+                  data-testid="refresh-button"
+                  onClick={async () =>
+                    handleUniqueIdChange(
+                      (await GenerateUniqueIdFetch())
+                        .unique_identifier,
+                    )
+                  }
+                >
+                  <RefreshIcon />
+                </Button>
+              </Grid>
+            </Paper>
+          </Box>
         </Grow>
         <TextField
           type="url"

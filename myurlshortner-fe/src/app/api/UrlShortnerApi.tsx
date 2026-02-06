@@ -45,8 +45,9 @@ export async function shortenUrlOperaton(
   url: string,
   uid: string,
   userId: number,
+  title?: string
 ): Promise<ShortenUrlResponse | ErrorResponse> {
-  const request = new ShortenUrlRequest(url, uid);
+  const request = new ShortenUrlRequest(url, uid, title);
   const requestConfig = {
     method: "POST",
     body: JSON.stringify(request),
@@ -135,10 +136,12 @@ export async function updateShortenedUrl(
 class ShortenUrlRequest {
   url: string;
   unique_identifier: string;
+  title?: string;
 
-  constructor(url: string, unique_identifier: string) {
+  constructor(url: string, unique_identifier: string, title?: string) {
     this.url = url;
     this.unique_identifier = unique_identifier;
+    this.title = title;
   }
 }
 
