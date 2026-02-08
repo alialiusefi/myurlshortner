@@ -33,7 +33,6 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
   const isTargetUrlValid = () => newTargetUrl.match(TARGET_URL_REGEX) != null;
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isEnabled, setIsEnabled] = useState<boolean>(props.isEnabled);
-  const onCloseCallback = props.onClose;
   const [error, setError] = useState<ErrorResponse>(null);
   const handleApply = async () => {
     const response = await updateShortenedUrl(
@@ -48,7 +47,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
     } else {
       setIsOpen(false);
       setError(null);
-      onCloseCallback();
+      props.onClose();
     }
   };
   return (
@@ -56,81 +55,65 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
       open={isOpen}
       onClose={() => {
         setIsOpen(false);
-        onCloseCallback();
+        props.onClose();
       }}
     >
-      <Grid padding={2} container>
-        <FormGroup sx={{ width: 400 }}>
-          <Grid>
-            <Typography
-              data-testid="title-text"
-              id="modal-modal-title"
-              variant="h6"
-              component="h2"
-              paddingBottom={2}
-            >
-              Update Shortened URL:
-            </Typography>
-          </Grid>
-          <Grid padding={2}>
-            <TextField
-              fullWidth
-              label="Title"
-              onChange={(e) => {
-                setTitleInput(e.target.value);
-              }}
-              value={titleInput ?? ""}
-              error={!isTitleValid()}
-              helperText={!isTitleValid() ? TITLE_ERROR_MESSAGE : ""
-              }
+      <Grid padding={3} spacing={2} container flexDirection={"column"} minWidth={400}>
+        <Typography
+          data-testid="title-text"
+          id="modal-modal-title"
+          variant="h6"
+          component="h2"
+          paddingBottom={2}
+        >
+          Update Shortened URL:
+        </Typography>
+        <TextField
+          fullWidth
+          label="Title"
+          onChange={(e) => {
+            setTitleInput(e.target.value);
+          }}
+          value={titleInput ?? ""}
+          error={!isTitleValid()}
+          helperText={!isTitleValid() ? TITLE_ERROR_MESSAGE : ""
+          }
+        />
+        <TextField
+          label="Target URL"
+          fullWidth
+          value={newTargetUrl}
+          onChange={(e) => setNewTargetUrl(e.target.value)}
+          error={!isTargetUrlValid()}
+        />
+        <FormControlLabel
+          label="Enabled"
+          control={
+            <Switch
+              checked={isEnabled}
+              onChange={(e) => setIsEnabled(e.target.checked)}
             />
-          </Grid>
-          <Grid padding={2}>
-            <FormControl fullWidth>
-              <TextField
-                label="Target URL"
-                fullWidth
-                value={newTargetUrl}
-                onChange={(e) => setNewTargetUrl(e.target.value)}
-                error={!isTargetUrlValid()}
-              />
-            </FormControl>
-          </Grid>
-          <Grid container spacing={2} padding={1}>
-            <FormControl>
-              <Button
-                variant="contained"
-                onClick={handleApply}
-                disabled={!isTargetUrlValid() || !isTitleValid()}
-              >
-                Apply
-              </Button>
-            </FormControl>
-            <FormControl>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setIsOpen(false);
-                  onCloseCallback();
-                }}
-              >
-                Cancel
-              </Button>
-            </FormControl>
-          </Grid>
-          <Grid padding={2}>
-            <FormControlLabel
-              label="Enabled"
-              control={
-                <Switch
-                  checked={isEnabled}
-                  onChange={(e) => setIsEnabled(e.target.checked)}
-                />
-              }
-            />
-          </Grid>
-          <Grid>{apiErrorSnackBar(error)}</Grid>
-        </FormGroup>
+          }
+        />
+        <Grid container spacing={2} paddingTop={1} justifyContent={"center"}>
+          <Button
+            variant="contained"
+            onClick={handleApply}
+            disabled={!isTargetUrlValid() || !isTitleValid()}
+          >
+            Apply
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setIsOpen(false);
+              props.onClose();
+            }}
+          >
+            Cancel
+          </Button>
+        </Grid>
+        {apiErrorSnackBar(error)}      
       </Grid>
     </Dialog>
   );
