@@ -33,7 +33,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
   const isTitleValid = () => titleInput == null || titleInput?.length < 100;
   const isTargetUrlValid = () => newTargetUrl.match(TARGET_URL_REGEX) != null;
   const isEdited = () =>
-    props.isEnabled !== isEnabled || props.originalUrl !== newTargetUrl;
+  props.isEnabled !== isEnabled || props.originalUrl !== newTargetUrl || props.title !== titleInput;
   const handleApply = async () => {
     const response = await updateShortenedUrl(
       props.uniqueIdentifier,

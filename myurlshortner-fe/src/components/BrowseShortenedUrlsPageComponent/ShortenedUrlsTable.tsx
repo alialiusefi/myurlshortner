@@ -173,20 +173,22 @@ export default function ShortnetedUrlsTable() {
                   >
                     <EditIcon />
                   </IconButton>
-                  <UpdateShortenedUrlDialog
-                    isOpen={currentSelectedForEdit === one.shortened_url}
-                    uniqueIdentifier={one.unique_identifier}
-                    originalUrl={one.url}
-                    isEnabled={one.is_enabled}
-                    close={() => {
-                      setCurrentSelectedForEdit(null);
-                    }}
-                    onApply={() => {
-                      mutate();
-                      setCurrentSelectedForEdit(null);
-                    }}
-                    title={one.title}
-                  />
+                  {
+                    currentSelectedForEdit !== null ? (<UpdateShortenedUrlDialog
+                      isOpen={currentSelectedForEdit === one.shortened_url}
+                      uniqueIdentifier={one.unique_identifier}
+                      originalUrl={one.url}
+                      isEnabled={one.is_enabled}
+                      close={() => {
+                        setCurrentSelectedForEdit(null);
+                      }}
+                      onApply={() => {
+                        mutate();
+                        setCurrentSelectedForEdit(null);
+                      }}
+                      title={one.title}
+                    />) : (<></>)
+                  }
                 </TableCell>
                 <TableCell>
                   <Button
