@@ -85,7 +85,7 @@ export default function ShortnetedUrlsTable() {
       setDirectionState("desc");
     }
   };
-  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState(null);
+  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState<string>(null);
   return (
     <Box>
       <Typography>Browse Shortened Urls:</Typography>
@@ -164,27 +164,24 @@ export default function ShortnetedUrlsTable() {
                 </TableCell>
                 <TableCell>
                   <IconButton
-                    onClick={() => {
-                      setCurrentSelectedForEdit(one.shortened_url);
-                    }}
+                    onClick={() => setCurrentSelectedForEdit(one.shortened_url)}
                   >
                     <EditIcon />
-                    {currentSelectedForEdit === one.shortened_url ? (
-                      <UpdateShortenedUrlDialog
-                        isOpen={currentSelectedForEdit === one.shortened_url}
-                        uniqueIdentifier={one.unique_identifier}
-                        originalUrl={one.url}
-                        isEnabled={one.is_enabled}
-                        onClose={() => {
-                          setCurrentSelectedForEdit(null);
-                          mutate();
-                        }}
-                        title={one.title}
-                      />
-                    ) : (
-                      <></>
-                    )}
                   </IconButton>
+                  <UpdateShortenedUrlDialog
+                      isOpen={currentSelectedForEdit === one.shortened_url}
+                      uniqueIdentifier={one.unique_identifier}
+                      originalUrl={one.url}
+                      isEnabled={one.is_enabled}
+                      close={() => {
+                        setCurrentSelectedForEdit(null);
+                      }}
+                      onApply={() => {
+                        mutate();
+                        setCurrentSelectedForEdit(null);
+                      }}
+                      title={one.title}
+                    />
                 </TableCell>
                 <TableCell>
                   <Button

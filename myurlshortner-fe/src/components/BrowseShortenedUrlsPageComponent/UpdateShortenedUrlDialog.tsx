@@ -22,18 +22,19 @@ type Properties = {
   originalUrl: string;
   isEnabled: boolean;
   title?: string;
-  onClose: () => void;
+  close: () => void;
+  onApply: () => void;
 };
 
 export default function UpdateShortenedUrlDialog(props: Properties) {
   const userId = useContext(UserProvider);
   const [titleInput, setTitleInput] = useState<string>(props.title);
   const [newTargetUrl, setNewTargetUrl] = useState<string>(props.originalUrl);
-  const isTitleValid = () => titleInput == null || titleInput?.length < 100;
-  const isTargetUrlValid = () => newTargetUrl.match(TARGET_URL_REGEX) != null;
-  const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isEnabled, setIsEnabled] = useState<boolean>(props.isEnabled);
   const [error, setError] = useState<ErrorResponse>(null);
+  const isTitleValid = () => titleInput == null || titleInput?.length < 100;
+  const isTargetUrlValid = () => newTargetUrl.match(TARGET_URL_REGEX) != null;
+  const isEdited = () => props.isEnabled !== isEnabled || props.originalUrl !== newTargetUrl
   const handleApply = async () => {
     const response = await updateShortenedUrl(
       props.uniqueIdentifier,
@@ -45,18 +46,14 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
     if (response instanceof ErrorResponse) {
       setError(response);
     } else {
-      setIsOpen(false);
       setError(null);
-      props.onClose();
+      props.onApply();
     }
   };
   return (
     <Dialog
-      open={isOpen}
-      onClose={() => {
-        setIsOpen(false);
-        props.onClose();
-      }}
+      open={props.isOpen}
+      onClose={props.close}
     >
       <Grid padding={3} spacing={2} container flexDirection={"column"} minWidth={400}>
         <Typography
@@ -99,15 +96,14 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
           <Button
             variant="contained"
             onClick={handleApply}
-            disabled={!isTargetUrlValid() || !isTitleValid()}
+            disabled={!isTargetUrlValid() || !isTitleValid() || !isEdited()}
           >
             Apply
           </Button>
           <Button
             variant="outlined"
             onClick={() => {
-              setIsOpen(false);
-              props.onClose();
+              props.close();
             }}
           >
             Cancel
