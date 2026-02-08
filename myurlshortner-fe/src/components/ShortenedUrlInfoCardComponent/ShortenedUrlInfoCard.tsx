@@ -40,7 +40,10 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
       </Grid>
       <Grid>
         <Typography variant="h5" paddingLeft={2}>
-          Title: {data.title == null || data.title.length == 0 ? ('<empty>') : (data.title)}
+          Title:{" "}
+          {data.title == null || data.title.length == 0
+            ? "<empty>"
+            : data.title}
         </Typography>
       </Grid>
       <Grid container spacing={1} padding={2}>

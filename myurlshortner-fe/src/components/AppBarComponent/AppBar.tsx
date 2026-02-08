@@ -27,10 +27,16 @@ export default function MyUrlShorterAppBar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             MyUrlShortner
           </Typography>
-          <Button onClick={() => redirect(buildShortenUrlPath())} color="inherit">
+          <Button
+            onClick={() => redirect(buildShortenUrlPath())}
+            color="inherit"
+          >
             Home
           </Button>
-          <Button onClick={() => redirect(buildBrowsePagePath())} color="inherit">
+          <Button
+            onClick={() => redirect(buildBrowsePagePath())}
+            color="inherit"
+          >
             Browse
           </Button>
           <IconButton

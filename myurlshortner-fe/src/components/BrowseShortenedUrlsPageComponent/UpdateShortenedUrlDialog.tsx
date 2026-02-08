@@ -1,9 +1,7 @@
 import {
   Button,
   Dialog,
-  FormControl,
   FormControlLabel,
-  FormGroup,
   Switch,
   TextField,
 } from "@mui/material";
@@ -34,7 +32,8 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
   const [error, setError] = useState<ErrorResponse>(null);
   const isTitleValid = () => titleInput == null || titleInput?.length < 100;
   const isTargetUrlValid = () => newTargetUrl.match(TARGET_URL_REGEX) != null;
-  const isEdited = () => props.isEnabled !== isEnabled || props.originalUrl !== newTargetUrl
+  const isEdited = () =>
+    props.isEnabled !== isEnabled || props.originalUrl !== newTargetUrl;
   const handleApply = async () => {
     const response = await updateShortenedUrl(
       props.uniqueIdentifier,
@@ -51,11 +50,14 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
     }
   };
   return (
-    <Dialog
-      open={props.isOpen}
-      onClose={props.close}
-    >
-      <Grid padding={3} spacing={2} container flexDirection={"column"} minWidth={400}>
+    <Dialog open={props.isOpen} onClose={props.close}>
+      <Grid
+        padding={3}
+        spacing={2}
+        container
+        flexDirection={"column"}
+        minWidth={400}
+      >
         <Typography
           data-testid="title-text"
           id="modal-modal-title"
@@ -73,8 +75,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
           }}
           value={titleInput ?? ""}
           error={!isTitleValid()}
-          helperText={!isTitleValid() ? TITLE_ERROR_MESSAGE : ""
-          }
+          helperText={!isTitleValid() ? TITLE_ERROR_MESSAGE : ""}
         />
         <TextField
           label="Target URL"
@@ -109,7 +110,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
             Cancel
           </Button>
         </Grid>
-        {apiErrorSnackBar(error)}      
+        {apiErrorSnackBar(error)}
       </Grid>
     </Dialog>
   );

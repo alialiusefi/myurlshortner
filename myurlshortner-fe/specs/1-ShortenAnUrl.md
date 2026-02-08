@@ -10,6 +10,7 @@ The form consists of:
 - Selection between Auto & Custom
 
 Auto:
+
 - Shortened Url
   - Shortened Url Label
   - App Url
@@ -20,6 +21,7 @@ Auto:
   - Text: 'Shorten'
 
 Custom:
+
 - Title
   - Up to 100 characters
   - Sets as "" by default
