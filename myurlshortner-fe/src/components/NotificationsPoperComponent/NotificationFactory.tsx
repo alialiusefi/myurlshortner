@@ -8,6 +8,7 @@ import {
   GiftRequestResponseToSourceUserNotification,
   GiftRequestResponseToSourceUserParamsType,
 } from "./Notification";
+import { buildInfoPagePath } from "app/lib/Constants";
 
 interface ShortenedUrlNotificationComponentFactory {
   getTitle(notification: ShortenedUrlNotification): ReactElement;
@@ -102,7 +103,7 @@ class GiftRequestResponseToSourceUserNotificationFactory
             Your gift request of shortened url with id{" "}
             {
               <Link
-                href={pathToInfoPage(notification.params.unique_identifier)}
+                href={buildInfoPagePath(notification.params.unique_identifier)}
               >
                 {notification.params.unique_identifier}
               </Link>
@@ -120,7 +121,7 @@ class GiftRequestResponseToSourceUserNotificationFactory
             Your gift request of shortened url with id{" "}
             {
               <Link
-                href={pathToInfoPage(notification.params.unique_identifier)}
+                href={buildInfoPagePath(notification.params.unique_identifier)}
               >
                 {notification.params.unique_identifier}
               </Link>
@@ -207,7 +208,7 @@ class ShortenedUrlReachedNViewNotificationFactory
       <Typography variant="caption" color="textSecondary">
         Your shortened url with id{" "}
         {
-          <Link href={pathToInfoPage(notification.params.unique_identifier)}>
+          <Link href={buildInfoPagePath(notification.params.unique_identifier)}>
             {notification.params.unique_identifier}
           </Link>
         }{" "}
@@ -219,6 +220,5 @@ class ShortenedUrlReachedNViewNotificationFactory
 export const shortenedUrlReachedNViewNotificationFactory =
   new ShortenedUrlReachedNViewNotificationFactory();
 
-const pathToInfoPage = (uid: string) => `/browse/${uid}/info`;
 const redirectUrl = (uid: string) =>
   `${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/goto/${uid}`;

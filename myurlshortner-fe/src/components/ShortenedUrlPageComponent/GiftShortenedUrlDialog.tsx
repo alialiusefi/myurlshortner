@@ -11,6 +11,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { useContext, useState } from "react";
 import { CreateAwaitingGiftRequestFetch } from "app/api/GiftRequestApi";
 import { UserProvider } from "app/context";
+import { USER_ID_REGEX } from "app/lib/Constants";
 
 interface GiftShortenedURLModalParams {
   uniqueIdentifier: string;
@@ -23,7 +24,7 @@ export function GiftShortenedURLDialog(params: GiftShortenedURLModalParams) {
   const userId = useContext(UserProvider);
   const [targetUserId, setTargetUserId] = useState<string>("");
   const validUserId = (str) =>
-    str.match(/^\d+$/) != null &&
+    str.match(USER_ID_REGEX) != null &&
     Number.parseInt(str) !== userId &&
     Number.parseInt(str) !== 0;
   return (

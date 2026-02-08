@@ -10,6 +10,7 @@ import { GiftShortenedURLDialog } from "./GiftShortenedUrlDialog";
 import { GiftShortenedUrlButton } from "./GiftShortenedUrlButton";
 import { GetAwaitingGiftRequestSWR } from "app/api/GiftRequestApi";
 import { UserProvider } from "app/context";
+import { buildBrowsePagePath } from "app/lib/Constants";
 
 export default function ShortenedUrlPage(params: {
   uniqueId: string;
@@ -30,7 +31,7 @@ export default function ShortenedUrlPage(params: {
         <Button
           variant="contained"
           startIcon={<ArrowBackIcon />}
-          onClick={() => redirect("/browse")}
+          onClick={() => redirect(buildBrowsePagePath())}
         >
           Back
         </Button>

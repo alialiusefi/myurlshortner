@@ -22,6 +22,7 @@ import { TextField } from "@mui/material";
 import { GetShortenedUrlInfoFetch } from "app/api/UrlsApi";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { UserProvider } from "app/context";
+import { TARGET_URL_REGEX, UID_INPUT_REGEX, TITLE_ERROR_MESSAGE } from "app/lib/Constants";
 
 const AUTO_TYPE_VALUE = 0;
 const CUSTOM_TYPE_VALUE = 1;
@@ -52,11 +53,8 @@ export default function ShortenUrlForm() {
   };
   const titleIsValid = () => titleInput == null || titleInput.length < 100;
   const validateForm = (targetUrl: string, uid?: string): boolean => {
-    const urlInputValidation =
-      targetUrl.match(
-        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*)/g,
-      ) != null;
-    const uidInputValidation = uid?.match(/^[a-zA-Z0-9-]{1,10}$/) != null;
+    const urlInputValidation = targetUrl.match(TARGET_URL_REGEX) != null;
+    const uidInputValidation = uid?.match(UID_INPUT_REGEX) != null;
     return urlInputValidation && uidInputValidation && titleIsValid();
   };
 
@@ -155,7 +153,7 @@ export default function ShortenUrlForm() {
               error={!titleIsValid()}
               helperText={
                 !titleIsValid()
-                  ? "Title cannot exceed 100 characters"
+                  ? TITLE_ERROR_MESSAGE
                   : "Short text that describes the shortened url"
               }
               placeholder="Your Title"
