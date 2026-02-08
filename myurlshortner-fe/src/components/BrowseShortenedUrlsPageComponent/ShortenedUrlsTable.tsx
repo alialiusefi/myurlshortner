@@ -28,6 +28,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import Grid from "@mui/material/Grid";
 import { updateShortenedUrl } from "app/api/UrlShortnerApi";
+import { buildInfoPagePath, EMPTY_VALUE, TITLE_ERROR_MESSAGE } from "app/lib/Constants";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -188,8 +189,7 @@ export default function ShortnetedUrlsTable() {
                 <TableCell>
                   <Button
                     onClick={() => {
-                      const infoUrl = `/browse/${one.unique_identifier}/info`;
-                      redirect(infoUrl);
+                      redirect(buildInfoPagePath(one.unique_identifier));
                     }}
                   >
                     INFO
@@ -239,14 +239,14 @@ function Title(params: {
     <Grid container direction="row">
       <TextField
         sx={{ width: 200 }}
-        placeholder="<empty>"
+        placeholder={EMPTY_VALUE}
         hiddenLabel
         variant="outlined"
         size="small"
         value={title ?? ""}
         error={!isValid(title)}
         helperText={
-          !isValid(title) ? "The provided title exceeds 100 characters" : ""
+          !isValid(title) ? TITLE_ERROR_MESSAGE : ""
         }
         onChange={(e) => setTitle(e.target.value)}
       />

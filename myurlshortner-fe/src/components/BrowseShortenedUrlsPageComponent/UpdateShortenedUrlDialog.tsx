@@ -14,6 +14,7 @@ import { updateShortenedUrl } from "app/api/UrlShortnerApi";
 import { apiErrorSnackBar } from "../Utility/ApiErrorSnackBar";
 import { ErrorResponse } from "app/api/Errors";
 import { UserProvider } from "app/context";
+import { TARGET_URL_REGEX, TITLE_ERROR_MESSAGE } from "app/lib/Constants";
 
 type Properties = {
   isOpen: boolean;
@@ -29,10 +30,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
   const [titleInput, setTitleInput] = useState<string>(props.title);
   const [newTargetUrl, setNewTargetUrl] = useState<string>(props.originalUrl);
   const isTitleValid = () => titleInput == null || titleInput?.length < 100;
-  const isTargetUrlValid = () =>
-    newTargetUrl.match(
-      /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*)/g,
-    ) != null;
+  const isTargetUrlValid = () => newTargetUrl.match(TARGET_URL_REGEX) != null;
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isEnabled, setIsEnabled] = useState<boolean>(props.isEnabled);
   const onCloseCallback = props.onClose;
@@ -83,10 +81,7 @@ export default function UpdateShortenedUrlDialog(props: Properties) {
               }}
               value={titleInput ?? ""}
               error={!isTitleValid()}
-              helperText={
-                !isTitleValid()
-                  ? "The provided title cannot exceed 100 characters"
-                  : ""
+              helperText={!isTitleValid() ? TITLE_ERROR_MESSAGE : ""
               }
             />
           </Grid>

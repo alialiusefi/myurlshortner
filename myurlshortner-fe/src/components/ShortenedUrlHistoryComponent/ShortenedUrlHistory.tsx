@@ -13,6 +13,7 @@ import { readableTimestamp } from "components/ReadableTimestampComponent/Readabl
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
+import { buildBrowsePagePath, EMPTY_VALUE } from "app/lib/Constants";
 
 export default function ShortenedUrlHistory(params: {
   uniqueId: string;
@@ -29,7 +30,7 @@ export default function ShortenedUrlHistory(params: {
     return <></>;
   }
   if (error instanceof GetShortenedUrlHistory404Response) {
-    redirect("/browse");
+    redirect(buildBrowsePagePath());
   }
   const result = data?.map((res) => res?.data).flat();
   return (
@@ -80,7 +81,7 @@ const TitleUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => 
       </Grid>
       <Grid>
         <Typography sx={{ p: 2 }}>
-          Title: {params.row.title == null || params.row.title.length == 0 ? ("<empty>") : (params.row.title)}
+          Title: {params.row.title == null || params.row.title.length == 0 ? (EMPTY_VALUE) : (params.row.title)}
         </Typography>
       </Grid>
     </Card>
@@ -102,7 +103,7 @@ const ShortenedUrlCreatedRow = (params: { row: GetShortenedUrlHistoryRowResponse
       </Grid>
       <Grid>
         <Typography sx={{ p: 2 }}>
-          Title: {params.row.title == null || params.row.title.length == 0 ? ("<empty>") : (params.row.title)}
+          Title: {params.row.title == null || params.row.title.length == 0 ? (EMPTY_VALUE) : (params.row.title)}
         </Typography>
       </Grid>
     </Card>
