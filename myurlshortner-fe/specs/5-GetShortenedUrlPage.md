@@ -36,7 +36,7 @@ http://{hostname}/browse/{uniqueIdentifier}/info
 - Title: History
   - Scrollable list of shortened url states.
   - 2 elements can be viewed at once.
-  - Every row has a datetime 
+  - Every row has a datetime
   - Possible rows:
     - Created Row
       - Target URL

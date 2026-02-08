@@ -22,7 +22,11 @@ import { TextField } from "@mui/material";
 import { GetShortenedUrlInfoFetch } from "app/api/UrlsApi";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { UserProvider } from "app/context";
-import { TARGET_URL_REGEX, UID_INPUT_REGEX, TITLE_ERROR_MESSAGE } from "app/lib/Constants";
+import {
+  TARGET_URL_REGEX,
+  UID_INPUT_REGEX,
+  TITLE_ERROR_MESSAGE,
+} from "app/lib/Constants";
 
 const AUTO_TYPE_VALUE = 0;
 const CUSTOM_TYPE_VALUE = 1;

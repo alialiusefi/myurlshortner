@@ -28,7 +28,11 @@ import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import Grid from "@mui/material/Grid";
 import { updateShortenedUrl } from "app/api/UrlShortnerApi";
-import { buildInfoPagePath, EMPTY_VALUE, TITLE_ERROR_MESSAGE } from "app/lib/Constants";
+import {
+  buildInfoPagePath,
+  EMPTY_VALUE,
+  TITLE_ERROR_MESSAGE,
+} from "app/lib/Constants";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -85,7 +89,8 @@ export default function ShortnetedUrlsTable() {
       setDirectionState("desc");
     }
   };
-  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState<string>(null);
+  const [currentSelectedForEdit, setCurrentSelectedForEdit] =
+    useState<string>(null);
   return (
     <Box>
       <Typography>Browse Shortened Urls:</Typography>
@@ -169,19 +174,19 @@ export default function ShortnetedUrlsTable() {
                     <EditIcon />
                   </IconButton>
                   <UpdateShortenedUrlDialog
-                      isOpen={currentSelectedForEdit === one.shortened_url}
-                      uniqueIdentifier={one.unique_identifier}
-                      originalUrl={one.url}
-                      isEnabled={one.is_enabled}
-                      close={() => {
-                        setCurrentSelectedForEdit(null);
-                      }}
-                      onApply={() => {
-                        mutate();
-                        setCurrentSelectedForEdit(null);
-                      }}
-                      title={one.title}
-                    />
+                    isOpen={currentSelectedForEdit === one.shortened_url}
+                    uniqueIdentifier={one.unique_identifier}
+                    originalUrl={one.url}
+                    isEnabled={one.is_enabled}
+                    close={() => {
+                      setCurrentSelectedForEdit(null);
+                    }}
+                    onApply={() => {
+                      mutate();
+                      setCurrentSelectedForEdit(null);
+                    }}
+                    title={one.title}
+                  />
                 </TableCell>
                 <TableCell>
                   <Button
@@ -224,8 +229,8 @@ function Title(params: {
   const [title, setTitle] = useState<string>(params.title);
   // the mutation will reload the props with new values however it will not update, since title has its own state already,
   useEffect(() => {
-    setTitle(params.title)
-  }, [params.title])
+    setTitle(params.title);
+  }, [params.title]);
   const isValid = (input?: string) => {
     return input == null || input?.length < 100;
   };
@@ -242,9 +247,7 @@ function Title(params: {
         size="small"
         value={title ?? ""}
         error={!isValid(title)}
-        helperText={
-          !isValid(title) ? TITLE_ERROR_MESSAGE : ""
-        }
+        helperText={!isValid(title) ? TITLE_ERROR_MESSAGE : ""}
         onChange={(e) => setTitle(e.target.value)}
       />
       <IconButton

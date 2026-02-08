@@ -120,7 +120,7 @@ export class GetShortenedUrlInfoResponse {
 export class GetShortenedUrlInfo404Response {}
 
 export type GetShortenedUrlHistoryRowResponse = {
-  type: string
+  type: string;
   url?: string;
   title?: string;
   event_date_time: string;

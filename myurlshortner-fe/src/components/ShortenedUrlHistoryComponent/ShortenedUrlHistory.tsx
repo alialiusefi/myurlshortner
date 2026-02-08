@@ -52,15 +52,12 @@ export default function ShortenedUrlHistory(params: {
               data={result}
               itemContent={(index, comp) => {
                 switch (comp.type) {
-                  case "USER_UPDATED_TITLE": return (
-                    <TitleUpdatedRow row={comp} />
-                  )
-                  case "USER_UPDATED_ORIGINAL_URL": return (
-                    <TargetUrlUpdatedRow row={comp} />
-                  )
-                  case "USER_CREATED_SHORTENED_URL": return (
-                    <ShortenedUrlCreatedRow row={comp} />
-                  )
+                  case "USER_UPDATED_TITLE":
+                    return <TitleUpdatedRow row={comp} />;
+                  case "USER_UPDATED_ORIGINAL_URL":
+                    return <TargetUrlUpdatedRow row={comp} />;
+                  case "USER_CREATED_SHORTENED_URL":
+                    return <ShortenedUrlCreatedRow row={comp} />;
                 }
               }}
             />
@@ -71,7 +68,9 @@ export default function ShortenedUrlHistory(params: {
   );
 }
 
-const TitleUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => {
+const TitleUpdatedRow = (params: {
+  row: GetShortenedUrlHistoryRowResponse;
+}) => {
   return (
     <Card variant="outlined">
       <Grid>
@@ -81,14 +80,19 @@ const TitleUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => 
       </Grid>
       <Grid>
         <Typography sx={{ p: 2 }}>
-          Title: {params.row.title == null || params.row.title.length == 0 ? (EMPTY_VALUE) : (params.row.title)}
+          Title:{" "}
+          {params.row.title == null || params.row.title.length == 0
+            ? EMPTY_VALUE
+            : params.row.title}
         </Typography>
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
-const ShortenedUrlCreatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => {
+const ShortenedUrlCreatedRow = (params: {
+  row: GetShortenedUrlHistoryRowResponse;
+}) => {
   return (
     <Card variant="outlined">
       <Grid>
@@ -103,20 +107,25 @@ const ShortenedUrlCreatedRow = (params: { row: GetShortenedUrlHistoryRowResponse
       </Grid>
       <Grid>
         <Typography sx={{ p: 2 }}>
-          Title: {params.row.title == null || params.row.title.length == 0 ? (EMPTY_VALUE) : (params.row.title)}
+          Title:{" "}
+          {params.row.title == null || params.row.title.length == 0
+            ? EMPTY_VALUE
+            : params.row.title}
         </Typography>
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
-
-const TargetUrlUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse }) => {
+const TargetUrlUpdatedRow = (params: {
+  row: GetShortenedUrlHistoryRowResponse;
+}) => {
   return (
     <Card variant="outlined">
       <Grid>
         <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
-          Target Url was updated - {readableTimestamp(params.row.event_date_time)}
+          Target Url was updated -{" "}
+          {readableTimestamp(params.row.event_date_time)}
         </Typography>
       </Grid>
       <Grid>
@@ -125,5 +134,5 @@ const TargetUrlUpdatedRow = (params: { row: GetShortenedUrlHistoryRowResponse })
         </Typography>
       </Grid>
     </Card>
-  )
-}
+  );
+};
