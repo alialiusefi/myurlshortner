@@ -76,8 +76,8 @@ class UrlShortnerControllerIT {
         var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
         assertThat(data, Matchers.not(Matchers.empty()));
         assertThat(data, Matchers.contains(
-                new UrlList.UrlRow("https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false, "test2"),
-                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true, "test1")
+                new UrlList.UrlRow("abcdefghi2", "https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false, "test2"),
+                new UrlList.UrlRow("abcdefghik", "https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true, "test1")
         ));
     }
 
