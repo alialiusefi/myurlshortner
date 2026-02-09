@@ -11,7 +11,7 @@ import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
-import { buildBrowsePagePath } from "app/lib/Constants";
+import { buildBrowsePagePath, EMPTY_VALUE } from "app/lib/Constants";
 
 export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
   const userId = useContext(UserProvider);
@@ -42,7 +42,7 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
         <Typography variant="h5" paddingLeft={2}>
           Title:{" "}
           {data.title == null || data.title.length == 0
-            ? "<empty>"
+            ? EMPTY_VALUE
             : data.title}
         </Typography>
       </Grid>

@@ -88,8 +88,8 @@ type PatchShortenedUrlResponse = {
  * Patch shortened url.
  * @param uniqueIdentifier Required Field
  * @param userId Required Field
- * @param newOriginalUrl Optional by passing 'undefined' otherwise can be 'null' or 'string'
- * @param isEnabled Optional by passing 'undefined' otherwise can be 'null' or 'string'
+ * @param newOriginalUrl Optional by passing 'undefined' or 'string'
+ * @param isEnabled Optional by passing 'undefined' or 'string'
  * @param title Optional by passing 'undefined' otherwise can be 'null' or 'string'
  * @returns Updated Shortened Url
  */
