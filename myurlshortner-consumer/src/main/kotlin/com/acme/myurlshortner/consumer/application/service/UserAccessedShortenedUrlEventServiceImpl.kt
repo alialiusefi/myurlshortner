@@ -16,6 +16,7 @@ import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShorten
 import com.acme.myurlshortner.consumer.domain.userevent.service.UserAccessedShortenedUrlEventService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 
@@ -23,7 +24,9 @@ import java.time.OffsetDateTime
 class UserAccessedShortenedUrlEventServiceImpl(
     private val client: ShortenedUrlApiClient,
     private val repo: UserAccessedShortenedUrlRepo,
-    private val notificationRepo: NotificationRepository
+    private val notificationRepo: NotificationRepository,
+    @Value($$"${spring.profiles.active}")
+    private val profile : String
 ) : UserAccessedShortenedUrlEventService {
 
     private val MOZILLA_PREFIX = "Mozilla/5.0"
@@ -32,7 +35,9 @@ class UserAccessedShortenedUrlEventServiceImpl(
         command: UserAccessedShortenedUrlCommand,
     ) {
         // for demonstration purposes.
-        TestErrorGenerator.generateTestError()
+        if (!profile.contains("test")) {
+            TestErrorGenerator.generateTestError()
+        }
         val (device, browser, os) = if (command.userAgent.startsWith(MOZILLA_PREFIX)) {
             val noPrefix = command.userAgent.substring(MOZILLA_PREFIX.length + 1)
             val systemInfoIdxEnd = noPrefix.indexOfFirst { it == ')' } + 1
