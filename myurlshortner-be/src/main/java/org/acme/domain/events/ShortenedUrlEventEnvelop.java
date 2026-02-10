@@ -9,12 +9,20 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
         Integer version;
         ShortenedUrlRecordType recordName;
         OffsetDateTime eventDateTime;
+        String uniqueIdentifier;
 
-        public Metadata(UUID eventId, Integer version, ShortenedUrlRecordType recordName, OffsetDateTime eventDateTime) {
+        public Metadata(
+                UUID eventId,
+                Integer version,
+                ShortenedUrlRecordType recordName,
+                OffsetDateTime eventDateTime,
+                String uniqueIdentifier
+        ) {
             this.eventId = eventId;
             this.version = version;
             this.recordName = recordName;
             this.eventDateTime = eventDateTime;
+            this.uniqueIdentifier = uniqueIdentifier;
         }
 
         public UUID getEventId() {
@@ -48,6 +56,14 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
         public void setEventDateTime(OffsetDateTime eventDateTime) {
             this.eventDateTime = eventDateTime;
         }
+
+        public String getUniqueIdentifier() {
+            return uniqueIdentifier;
+        }
+
+        public void setUniqueIdentifier(String uniqueIdentifier) {
+            this.uniqueIdentifier = uniqueIdentifier;
+        }
     }
 
     private final Metadata metadata;
@@ -61,6 +77,7 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
     ShortenedUrlEventEnvelop(
             UUID eventId,
             Integer version,
+            String uniqueIdentifier,
             ShortenedUrlRecordType recordName,
             OffsetDateTime eventDateTime,
             T event
@@ -69,7 +86,8 @@ public class ShortenedUrlEventEnvelop<T extends ShortenedUrlEvent> {
                 eventId,
                 version,
                 recordName,
-                eventDateTime
+                eventDateTime,
+                uniqueIdentifier
         );
         this.event = event;
     }

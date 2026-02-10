@@ -13,6 +13,7 @@ public class ShortenedUrlEventEnvelopFactory {
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
                 2,
+                shortenedUrl.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_CREATED_SHORTENED_URL,
                 shortenedUrl.getCreatedAt(),
                 new V2UserCreatedShortenedUrlEvent(
@@ -34,6 +35,7 @@ public class ShortenedUrlEventEnvelopFactory {
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
                 1,
+                url.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL,
                 createdAt,
                 new V1UserUpdatedOriginalUrlEvent(
@@ -53,6 +55,7 @@ public class ShortenedUrlEventEnvelopFactory {
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
                 2,
+                url.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_GIFTED_SHORTENED_URL,
                 newCreatedAt,
                 new V2UserGiftedShortenedUrlEvent(
@@ -74,6 +77,7 @@ public class ShortenedUrlEventEnvelopFactory {
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
                 1,
+                url.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_UPDATED_TITLE,
                 newCreatedAt,
                 new V1UserUpdatedTitleEvent(

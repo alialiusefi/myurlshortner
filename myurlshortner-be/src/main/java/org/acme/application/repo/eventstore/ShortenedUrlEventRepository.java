@@ -31,7 +31,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
     }
 
     public Optional<ShortenedUrlEventEnvelop<?>> getLatestShortenedUrlEventByIdAndType(String uniqueIdentifier, ShortenedUrlRecordType recordType) {
-        return find("uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc limit 1", uniqueIdentifier, recordType).firstResultOptional().map(this::toShortenedUrlEvent);
+        return find("metadata.uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc limit 1", uniqueIdentifier, recordType).firstResultOptional().map(this::toShortenedUrlEvent);
     }
 
     @Transactional
@@ -40,54 +40,16 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
             throw new IllegalStateException("Event already exists!");
         }
         var embeddedMetadata = toEmbeddedMetadata(envelop.getMetadata());
-        try {
-            switch (envelop.getEvent()) {
-                case V2UserCreatedShortenedUrlEvent createdEvent -> {
-                    var jsonString = mapper.writeValueAsString(createdEvent);
-                    persist(
-                            new ShortenedUrlEventEntity(
-                                    envelop.getMetadata().getEventId(),
-                                    createdEvent.uniqueIdentifier(),
-                                    embeddedMetadata,
-                                    jsonString
-                            )
-                    );
 
-                }
-                case V1UserUpdatedOriginalUrlEvent updatedEvent -> {
-                    var jsonString = mapper.writeValueAsString(updatedEvent);
-                    persist(
-                            new ShortenedUrlEventEntity(
-                                    envelop.getMetadata().getEventId(),
-                                    updatedEvent.uniqueIdentifier(),
-                                    embeddedMetadata,
-                                    jsonString
-                            )
-                    );
-                }
-                case V2UserGiftedShortenedUrlEvent giftEvent -> {
-                    var jsonString = mapper.writeValueAsString(giftEvent);
-                    persist(
-                            new ShortenedUrlEventEntity(
-                                    envelop.getMetadata().getEventId(),
-                                    giftEvent.uniqueIdentifier(),
-                                    embeddedMetadata,
-                                    jsonString
-                            )
-                    );
-                }
-                case V1UserUpdatedTitleEvent titleEvent -> {
-                    var jsonString = mapper.writeValueAsString(titleEvent);
-                    persist(
-                            new ShortenedUrlEventEntity(
-                                    envelop.getMetadata().getEventId(),
-                                    titleEvent.uniqueIdentifier(),
-                                    embeddedMetadata,
-                                    jsonString
-                            )
-                    );
-                }
-            }
+        try {
+            var jsonString = mapper.writeValueAsString(envelop.getEvent());
+            persist(
+                    new ShortenedUrlEventEntity(
+                            envelop.getMetadata().getEventId(),
+                            embeddedMetadata,
+                            jsonString
+                    )
+            );
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Incorrect json provided", e);
         }
@@ -104,7 +66,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         var criteriaQuery = builder.createQuery(ShortenedUrlEventEntity.class);
         var root = criteriaQuery.from(ShortenedUrlEventEntity.class);
         var predicates = new ArrayList<Predicate>() {{
-            add(root.get("uniqueIdentifier").equalTo(uniqueIdentifier));
+            add(root.get("metadata").get("uniqueIdentifier").equalTo(uniqueIdentifier));
             add(builder.lessThanOrEqualTo(root.get("metadata").get("eventDateTime"), from));
             if (to != null) {
                 add(builder.greaterThanOrEqualTo(root.get("metadata").get("eventDateTime"), to));
@@ -125,7 +87,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
     ) {
         return Option.ofOptional(
                 find(
-                        "uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc",
+                        "metadata.uniqueIdentifier = ?1 and metadata.recordName = ?2 order by metadata.eventDateTime desc",
                         uid,
                         USER_GIFTED_SHORTENED_URL
                 )
@@ -143,7 +105,8 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
         return new ShortenedUrlEventMetadata(
                 metadata.getVersion(),
                 metadata.getRecordName(),
-                metadata.getEventDateTime()
+                metadata.getEventDateTime(),
+                metadata.getUniqueIdentifier()
         );
     }
 
@@ -155,7 +118,8 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
                 eventId,
                 embedded.getVersion(),
                 embedded.getRecordName(),
-                embedded.getEventDateTime()
+                embedded.getEventDateTime(),
+                embedded.getUniqueIdentifier()
         );
     }
 
@@ -197,7 +161,7 @@ public class ShortenedUrlEventRepository implements PanacheRepository<ShortenedU
     public static class ShortenedUrlEventIterator implements Iterator<List<? extends ShortenedUrlEvent>> {
         private final ShortenedUrlEventRepository repo;
         private int offset = 0;
-        private final String query = "uniqueIdentifier = ?1 order by metadata.eventDateTime asc";
+        private final String query = "metadata.uniqueIdentifier = ?1 order by metadata.eventDateTime asc";
         private final String uniqueIdentifier;
         private final int batchSize;
         //private OffsetDateTime till;
