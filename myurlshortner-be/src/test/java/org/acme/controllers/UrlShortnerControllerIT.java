@@ -117,7 +117,9 @@ class UrlShortnerControllerIT {
         Mockito.verify(publisher).publishUserCreatedShortenedUrl(
                 Mockito.any(OffsetDateTime.class),
                 Mockito.any(URI.class),
-                Mockito.any(String.class)
+                Mockito.any(String.class),
+                Mockito.isNull(),
+                Mockito.any(Long.class)
         );
     }
 
@@ -150,7 +152,9 @@ class UrlShortnerControllerIT {
         Mockito.verify(publisher).publishUserCreatedShortenedUrl(
                 Mockito.any(OffsetDateTime.class),
                 Mockito.any(URI.class),
-                Mockito.any(String.class)
+                Mockito.any(String.class),
+                Mockito.isNull(),
+                Mockito.any(Long.class)
         );
     }
 

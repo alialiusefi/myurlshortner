@@ -4,6 +4,7 @@ import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.domain.entity.ShortenedUrl;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,9 @@ public class KafkaUrlPublisherLocal implements KafkaUrlPublisher {
     public void publishUserCreatedShortenedUrl(
             @NonNull OffsetDateTime createdAt,
             @NonNull URI originalUrl,
-            @NonNull String uniqueIdentifier
+            @NonNull String uniqueIdentifier,
+            @Nullable String title,
+            @NonNull Long userId
     ) {
         logger.info("Message sent successfully!");
     }
