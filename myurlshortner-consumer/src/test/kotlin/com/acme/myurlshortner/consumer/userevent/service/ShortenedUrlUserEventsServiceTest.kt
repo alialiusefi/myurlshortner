@@ -47,7 +47,7 @@ class ShortenedUrlUserEventsServiceTest {
 
     @Test
     fun shouldSaveUserAccessEvent() {
-        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo)
+        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo, "test")
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
@@ -86,7 +86,7 @@ class ShortenedUrlUserEventsServiceTest {
 
     @Test
     fun shouldSaveNotificationWhen10Views() {
-        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo)
+        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo, "test")
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
@@ -103,7 +103,7 @@ class ShortenedUrlUserEventsServiceTest {
                 1,
                 uid,
                 10,
-                OffsetDateTime.now()
+                any()
             )
         } returns Unit
         service.handleShortenedUrlUserAccessed(
