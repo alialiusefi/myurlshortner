@@ -183,7 +183,13 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
         }
         var event = ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(shortUrl);
         eventStore.insertEvent(event);
-        publisher.publishUserCreatedShortenedUrl(shortUrl.getCreatedAt(), shortUrl.getOriginalUrl(), shortUrl.getPublicIdentifier());
+        publisher.publishUserCreatedShortenedUrl(
+                shortUrl.getCreatedAt(),
+                shortUrl.getOriginalUrl(),
+                shortUrl.getPublicIdentifier(),
+                shortUrl.getTitle(),
+                shortUrl.getUserId()
+        );
         cache.put(uniqueIdentifier, shortUrl);
         logger.debug("Successfully generated a short url!");
         return Either.right(shortUrl);

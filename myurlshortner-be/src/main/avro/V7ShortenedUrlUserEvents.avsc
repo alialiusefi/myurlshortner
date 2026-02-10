@@ -75,6 +75,16 @@
         "name": "created_at",
         "type": "string",
         "doc": "ISO 8601 Timestamp"
+      },
+      {
+        "name": "title",
+        "type": ["null", "string"],
+        "default": "null"
+      },
+      {
+        "name": "user_id",
+        "type": ["null", "long"],
+        "default": null
       }
     ]
   },
