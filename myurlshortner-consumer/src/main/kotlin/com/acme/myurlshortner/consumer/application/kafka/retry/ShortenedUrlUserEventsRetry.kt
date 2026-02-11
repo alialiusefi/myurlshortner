@@ -26,7 +26,7 @@ class ShortenedUrlUserEventsRetry(
     @Value($$"${app.kafka.topic-name}")
     lateinit var topic: String
 
-    fun handleFailedKafkaUserAccessedShortenedUrlEvent(event: AvroUserAccessedShortenedUrl) {
+    suspend fun handleFailedKafkaUserAccessedShortenedUrlEvent(event: AvroUserAccessedShortenedUrl) {
         val writer: DatumWriter<AvroUserAccessedShortenedUrl> =
             SpecificDatumWriter(AvroUserAccessedShortenedUrl.getClassSchema())
         val byteOutputStream = ByteArrayOutputStream()
@@ -46,7 +46,7 @@ class ShortenedUrlUserEventsRetry(
         )
     }
 
-    fun handleFailedKafkaUserCreatedShortenedUrlEvent(event: AvroUserCreatedShortenedUrl) {
+    suspend fun handleFailedKafkaUserCreatedShortenedUrlEvent(event: AvroUserCreatedShortenedUrl) {
         val writer: DatumWriter<AvroUserCreatedShortenedUrl> =
             SpecificDatumWriter(AvroUserCreatedShortenedUrl.getClassSchema())
         val byteOutputStream = ByteArrayOutputStream()

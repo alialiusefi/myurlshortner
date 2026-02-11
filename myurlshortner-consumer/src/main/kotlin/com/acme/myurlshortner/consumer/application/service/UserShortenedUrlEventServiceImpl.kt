@@ -19,11 +19,8 @@ import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShort
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
 import com.acme.myurlshortner.consumer.domain.userevent.service.UserAccessedShortenedUrlEventService
 import com.acme.myurlshortner.consumer.domain.userevent.service.UserCreatedShortenedUrlService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 
@@ -60,34 +57,32 @@ class UserShortenedUrlEventServiceImpl(
         } else {
             Triple(Device.Other, Browser.Other, OperatingSystem.Other)
         }
-        runBlocking(Dispatchers.IO) {
-            val count = repo.countById(command.uniqueIdentifier)
-            if (count == 9L) {
-                client.getShortenedUrlById(command.uniqueIdentifier).fold(
-                    onSuccess = { res ->
-                        notificationRepo.insertShortenedUrlViewedNTimesNotification(
-                            userId = res.user_id,
-                            uid = command.uniqueIdentifier,
-                            viewCount = count + 1,
-                            createdAt = OffsetDateTime.now()
-                        )
-                    },
-                    onFailure = { err -> throw err }
-                )
-            }
-            repo.saveUserAccessedShortenedUrl(
-                UserAccessedShortenedUrl(
-                    uniqueIdentifier = command.uniqueIdentifier,
-                    originalUrl = command.originalUrl,
-                    shortenedUrl = command.shortenedUrl,
-                    device = device,
-                    browser = browser,
-                    operatingSystem = os,
-                    accessedAt = command.accessedAt
-                )
+        val count = repo.countById(command.uniqueIdentifier)
+        if (count == 9L) {
+            client.getShortenedUrlById(command.uniqueIdentifier).fold(
+                onSuccess = { res ->
+                    notificationRepo.insertShortenedUrlViewedNTimesNotification(
+                        userId = res.user_id,
+                        uid = command.uniqueIdentifier,
+                        viewCount = count + 1,
+                        createdAt = OffsetDateTime.now()
+                    )
+                },
+                onFailure = { err -> throw err }
             )
-
         }
+        repo.saveUserAccessedShortenedUrl(
+            UserAccessedShortenedUrl(
+                uniqueIdentifier = command.uniqueIdentifier,
+                originalUrl = command.originalUrl,
+                shortenedUrl = command.shortenedUrl,
+                device = device,
+                browser = browser,
+                operatingSystem = os,
+                accessedAt = command.accessedAt
+            )
+        )
+
     }
 
     override suspend fun handleShortenedUrlCreated(command: UserCreatedShortenedUrlCommand) {

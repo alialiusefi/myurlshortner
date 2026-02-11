@@ -39,38 +39,41 @@ class ShortenedUrlApiClient(
         val user_id: Long
     )
 
-    suspend fun getShortenedUrlById(uniqueIdentifier: String): Result<GetShortenedUrlByIdResponse> = try {
-        restClient.get()
-            .uri("/shortened-urls/{id}", uniqueIdentifier)
-            .header(API_KEY_HEADER, apiKey)
-            .retrieve()
-            .body(GetShortenedUrlByIdResponse::class.java)!!.let {
-                Result.success(it)
-            }
-    } catch (timeoutException: ConnectTimeoutException) {
-        Result.failure(TimeoutException(timeoutException))
-    } catch (timeoutException: ReadTimeoutException) {
-        Result.failure(TimeoutException(timeoutException))
+    suspend fun getShortenedUrlById(uniqueIdentifier: String): Result<GetShortenedUrlByIdResponse> = executeIOAndAwait {
+        try {
+            restClient.get()
+                .uri("/shortened-urls/{id}", uniqueIdentifier)
+                .header(API_KEY_HEADER, apiKey)
+                .retrieve()
+                .body(GetShortenedUrlByIdResponse::class.java)!!.let {
+                    Result.success(it)
+                }
+        } catch (timeoutException: ConnectTimeoutException) {
+            Result.failure(TimeoutException(timeoutException))
+        } catch (timeoutException: ReadTimeoutException) {
+            Result.failure(TimeoutException(timeoutException))
+        }
     }
 
     /**
      * Title length can be up to 100 characters.
      */
-    fun patchShortenedUrl(uniqueIdentifier: String, userId: Long, title: String): RestClientException? {
-        data class Request(val title: String)
-        return try {
-            restClient.patch().uri("/shortened-urls/{id}", uniqueIdentifier)
-                .header(USER_ID_HEADER, userId.toString())
-                .body(Request(title))
-                .exchange { _, res ->
-                    when {
-                        res.statusCode.is4xxClientError -> ClientException(res.statusCode.value())
-                        res.statusCode.is5xxServerError -> ServerException(res.statusCode.value())
-                        else -> null
+    suspend fun patchShortenedUrl(uniqueIdentifier: String, userId: Long, title: String): RestClientException? =
+        executeIOAndAwait {
+            data class Request(val title: String)
+            try {
+                restClient.patch().uri("/shortened-urls/{id}", uniqueIdentifier)
+                    .header(USER_ID_HEADER, userId.toString())
+                    .body(Request(title))
+                    .exchange { _, res ->
+                        when {
+                            res.statusCode.is4xxClientError -> ClientException(res.statusCode.value())
+                            res.statusCode.is5xxServerError -> ServerException(res.statusCode.value())
+                            else -> null
+                        }
                     }
-                }
-        } catch (timeoutException: SocketTimeoutException) {
-            TimeoutException(timeoutException)
+            } catch (timeoutException: SocketTimeoutException) {
+                TimeoutException(timeoutException)
+            }
         }
-    }
 }

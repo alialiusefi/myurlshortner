@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 
 interface NotificationRepository {
 
-    fun insertShortenedUrlViewedNTimesNotification(
+    suspend fun insertShortenedUrlViewedNTimesNotification(
         userId: Long,
         uid: String,
         viewCount: Long,
