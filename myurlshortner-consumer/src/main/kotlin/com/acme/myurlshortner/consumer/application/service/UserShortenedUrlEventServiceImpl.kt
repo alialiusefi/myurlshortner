@@ -1,6 +1,9 @@
 package com.acme.myurlshortner.consumer.application.service
 
+import com.acme.myurlshortner.consumer.application.client.ExternalWebApiClient
+import com.acme.myurlshortner.consumer.application.client.ServerException
 import com.acme.myurlshortner.consumer.application.client.ShortenedUrlApiClient
+import com.acme.myurlshortner.consumer.application.client.TimeoutException
 import com.acme.myurlshortner.consumer.application.util.TestErrorGenerator
 import com.acme.myurlshortner.consumer.domain.notification.repo.NotificationRepository
 import com.acme.myurlshortner.consumer.domain.useragent.Browser
@@ -11,25 +14,30 @@ import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem
 import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem.Macintosh
 import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem.Windows
 import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShortenedUrlCommand
+import com.acme.myurlshortner.consumer.domain.userevent.command.UserCreatedShortenedUrlCommand
 import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
 import com.acme.myurlshortner.consumer.domain.userevent.service.UserAccessedShortenedUrlEventService
+import com.acme.myurlshortner.consumer.domain.userevent.service.UserCreatedShortenedUrlService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.jsoup.Jsoup
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 
 @Service
-class UserAccessedShortenedUrlEventServiceImpl(
+class UserShortenedUrlEventServiceImpl(
     private val client: ShortenedUrlApiClient,
+    private val externalWebClient: ExternalWebApiClient,
     private val repo: UserAccessedShortenedUrlRepo,
     private val notificationRepo: NotificationRepository,
-    @Value($$"${spring.profiles.active}")
-    private val profile : String
-) : UserAccessedShortenedUrlEventService {
+    private val profile: String = ""
+) : UserAccessedShortenedUrlEventService, UserCreatedShortenedUrlService {
 
     private val MOZILLA_PREFIX = "Mozilla/5.0"
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun handleShortenedUrlUserAccessed(
         command: UserAccessedShortenedUrlCommand,
@@ -55,12 +63,16 @@ class UserAccessedShortenedUrlEventServiceImpl(
         runBlocking(Dispatchers.IO) {
             val count = repo.countById(command.uniqueIdentifier)
             if (count == 9L) {
-                val userId = client.getShortenedUrlById(command.uniqueIdentifier).user_id
-                notificationRepo.insertShortenedUrlViewedNTimesNotification(
-                    userId = userId,
-                    uid = command.uniqueIdentifier,
-                    viewCount = count + 1,
-                    createdAt = OffsetDateTime.now()
+                client.getShortenedUrlById(command.uniqueIdentifier).fold(
+                    onSuccess = { res ->
+                        notificationRepo.insertShortenedUrlViewedNTimesNotification(
+                            userId = res.user_id,
+                            uid = command.uniqueIdentifier,
+                            viewCount = count + 1,
+                            createdAt = OffsetDateTime.now()
+                        )
+                    },
+                    onFailure = { err -> throw err }
                 )
             }
             repo.saveUserAccessedShortenedUrl(
@@ -75,6 +87,27 @@ class UserAccessedShortenedUrlEventServiceImpl(
                 )
             )
 
+        }
+    }
+
+    override fun handleShortenedUrlCreated(command: UserCreatedShortenedUrlCommand) {
+        if (command.title == null) {
+            externalWebClient.callAndReturnHtmlBody(command.originalUrl).fold(
+                onSuccess = { html ->
+                    logger.debug("Called the target url: $html")
+                    Jsoup.parse(html).title().take(100)
+                },
+                onFailure = { ex ->
+                    logger.warn("Failed to get title from server: ${ex.message}", ex)
+                    if (ex is ServerException || ex is TimeoutException) throw ex
+                    null
+                }
+            )?.let { truncatedTitle ->
+                logger.debug("Patching with title $truncatedTitle")
+                client.patchShortenedUrl(command.uniqueIdentifier, command.userId, truncatedTitle)?.let { ex ->
+                    throw ex
+                }
+            }
         }
     }
 

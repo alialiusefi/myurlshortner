@@ -34,6 +34,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-java-time:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-json:1.0.0-rc-1")
+    implementation("org.jsoup:jsoup:1.22.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     //implementation("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
