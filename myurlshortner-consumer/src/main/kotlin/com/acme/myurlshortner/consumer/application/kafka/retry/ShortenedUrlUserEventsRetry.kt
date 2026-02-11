@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 import java.time.OffsetDateTime
 import com.acme.events.UserAccessedShortenedUrl as AvroUserAccessedShortenedUrl
+import com.acme.events.UserCreatedShortenedUrl as AvroUserCreatedShortenedUrl
 
 @Component
 class ShortenedUrlUserEventsRetry(
@@ -40,7 +41,27 @@ class ShortenedUrlUserEventsRetry(
             eventDateTime = OffsetDateTime.parse(event.accessedAt),
             key = event.uniqueIdentifier,
             type = KafkaEventType.USER_ACCESSED_SHORTENED_URL,
-            version = 6,
+            version = 7,
+            topic = topic
+        )
+    }
+
+    fun handleFailedKafkaUserCreatedShortenedUrlEvent(event: AvroUserCreatedShortenedUrl) {
+        val writer: DatumWriter<AvroUserCreatedShortenedUrl> =
+            SpecificDatumWriter(AvroUserCreatedShortenedUrl.getClassSchema())
+        val byteOutputStream = ByteArrayOutputStream()
+        val encoder = EncoderFactory.get().jsonEncoder(AvroUserCreatedShortenedUrl.getClassSchema(), byteOutputStream)
+        byteOutputStream.use {
+            writer.write(event, encoder)
+        }
+        encoder.flush()
+        val json = byteOutputStream.toString()
+        repository.insertFailedEvent(
+            event = json,
+            eventDateTime = OffsetDateTime.parse(event.createdAt),
+            key = event.uniqueIdentifier,
+            type = KafkaEventType.USER_CREATED_SHORTENED_URL,
+            version = 7,
             topic = topic
         )
     }
@@ -60,6 +81,18 @@ class ShortenedUrlUserEventsRetry(
                         SpecificDatumReader(AvroUserAccessedShortenedUrl.getClassSchema())
                     val record = reader.read(null, decoder)
                     useCases.handleUserAccessedShortenedUrl(record)
+                    repository.deleteFailedEventFromQueue(failedEvent.id)
+                }
+
+                KafkaEventType.USER_CREATED_SHORTENED_URL -> {
+                    val decoder = DecoderFactory.get().jsonDecoder(
+                        AvroUserCreatedShortenedUrl.getClassSchema(),
+                        failedEvent.event
+                    )
+                    val reader: SpecificDatumReader<AvroUserCreatedShortenedUrl> =
+                        SpecificDatumReader(AvroUserCreatedShortenedUrl.getClassSchema())
+                    val record = reader.read(null, decoder)
+                    useCases.handleUserCreatedShortenedUrl(record)
                     repository.deleteFailedEventFromQueue(failedEvent.id)
                 }
             }
