@@ -39,7 +39,7 @@ class UserShortenedUrlEventServiceImpl(
     private val MOZILLA_PREFIX = "Mozilla/5.0"
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    override fun handleShortenedUrlUserAccessed(
+    override suspend fun handleShortenedUrlUserAccessed(
         command: UserAccessedShortenedUrlCommand,
     ) {
         // for demonstration purposes.
@@ -90,7 +90,7 @@ class UserShortenedUrlEventServiceImpl(
         }
     }
 
-    override fun handleShortenedUrlCreated(command: UserCreatedShortenedUrlCommand) {
+    override suspend fun handleShortenedUrlCreated(command: UserCreatedShortenedUrlCommand) {
         if (command.title == null) {
             externalWebClient.callAndReturnHtmlBody(command.originalUrl).fold(
                 onSuccess = { html ->

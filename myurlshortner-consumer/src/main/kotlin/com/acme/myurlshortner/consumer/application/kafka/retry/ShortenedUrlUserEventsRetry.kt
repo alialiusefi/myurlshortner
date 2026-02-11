@@ -67,7 +67,7 @@ class ShortenedUrlUserEventsRetry(
     }
 
     @Scheduled(fixedRate = 5000)
-    fun retryFailedKafkaEvents() {
+    suspend fun retryFailedKafkaEvents() {
         val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return
         try {
             logger.info("Retrying failed event id=${failedEvent.id} type=${failedEvent.eventType} with retryCount=${failedEvent.retryCount}")
