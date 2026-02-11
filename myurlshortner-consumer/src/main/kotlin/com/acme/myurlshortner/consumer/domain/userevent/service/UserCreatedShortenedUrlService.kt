@@ -7,5 +7,5 @@ interface UserCreatedShortenedUrlService {
     /**
      * Business logic of post creating a shortened url.
      */
-    fun handleShortenedUrlCreated(command: UserCreatedShortenedUrlCommand)
+    suspend fun handleShortenedUrlCreated(command: UserCreatedShortenedUrlCommand)
 }

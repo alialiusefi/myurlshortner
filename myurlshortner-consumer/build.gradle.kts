@@ -24,8 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:1.0.0-rc-1")
@@ -34,6 +33,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-java-time:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-json:1.0.0-rc-1")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.jsoup:jsoup:1.22.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     //implementation("org.springframework.boot:spring-boot-devtools")
@@ -42,6 +44,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.kafka:spring-kafka-test")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

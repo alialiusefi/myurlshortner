@@ -26,7 +26,7 @@ class ShortenedUrlUserEventsConsumer(
         topics = [$$"${app.kafka.topic-name}"],
         autoStartup = $$"${app.kafka.enabled}"
     )
-    fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
+    suspend fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
         val key = message.key()
         val record = message.value()
         val datetime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp()), ZoneId.systemDefault())
