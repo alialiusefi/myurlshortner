@@ -12,6 +12,7 @@ import { IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { NotificationsPopper } from "components/NotificationsPoperComponent/NotificationPoper";
 import { GetNotificationsSWR } from "app/api/NotificationApi";
+import { buildBrowsePagePath, buildShortenUrlPath } from "app/lib/Constants";
 
 export default function MyUrlShorterAppBar() {
   const [openNotifications, setOpenNotifications] = useState(false);
@@ -26,10 +27,16 @@ export default function MyUrlShorterAppBar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             MyUrlShortner
           </Typography>
-          <Button onClick={() => redirect("/")} color="inherit">
+          <Button
+            onClick={() => redirect(buildShortenUrlPath())}
+            color="inherit"
+          >
             Home
           </Button>
-          <Button onClick={() => redirect("/browse")} color="inherit">
+          <Button
+            onClick={() => redirect(buildBrowsePagePath())}
+            color="inherit"
+          >
             Browse
           </Button>
           <IconButton

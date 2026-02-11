@@ -12,6 +12,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -52,7 +53,9 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
     public void publishUserCreatedShortenedUrl(
             @NonNull OffsetDateTime createdAt,
             @NonNull URI originalUrl,
-            @NonNull String uniqueIdentifier
+            @NonNull String uniqueIdentifier,
+            @Nullable String title,
+            @NonNull Long userId
     ) {
         emitter.sendAndAwait(
                 ShortenedUrlUserEvents.newBuilder()
@@ -61,6 +64,8 @@ public class KafkaUrlPublisherImpl implements KafkaUrlPublisher {
                                         .setCreatedAt(createdAt.toString())
                                         .setOriginalUrl(originalUrl.toString())
                                         .setUniqueIdentifier(uniqueIdentifier)
+                                        .setTitle(title)
+                                        .setUserId(userId)
                                         .build()
                         )
                         .build()

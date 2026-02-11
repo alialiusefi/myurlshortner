@@ -9,6 +9,7 @@ public record ShortenedUrlResponse(
         OffsetDateTime updatedAt,
         String url,
         boolean isEnabled,
-        Long userId
+        Long userId,
+        String title
 ) {
 }

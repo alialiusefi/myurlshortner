@@ -28,9 +28,20 @@ http://{hostname}/browse/{uniqueIdentifier}/info
 - Title: Info
   - Your unique identifier: {unique_identifier}
   - {shortened_link} green arrow -> (red X if disabled) {target_url}
+  - Title
+    - Show <empty> if null or "" is returned
   - Created At
   - Last Updated At
 
 - Title: History
   - Scrollable list of shortened url states.
   - 2 elements can be viewed at once.
+  - Every row has a datetime
+  - Possible rows:
+    - Created Row
+      - Target URL
+      - Title
+    - Updated Target Url Row
+      - Target URL
+    - Updated Title Row
+      - Title

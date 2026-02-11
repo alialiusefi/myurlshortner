@@ -111,6 +111,7 @@ export class GetShortenedUrlInfoResponse {
   unique_identifier: string;
   shortened_url: string;
   url: string;
+  title: string;
   is_enabled: boolean;
   created_at: string;
   updated_at: string;
@@ -119,7 +120,9 @@ export class GetShortenedUrlInfoResponse {
 export class GetShortenedUrlInfo404Response {}
 
 export type GetShortenedUrlHistoryRowResponse = {
-  url: string;
+  type: string;
+  url?: string;
+  title?: string;
   event_date_time: string;
 };
 
@@ -133,16 +136,18 @@ export class GetShortenedUrlHistoryResponse {
 
 export class GetShortenedUrlHistory404Response {}
 
+export class GetAvailableUrlsResponseData {
+  unique_identifier: string;
+  url: string;
+  shortened_url: string;
+  created_at: string;
+  access_count: number;
+  is_enabled: boolean;
+  title?: string;
+}
+
 export class GetAvailableUrlsResponse {
-  data: [
-    {
-      url: string;
-      shortened_url: string;
-      created_at: string;
-      access_count: number;
-      is_enabled: boolean;
-    },
-  ];
+  data: GetAvailableUrlsResponseData[];
   total: number;
 
   constructor(data, total) {

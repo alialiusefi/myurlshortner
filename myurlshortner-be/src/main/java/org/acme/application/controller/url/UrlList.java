@@ -8,11 +8,13 @@ public record UrlList(
         Long total
 ) {
     public record UrlRow(
+            String uniqueIdentifier,
             String url,
             String shortenedUrl,
             Long accessCount,
             OffsetDateTime createdAt,
-            Boolean isEnabled
+            Boolean isEnabled,
+            String title
     ) {
     }
 }

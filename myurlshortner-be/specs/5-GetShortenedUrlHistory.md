@@ -2,7 +2,7 @@
 
 ### Description
 
-Get shortened url history.
+Get shortened url history. Should not show gifted event but instead show as USER_CREATED_SHORTENED_URL.
 
 ### Requests
 
@@ -20,11 +20,19 @@ Authorization:
 {
   "data" : [
     {
+      "type": "USER_UPDATED_TITLE",
+      "title": "Google",
+      "event_date_time": "2025-10-16T15:13:42.978495+09:00"
+    },
+    {
+      "type": "USER_UPDATED_ORIGINAL_URL",
       "url": "https://www.google.com",
       "event_date_time": "2025-10-15T15:13:42.978495+09:00"
     },
     {
+      "type": "USER_CREATED_SHORTENED_URL",
       "url": "https://www.youtube.com",
+      "title": null, // nullable
       "event_date_time": "2025-10-15T15:12:42.978495+09:00"
     }
   ]

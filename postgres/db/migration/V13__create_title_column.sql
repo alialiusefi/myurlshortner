@@ -1,0 +1,1 @@
+alter table shortened_urls add column title varchar(100) default null;

@@ -38,7 +38,9 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
 
     @Override
     public Optional<ShortenedUrl> getShortenedUrl(@NonNull String uniqueIdentifier, @Nullable Long userId) {
-        var query = userId == null ? find("uniqueIdentifier = ?1", uniqueIdentifier) : find("uniqueIdentifier = ?1 and userId = ?2", uniqueIdentifier, userId);
+        var query = userId == null ?
+                find("uniqueIdentifier = ?1", uniqueIdentifier) :
+                find("uniqueIdentifier = ?1 and userId = ?2", uniqueIdentifier, userId);
         return query.firstResultOptional().map(
                 result -> new ShortenedUrl(
                         result.getOriginalUrl(),
@@ -46,7 +48,8 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
                         result.getCreatedAt(),
                         result.getUpdatedAt(),
                         result.getEnabled(),
-                        result.getUserId()
+                        result.getUserId(),
+                        result.getTitle()
                 )
         );
     }
@@ -67,14 +70,14 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         var order = isAscending ? "asc" : "desc";
         var queryForCount = String.format("""
                 select count(*) from (
-                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled from shortened_urls us1 \s
+                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled, us1.title from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
                 %s \s
                 group by us1.unique_identifier, us1.original_url, us1.created_at, us1.is_enabled \s
                 );
                 """, whereClause);
         var query = String.format("""
-                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled from shortened_urls us1 \s
+                select us1.unique_identifier, us1.original_url, count(us2.unique_identifier), us1.created_at, us1.is_enabled, us1.title from shortened_urls us1 \s
                 left join shortened_url_user_access us2 on us1.unique_identifier = us2.unique_identifier \s
                 %s
                 group by us1.unique_identifier, us1.original_url, us1.created_at, us1.is_enabled \s
@@ -90,7 +93,8 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
                         URI.create((String) array[1]),
                         OffsetDateTime.ofInstant((Instant) array[3], ZoneId.systemDefault()),
                         (Long) array[2],
-                        (Boolean) array[4]
+                        (Boolean) array[4],
+                        (String) array[5]
                 )
         ).toList();
         return Tuple.of(count, result);
@@ -99,11 +103,12 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
     @Override
     @Transactional
     public void updateShortenedUrl(@NonNull ShortenedUrl shortenedUrl, OffsetDateTime existingUpdatedAt) throws ShortenedUrlOptimisticLockException {
-        var count = update("set originalUrl = ?1, updatedAt = ?2, isEnabled = ?3, userId = ?4 where uniqueIdentifier = ?5 and updatedAt = ?6",
+        var count = update("set originalUrl = ?1, updatedAt = ?2, isEnabled = ?3, userId = ?4, title = ?5 where uniqueIdentifier = ?6 and updatedAt = ?7",
                 shortenedUrl.getOriginalUrl().toString(),
                 shortenedUrl.getUpdatedAt(),
                 shortenedUrl.isEnabled(),
                 shortenedUrl.getUserId(),
+                shortenedUrl.getTitle(),
                 shortenedUrl.getPublicIdentifier(),
                 existingUpdatedAt
         );
@@ -114,6 +119,13 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
 
     private ShortenedUrlEntity toEntity(ShortenedUrl from) {
         return new ShortenedUrlEntity(
-                from.getPublicIdentifier(), from.getOriginalUrl().toString(), from.getCreatedAt(), from.getUpdatedAt(), from.isEnabled(), from.getUserId());
+                from.getPublicIdentifier(),
+                from.getOriginalUrl().toString(),
+                from.getCreatedAt(),
+                from.getUpdatedAt(),
+                from.isEnabled(),
+                from.getUserId(),
+                from.getTitle()
+        );
     }
 }

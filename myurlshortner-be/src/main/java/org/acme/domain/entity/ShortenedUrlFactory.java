@@ -1,9 +1,6 @@
 package org.acme.domain.entity;
 
-import org.acme.domain.events.ShortenedUrlEvent;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
-import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
@@ -17,14 +14,15 @@ public class ShortenedUrlFactory {
         ShortenedUrl state = start;
         for (ShortenedUrlEvent event : events) {
             switch (event) {
-                case V1UserCreatedShortenedUrlEvent created -> {
+                case V2UserCreatedShortenedUrlEvent created -> {
                     state = new ShortenedUrl(
                             created.originalUrl().toString(),
                             created.uniqueIdentifier(),
                             created.createdAt(),
                             created.createdAt(),
                             true,
-                            created.userId()
+                            created.userId(),
+                            created.title()
                     );
                 }
                 case V1UserUpdatedOriginalUrlEvent updated -> {
@@ -33,9 +31,15 @@ public class ShortenedUrlFactory {
                         state.setUpdatedAt(updated.updatedAt());
                     }
                 }
-                case V1UserGiftedShortenedUrlEvent gifted -> {
+                case V2UserGiftedShortenedUrlEvent gifted -> {
                     if (state != null) {
                         state.giftShortenedUrl(gifted);
+                    }
+                }
+
+                case V1UserUpdatedTitleEvent titleUpdated -> {
+                    if (state != null) {
+                        state.updateTitle(titleUpdated);
                     }
                 }
             }

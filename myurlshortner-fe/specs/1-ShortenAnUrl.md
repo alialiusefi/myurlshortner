@@ -8,6 +8,23 @@ When the user opens the homepage, he's greeted with a form the allows him to sub
 The form consists of:
 
 - Selection between Auto & Custom
+
+Auto:
+
+- Shortened Url
+  - Shortened Url Label
+  - App Url
+  - Unique ID Input
+    - Refresh button that regenerates the id
+    - Input that is validated
+- Submit Button
+  - Text: 'Shorten'
+
+Custom:
+
+- Title
+  - Up to 100 characters
+  - Sets as "" by default
 - Shortened Url
   - Shortened Url Label
   - App Url

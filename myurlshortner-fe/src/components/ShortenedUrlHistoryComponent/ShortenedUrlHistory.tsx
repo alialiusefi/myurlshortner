@@ -1,6 +1,7 @@
 "use client";
 import {
   GetShortenedUrlHistorySWR,
+  GetShortenedUrlHistoryRowResponse,
   GetShortenedUrlHistory404Response,
 } from "app/api/UrlsApi";
 import { Grid, Paper, Typography } from "@mui/material";
@@ -12,6 +13,7 @@ import { readableTimestamp } from "components/ReadableTimestampComponent/Readabl
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
+import { buildBrowsePagePath, EMPTY_VALUE } from "app/lib/Constants";
 
 export default function ShortenedUrlHistory(params: {
   uniqueId: string;
@@ -28,7 +30,7 @@ export default function ShortenedUrlHistory(params: {
     return <></>;
   }
   if (error instanceof GetShortenedUrlHistory404Response) {
-    redirect("/browse");
+    redirect(buildBrowsePagePath());
   }
   const result = data?.map((res) => res?.data).flat();
   return (
@@ -49,22 +51,14 @@ export default function ShortenedUrlHistory(params: {
               }}
               data={result}
               itemContent={(index, comp) => {
-                return (
-                  <Grid container direction="column">
-                    <Card variant="outlined">
-                      <Grid>
-                        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
-                          {readableTimestamp(comp.event_date_time)}
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Typography sx={{ p: 2 }}>
-                          Target URL: {<NewTabLink url={comp.url} />}
-                        </Typography>
-                      </Grid>
-                    </Card>
-                  </Grid>
-                );
+                switch (comp.type) {
+                  case "USER_UPDATED_TITLE":
+                    return <TitleUpdatedRow row={comp} />;
+                  case "USER_UPDATED_ORIGINAL_URL":
+                    return <TargetUrlUpdatedRow row={comp} />;
+                  case "USER_CREATED_SHORTENED_URL":
+                    return <ShortenedUrlCreatedRow row={comp} />;
+                }
               }}
             />
           }
@@ -73,3 +67,72 @@ export default function ShortenedUrlHistory(params: {
     </Paper>
   );
 }
+
+const TitleUpdatedRow = (params: {
+  row: GetShortenedUrlHistoryRowResponse;
+}) => {
+  return (
+    <Card variant="outlined">
+      <Grid>
+        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
+          Title was updated - {readableTimestamp(params.row.event_date_time)}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Title:{" "}
+          {params.row.title == null || params.row.title.length == 0
+            ? EMPTY_VALUE
+            : params.row.title}
+        </Typography>
+      </Grid>
+    </Card>
+  );
+};
+
+const ShortenedUrlCreatedRow = (params: {
+  row: GetShortenedUrlHistoryRowResponse;
+}) => {
+  return (
+    <Card variant="outlined">
+      <Grid>
+        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
+          Created - {readableTimestamp(params.row.event_date_time)}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Target URL: {<NewTabLink url={params.row.url} />}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Title:{" "}
+          {params.row.title == null || params.row.title.length == 0
+            ? EMPTY_VALUE
+            : params.row.title}
+        </Typography>
+      </Grid>
+    </Card>
+  );
+};
+
+const TargetUrlUpdatedRow = (params: {
+  row: GetShortenedUrlHistoryRowResponse;
+}) => {
+  return (
+    <Card variant="outlined">
+      <Grid>
+        <Typography gutterBottom sx={{ fontSize: 14, p: 2 }}>
+          Target Url was updated -{" "}
+          {readableTimestamp(params.row.event_date_time)}
+        </Typography>
+      </Grid>
+      <Grid>
+        <Typography sx={{ p: 2 }}>
+          Target URL: {<NewTabLink url={params.row.url} />}
+        </Typography>
+      </Grid>
+    </Card>
+  );
+};
