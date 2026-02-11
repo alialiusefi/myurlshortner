@@ -2,62 +2,89 @@ package org.acme.domain.events;
 
 import org.acme.domain.entity.ShortenedUrl;
 
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public class ShortenedUrlEventEnvelopFactory {
-    public static ShortenedUrlEventEnvelop<V1UserCreatedShortenedUrlEvent> createV1CreatedShortenUrlEvent(
+    public static ShortenedUrlEventEnvelop<V2UserCreatedShortenedUrlEvent> createV2CreatedShortenUrlEvent(
             ShortenedUrl shortenedUrl
     ) {
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
-                1,
+                2,
+                shortenedUrl.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_CREATED_SHORTENED_URL,
                 shortenedUrl.getCreatedAt(),
-                new V1UserCreatedShortenedUrlEvent(
+                new V2UserCreatedShortenedUrlEvent(
                         shortenedUrl.getPublicIdentifier(),
                         shortenedUrl.getCreatedAt(),
                         shortenedUrl.isEnabled(),
                         shortenedUrl.getOriginalUrl(),
-                        shortenedUrl.getUserId()
+                        shortenedUrl.getUserId(),
+                        shortenedUrl.getTitle()
                 )
         );
     }
 
-    // todo update code to apply changes here for factory class
     public static ShortenedUrlEventEnvelop<V1UserUpdatedOriginalUrlEvent> createV1UpdatedOriginalUrlEvent(
-            ShortenedUrl url
+            ShortenedUrl url,
+            URI newTargetUrl
     ) {
+        var createdAt = OffsetDateTime.now();
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
                 1,
+                url.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL,
-                url.getUpdatedAt(),
+                createdAt,
                 new V1UserUpdatedOriginalUrlEvent(
                         url.getPublicIdentifier(),
-                        url.getOriginalUrl(),
-                        url.getUpdatedAt(),
+                        newTargetUrl,
+                        createdAt,
                         url.getUserId()
                 )
         );
     }
 
-    public static ShortenedUrlEventEnvelop<V1UserGiftedShortenedUrlEvent> createV1CreateUserGiftedShortenedUrlEvent(
+    public static ShortenedUrlEventEnvelop<V2UserGiftedShortenedUrlEvent> createV2CreateUserGiftedShortenedUrlEvent(
             ShortenedUrl url,
             Long targetUserId
     ) {
         var newCreatedAt = OffsetDateTime.now();
         return new ShortenedUrlEventEnvelop<>(
                 UUID.randomUUID(),
-                1,
+                2,
+                url.getPublicIdentifier(),
                 ShortenedUrlRecordType.USER_GIFTED_SHORTENED_URL,
                 newCreatedAt,
-                new V1UserGiftedShortenedUrlEvent(
+                new V2UserGiftedShortenedUrlEvent(
                         url.getPublicIdentifier(),
                         newCreatedAt,
                         url.getOriginalUrl(),
                         url.getUserId(),
-                        targetUserId
+                        targetUserId,
+                        url.getTitle()
+                )
+        );
+    }
+
+    public static ShortenedUrlEventEnvelop<V1UserUpdatedTitleEvent> createV1UpdatedTitleEvent(
+            ShortenedUrl url,
+            String title
+    ) {
+        var newCreatedAt = OffsetDateTime.now();
+        return new ShortenedUrlEventEnvelop<>(
+                UUID.randomUUID(),
+                1,
+                url.getPublicIdentifier(),
+                ShortenedUrlRecordType.USER_UPDATED_TITLE,
+                newCreatedAt,
+                new V1UserUpdatedTitleEvent(
+                        url.getPublicIdentifier(),
+                        title,
+                        newCreatedAt,
+                        url.getUserId()
                 )
         );
     }

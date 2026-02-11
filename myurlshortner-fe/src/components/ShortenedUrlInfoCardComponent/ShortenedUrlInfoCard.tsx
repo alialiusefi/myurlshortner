@@ -11,6 +11,7 @@ import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { useContext } from "react";
 import { UserProvider } from "app/context";
+import { buildBrowsePagePath, EMPTY_VALUE } from "app/lib/Constants";
 
 export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
   const userId = useContext(UserProvider);
@@ -22,7 +23,7 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
     return <></>;
   }
   if (error instanceof GetShortenedUrlInfo404Response) {
-    redirect("/browse");
+    redirect(buildBrowsePagePath());
   }
   return (
     <Card>
@@ -37,18 +38,26 @@ export default function ShortenedUrlInfoCard(params: { uniqueId: string }) {
           {params.uniqueId}
         </Typography>
       </Grid>
+      <Grid>
+        <Typography variant="h5" paddingLeft={2}>
+          Title:{" "}
+          {data.title == null || data.title.length == 0
+            ? EMPTY_VALUE
+            : data.title}
+        </Typography>
+      </Grid>
       <Grid container spacing={1} padding={2}>
         <Typography variant="h5">
-          <NewTabLink url={data?.shortened_url} />
+          <NewTabLink url={data.shortened_url} />
         </Typography>
-        {data?.is_enabled ? (
+        {data.is_enabled ? (
           <ArrowForwardIcon fontSize="large" color={"success"} />
         ) : (
           <DoNotDisturbOnIcon fontSize="large" color={"error"} />
         )}
         <Grid size={5}>
           <Typography variant="h5">
-            <NewTabLink url={data?.url} />
+            <NewTabLink url={data.url} />
           </Typography>
         </Grid>
       </Grid>

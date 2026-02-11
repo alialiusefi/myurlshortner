@@ -15,9 +15,9 @@ quarkus-kafka = { module = "io.quarkus:quarkus-messaging-kafka", version.ref = "
 quarkus-apicurioregistry-avro = { module = "io.quarkus:quarkus-apicurio-registry-avro", version.ref = "quarkus" }
 quarkus-health = { module = "io.quarkus:quarkus-smallrye-health", version.ref = "quarkus" }
 quarkus-image-docker = { module = "io.quarkus:quarkus-container-image-docker", version.ref = "quarkus" }
-quarkus-jdbc-postgres = { module = "io.quarkus:quarkus-jdbc-postgresql", version.ref = "quarkus"}
-quarkus-hibernate = { module = "io.quarkus:quarkus-hibernate-orm-panache", version.ref = "quarkus"}
-quarkus-flyway = { module = "io.quarkus:quarkus-flyway", version.ref = "quarkus"}
+quarkus-jdbc-postgres = { module = "io.quarkus:quarkus-jdbc-postgresql", version.ref = "quarkus" }
+quarkus-hibernate = { module = "io.quarkus:quarkus-hibernate-orm-panache", version.ref = "quarkus" }
+quarkus-flyway = { module = "io.quarkus:quarkus-flyway", version.ref = "quarkus" }
 quarkus-redis = { module = "io.quarkus:quarkus-redis-client", version.ref = "quarkus" }
 quarkus-scheduler = { module = "io.quarkus:quarkus-scheduler", version.ref = "quarkus" }
 vavr-core = { module = "io.vavr:vavr", version.ref = "vavr" }

@@ -66,8 +66,8 @@ class UrlShortnerControllerIT {
     void testGetUrlsEndpoint() throws SaveShortenedUrlConflictError {
         var datetime = OffsetDateTime.now();
         var datetime2 = OffsetDateTime.now();
-        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true, 1L));
-        repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime2, datetime2, false, 1L));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true, 1L, "test1"));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime2, datetime2, false, 1L, "test2"));
         var result = given()
                 .when().get("/shortened-urls?page=1&size=10")
                 .then()
@@ -76,8 +76,8 @@ class UrlShortnerControllerIT {
         var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
         assertThat(data, Matchers.not(Matchers.empty()));
         assertThat(data, Matchers.contains(
-                new UrlList.UrlRow("https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false),
-                new UrlList.UrlRow("https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true)
+                new UrlList.UrlRow("abcdefghi2", "https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false, "test2"),
+                new UrlList.UrlRow("abcdefghik", "https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true, "test1")
         ));
     }
 
@@ -117,7 +117,9 @@ class UrlShortnerControllerIT {
         Mockito.verify(publisher).publishUserCreatedShortenedUrl(
                 Mockito.any(OffsetDateTime.class),
                 Mockito.any(URI.class),
-                Mockito.any(String.class)
+                Mockito.any(String.class),
+                Mockito.isNull(),
+                Mockito.any(Long.class)
         );
     }
 
@@ -150,7 +152,9 @@ class UrlShortnerControllerIT {
         Mockito.verify(publisher).publishUserCreatedShortenedUrl(
                 Mockito.any(OffsetDateTime.class),
                 Mockito.any(URI.class),
-                Mockito.any(String.class)
+                Mockito.any(String.class),
+                Mockito.isNull(),
+                Mockito.any(Long.class)
         );
     }
 
@@ -159,10 +163,10 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "youtube.com";
         var uid = "abcdefghik";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "title");
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -179,7 +183,7 @@ class UrlShortnerControllerIT {
                 .when()
                 .patch(String.format("/shortened-urls/%s", uid))
                 .then()
-                .statusCode(204);
+                .statusCode(200);
 
         var found = repo.getShortenedUrl(uid, userId);
         var event = eventStore.getLatestShortenedUrlEventByIdAndType(uid, ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL);
@@ -198,10 +202,10 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "https://www.google.com";
         var uid = "abcdefghic";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "");
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -218,13 +222,14 @@ class UrlShortnerControllerIT {
                 .when()
                 .patch(String.format("/shortened-urls/%s", uid))
                 .then()
-                .statusCode(204);
+                .statusCode(200);
 
         var found = repo.getShortenedUrl(uid, userId);
         var event = eventStore.getLatestShortenedUrlEventByIdAndType(uid, ShortenedUrlRecordType.USER_UPDATED_ORIGINAL_URL);
         assertThat("Shortened url exists", found.isPresent());
         var foundShortenedUrl = found.get();
         assertThat("Url has not changed", foundShortenedUrl.getOriginalUrl().equals(URI.create("https://www.google.com")));
+        assertThat("Url has not changed", foundShortenedUrl.getTitle().isEmpty());
         assertThat("Event doesnt exists", event.isEmpty());
         assertThat("Updated at has changed", foundShortenedUrl.getUpdatedAt().isAfter(entity.getUpdatedAt()));
         assertThat("Created at didn't change", foundShortenedUrl.getCreatedAt().isEqual(entity.getCreatedAt()));
@@ -242,6 +247,7 @@ class UrlShortnerControllerIT {
         given()
                 .body(body)
                 .contentType(ContentType.JSON)
+                .header(new Header(Constants.USER_ID_HEADER_KEY, "1"))
                 .when()
                 .patch("/shortened-urls/abcdabcd12")
                 .then()
@@ -253,10 +259,10 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "youtube.com";
         var uid = "abcdefghik";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, null);
         repo.insertShortenedUrl(entity);
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
@@ -292,24 +298,24 @@ class UrlShortnerControllerIT {
         var url = "youtube.com";
         var uid = "abcdefghi2";
         var userId = 1L;
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, null);
         repo.insertShortenedUrl(entity);
 
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
-        entity.setOriginalUrl(URI.create("abc.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("abc.com")
                 )
         );
-        entity.setOriginalUrl(URI.create("yahoo.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("yahoo.com")
                 )
         );
 
@@ -318,10 +324,10 @@ class UrlShortnerControllerIT {
                 .get("/shortened-urls/" + uid + "/history?offset=1&size=1&from=" + now)
                 .then()
                 .statusCode(200)
-                .extract().jsonPath(config).getList("data", ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow.class);
+                .extract().jsonPath(config).getList("data", ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow.class);
 
         assertThat("Size is correct", response.size() == 1);
-        assertThat("Content is correct", response.getFirst().url().equals("abc.com"));
+        assertThat("Content is correct", response.getFirst().getUrl().equals("abc.com"));
     }
 
     @Test
@@ -345,24 +351,24 @@ class UrlShortnerControllerIT {
         var userId = 1L;
         var url = "youtube.com";
         var uid = "abcdefgh45";
-        var entity = new ShortenedUrl(URI.create(url), uid, userId);
+        var entity = new ShortenedUrl(URI.create(url), uid, userId, "some");
         repo.insertShortenedUrl(entity);
 
         eventStore.insertEvent(
-                ShortenedUrlEventEnvelopFactory.createV1CreatedShortenUrlEvent(
+                ShortenedUrlEventEnvelopFactory.createV2CreatedShortenUrlEvent(
                         entity
                 )
         );
-        entity.setOriginalUrl(URI.create("abc.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("abc.com")
                 )
         );
-        entity.setOriginalUrl(URI.create("yahoo.com"));
         eventStore.insertEvent(
                 ShortenedUrlEventEnvelopFactory.createV1UpdatedOriginalUrlEvent(
-                        entity
+                        entity,
+                        URI.create("yahoo.com")
                 )
         );
         entity.setIsEnabled(false);
@@ -376,8 +382,9 @@ class UrlShortnerControllerIT {
                 .extract().jsonPath(config).getObject("", ShortenedUrlResponse.class);
 
         assertThat("Url is correct", response.url().equals("yahoo.com"));
+        assertThat("Url is correct", response.title().equals("some"));
         assertThat("Is Enabled is correct", !response.isEnabled());
-        assertThat("Updated at is correct", response.updatedAt().equals(entity.getUpdatedAt()));
+        assertThat("Updated at is correct", !response.updatedAt().equals(entity.getUpdatedAt()));
         assertThat("Created at is correct", response.createdAt().equals(entity.getCreatedAt()));
     }
 }

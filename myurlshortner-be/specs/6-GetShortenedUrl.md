@@ -19,7 +19,8 @@ Responses:
   "url": "https://www.google.com?q=rr",
   "is_enabled": true,
   "created_at": "2025-01-01T01:05:12.123+09:00",
-  "updated_at": "2025-01-01T01:05:12.123+09:00"
+  "updated_at": "2025-01-01T01:05:12.123+09:00",
+  "title": "Google - The center of web" // nullable
 }
 ```
 

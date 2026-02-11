@@ -14,7 +14,7 @@ import java.util.Objects;
 public class NotificationEntity extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_generator")
-    @SequenceGenerator(name="notification_generator", sequenceName = "notifications_id_seq", allocationSize=1)
+    @SequenceGenerator(name = "notification_generator", sequenceName = "notifications_id_seq", allocationSize = 1)
     private Long id;
     private String uniqueIdentifier;
     @Enumerated(EnumType.STRING)

@@ -1,6 +1,8 @@
 package org.acme.domain.entity;
 
-import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
+import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
+import org.acme.domain.events.V1UserUpdatedTitleEvent;
+import org.acme.domain.events.V2UserGiftedShortenedUrlEvent;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -13,26 +15,37 @@ public class ShortenedUrl {
     private OffsetDateTime updatedAt;
     private boolean enabled;
     private Long userId;
+    private String title;
 
     public ShortenedUrl() {
     }
 
-    public ShortenedUrl(URI originalUrl, String publicIdentifier, Long userId) {
+    public ShortenedUrl(URI originalUrl, String publicIdentifier, Long userId, String title) {
         this.originalUrl = originalUrl;
         this.publicIdentifier = publicIdentifier;
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = this.createdAt;
         this.enabled = true;
         this.userId = userId;
+        this.title = title;
     }
 
-    public ShortenedUrl(String originalUrl, String publicIdentifier, OffsetDateTime datetime, OffsetDateTime updatedAt, Boolean enabled, Long userId) {
+    public ShortenedUrl(
+            String originalUrl,
+            String publicIdentifier,
+            OffsetDateTime datetime,
+            OffsetDateTime updatedAt,
+            Boolean enabled,
+            Long userId,
+            String title
+    ) {
         this.originalUrl = URI.create(originalUrl);
         this.publicIdentifier = publicIdentifier;
         this.createdAt = datetime;
         this.updatedAt = updatedAt;
         this.enabled = enabled;
         this.userId = userId;
+        this.title = title;
     }
 
     public String shortenedUrl(String serviceHostname) {
@@ -44,18 +57,31 @@ public class ShortenedUrl {
         return String.format(format, serviceHostname, publicIdentifier);
     }
 
-    public ShortenedUrl updateOriginalUrl(URI newOriginalUrl, Boolean isEnabled) {
-        this.originalUrl = newOriginalUrl;
-        this.updatedAt = OffsetDateTime.now();
-        this.enabled = isEnabled;
-        return this;
-    }
-
-    public ShortenedUrl giftShortenedUrl(V1UserGiftedShortenedUrlEvent event) {
+    public ShortenedUrl giftShortenedUrl(V2UserGiftedShortenedUrlEvent event) {
         this.updatedAt = event.createdAt();
         this.createdAt = event.createdAt();
         this.userId = event.targetUserId();
         return this;
+    }
+
+    public ShortenedUrl updateOriginalUrl(V1UserUpdatedOriginalUrlEvent event) {
+        this.originalUrl = event.newOriginalUrl();
+        this.updatedAt = event.updatedAt();
+        return this;
+    }
+
+    public ShortenedUrl updateTitle(V1UserUpdatedTitleEvent event) {
+        this.title = event.newTitle();
+        this.updatedAt = event.createdAt();
+        return this;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public Long getUserId() {

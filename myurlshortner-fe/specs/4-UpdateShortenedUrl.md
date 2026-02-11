@@ -5,6 +5,8 @@
 When the user presses the edit button, a dialog opens that allows the user to update the original url.
 
 - Title
+  - Up 100 characters
+  - <empty> placeholder when existing value is null or ""
 - URL Input
   - Label: Target URL
   - Placeholder: _existing url_

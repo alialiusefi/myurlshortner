@@ -1,20 +1,25 @@
 package org.acme.application.controller.url;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
-import org.acme.domain.events.V1UserCreatedShortenedUrlEvent;
-import org.acme.domain.events.V1UserGiftedShortenedUrlEvent;
+import org.acme.application.util.PatchField;
+import org.acme.domain.entity.ShortenedUrl;
 import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
-import org.acme.domain.exceptions.url.UpdateOriginalUrlException;
+import org.acme.domain.events.V1UserUpdatedTitleEvent;
+import org.acme.domain.events.V2UserCreatedShortenedUrlEvent;
+import org.acme.domain.events.V2UserGiftedShortenedUrlEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.acme.application.controller.Constants.API_KEY;
 import static org.acme.application.controller.Constants.USER_ID_HEADER_KEY;
+import static org.acme.application.controller.url.PatchShortenedUrlRequest.*;
 
 @Path("/")
 public class UrlShortnerController {
@@ -40,7 +45,6 @@ public class UrlShortnerController {
     @Produces(APPLICATION_JSON)
     public Response createShortenedUrl(
             ShortenUrlRequest request,
-            @DefaultValue("1")
             @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
         return this.shortenedUrlUseCases.createShortenedUrl(userIdHeader, request).fold(
@@ -77,11 +81,13 @@ public class UrlShortnerController {
                     var results = success._2.stream()
                             .map(
                                     row -> new UrlList.UrlRow(
+                                            row.uniqueIdentifier(),
                                             row.originalUrl().toString(),
                                             row.shortenedUrl(hostname),
                                             row.accessCount(),
                                             row.createdAt(),
-                                            row.isEnabled()
+                                            row.isEnabled(),
+                                            row.title()
                                     )
                             ).toList();
                     return Response.ok().entity(new UrlList(results, total)).build();
@@ -92,31 +98,44 @@ public class UrlShortnerController {
     @PATCH
     @Path("/shortened-urls/{uniqueIdentifier}")
     @Produces(APPLICATION_JSON)
-    public Response updateOriginalUrl(
-            UpdateOriginalUrlRequest request,
+    public Response patchShortenedUrl(
+            JsonNode request,
             @PathParam("uniqueIdentifier") String uniqueIdentifier,
-            @DefaultValue("1")
             @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
-        if (request.isEnabled() == null) {
-            request = new UpdateOriginalUrlRequest(request.url(), true);
-        }
-        return shortenedUrlUseCases.updateOriginalUrl(uniqueIdentifier, request, userIdHeader).fold(
-                fail -> {
-                    return fail.operationError().map(
-                            error -> switch (error) {
-                                case UpdateOriginalUrlException.ShortenedUrlIsNotFound notFound ->
-                                        Response.status(Response.Status.NOT_FOUND).build();
+        BiFunction<JsonNode, String, PatchField<String>> parseString = (JsonNode a, String field) -> {
+            var isSet = a.has(field);
+            if (isSet) {
+                if (!a.get(field).isNull()) {
+                    return new PatchField<>(a.get(field).asText(), isSet);
+                }
+                return new PatchField<>(null, isSet);
+            } else {
+                return new PatchField<>(null, isSet);
+            }
+        };
+        BiFunction<JsonNode, String, PatchField<Boolean>> parseBoolean = (JsonNode a, String field) -> {
+            var isSet = a.has(field);
+            if (isSet) {
+                return new PatchField<>(a.get(field).asBoolean(), isSet);
+            } else {
+                return new PatchField<>(null, isSet);
+            }
+        };
 
-                                default -> throw new IllegalStateException("Unexpected value: " + error);
-                            }
-                    ).orElseGet(() ->
-                            Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainErrors(
-                                            fail.validationErrors()
-                                    )
-                            ).build());
-                },
-                success -> Response.status(Response.Status.NO_CONTENT).build()
+        return shortenedUrlUseCases.patchShortenedUrl(
+                new PatchShortenedUrlRequest(
+                        parseString.apply(request, URL_FIELD),
+                        parseBoolean.apply(request, IS_ENABLED_FIELD),
+                        parseString.apply(request, TITLE_FIELD)
+                ),
+                userIdHeader,
+                uniqueIdentifier
+        ).fold(
+                fail -> fail.notFound().map(a -> Response.status(404).build()).orElseGet(
+                        () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(fail.validationErrors())).build())
+                ,
+                this::toResponse
         );
     }
 
@@ -130,18 +149,25 @@ public class UrlShortnerController {
         return shortenedUrlUseCases.getShortenedUrl(userIdHeader, uniqueIdentifier, apiKey).fold(
                 fail -> fail.notFound.map(a -> Response.status(404).build()).orElseGet(
                         () -> Response.status(400).entity(ErrorResponse.buildFromDomainErrors(fail.validationException)).build()),
-                success -> Response.ok(new ShortenedUrlResponse(
-                                success.getPublicIdentifier(),
-                                success.shortenedUrl(hostname),
-                                success.getCreatedAt(),
-                                success.getUpdatedAt(),
-                                success.getOriginalUrl().toString(),
-                                success.isEnabled(),
-                                success.getUserId()
-                        )
-                ).build()
+                this::toResponse
         );
     }
+
+    private Response toResponse(ShortenedUrl url) {
+        return Response.ok(
+                new ShortenedUrlResponse(
+                        url.getPublicIdentifier(),
+                        url.shortenedUrl(hostname),
+                        url.getCreatedAt(),
+                        url.getUpdatedAt(),
+                        url.getOriginalUrl().toString(),
+                        url.isEnabled(),
+                        url.getUserId(),
+                        url.getTitle()
+                )
+        ).build();
+    }
+
 
     @GET
     @Path("/shortened-urls/{uniqueIdentifier}/history")
@@ -162,19 +188,26 @@ public class UrlShortnerController {
                 events ->
                         Response.ok(new ShortenedUrlHistoryResponse(events.stream().map(e ->
                                 switch (e) {
-                                    case V1UserCreatedShortenedUrlEvent event ->
-                                            new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
+                                    case V2UserCreatedShortenedUrlEvent event ->
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlCreatedHistoryRow(
+                                                    event.createdAt(),
                                                     event.originalUrl().toString(),
-                                                    event.createdAt()
+                                                    event.title()
                                             );
                                     case V1UserUpdatedOriginalUrlEvent event ->
-                                            new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
+                                            new ShortenedUrlHistoryResponse.UrlUpdatedHistoryRow(
                                                     event.newOriginalUrl().toString(),
                                                     event.updatedAt()
                                             );
-                                    case V1UserGiftedShortenedUrlEvent event ->
-                                            new ShortenedUrlHistoryResponse.ShortenedUrlHistoryRow(
+                                    case V2UserGiftedShortenedUrlEvent event ->
+                                            new ShortenedUrlHistoryResponse.ShortenedUrlCreatedHistoryRow(
+                                                    event.createdAt(),
                                                     event.originalUrl().toString(),
+                                                    event.title()
+                                            );
+                                    case V1UserUpdatedTitleEvent event ->
+                                            new ShortenedUrlHistoryResponse.TitleUpdatedHistoryRow(
+                                                    event.newTitle(),
                                                     event.createdAt()
                                             );
                                 }).toList())

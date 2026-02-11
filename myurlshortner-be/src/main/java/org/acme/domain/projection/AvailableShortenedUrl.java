@@ -8,7 +8,8 @@ public record AvailableShortenedUrl(
         URI originalUrl,
         OffsetDateTime createdAt,
         Long accessCount,
-        Boolean isEnabled
+        Boolean isEnabled,
+        String title
 ) {
     public String shortenedUrl(String serviceHostname) {
         String format = "http://%s/goto/%s";

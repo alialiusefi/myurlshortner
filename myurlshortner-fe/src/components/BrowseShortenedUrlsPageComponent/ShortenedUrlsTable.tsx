@@ -4,7 +4,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Table from "@mui/material/Table";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TableBody from "@mui/material/TableBody";
@@ -23,6 +23,16 @@ import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
+import { TextField } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import UndoIcon from "@mui/icons-material/Undo";
+import Grid from "@mui/material/Grid";
+import { updateShortenedUrl } from "app/api/UrlShortnerApi";
+import {
+  buildInfoPagePath,
+  EMPTY_VALUE,
+  TITLE_ERROR_MESSAGE,
+} from "app/lib/Constants";
 
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
@@ -79,7 +89,8 @@ export default function ShortnetedUrlsTable() {
       setDirectionState("desc");
     }
   };
-  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState(null);
+  const [currentSelectedForEdit, setCurrentSelectedForEdit] =
+    useState<string>(null);
   return (
     <Box>
       <Typography>Browse Shortened Urls:</Typography>
@@ -88,6 +99,7 @@ export default function ShortnetedUrlsTable() {
           <TableHead>
             <TableRow>
               <TableCell>Status</TableCell>
+              <TableCell>Title</TableCell>
               <TableCell>Shortened URL</TableCell>
               <TableCell>Access Count</TableCell>
               <TableCell>Original URL</TableCell>
@@ -104,7 +116,7 @@ export default function ShortnetedUrlsTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.data.map((one) => (
+            {data?.data.map((one, idx) => (
               <TableRow key={one.shortened_url}>
                 <TableCell>
                   {one.is_enabled ? (
@@ -112,6 +124,38 @@ export default function ShortnetedUrlsTable() {
                   ) : (
                     <CircleIcon sx={{ p: 1, fontSize: 30 }} color="error" />
                   )}
+                </TableCell>
+                <TableCell>
+                  <Title
+                    title={one.title}
+                    updateTitle={async (newTitle: string) => {
+                      const updated = await updateShortenedUrl(
+                        one.unique_identifier,
+                        userId,
+                        undefined,
+                        undefined,
+                        newTitle,
+                      );
+                      const newOne = {
+                        unique_identifier: one.unique_identifier,
+                        title: updated.title,
+                        created_at: updated.created_at,
+                        is_enabled: updated.is_enabled,
+                        url: updated.url,
+                        shortened_url: updated.shortened_url,
+                        access_count: one.access_count,
+                      };
+                      mutate(
+                        () => {
+                          return {
+                            data: data.data.toSpliced(idx, 1, newOne),
+                            total: data.total,
+                          };
+                        },
+                        { revalidate: false },
+                      );
+                    }}
+                  />
                 </TableCell>
                 <TableCell>
                   <NewTabLink url={one.shortened_url} />
@@ -125,37 +169,31 @@ export default function ShortnetedUrlsTable() {
                 </TableCell>
                 <TableCell>
                   <IconButton
-                    onClick={() => {
-                      setCurrentSelectedForEdit(one.shortened_url);
-                    }}
+                    onClick={() => setCurrentSelectedForEdit(one.shortened_url)}
                   >
                     <EditIcon />
-                    {currentSelectedForEdit === one.shortened_url ? (
-                      <UpdateShortenedUrlDialog
-                        isOpen={currentSelectedForEdit === one.shortened_url}
-                        uniqueIdentifier={one.shortened_url.substring(
-                          one.shortened_url.indexOf("/goto/") + 6,
-                        )}
-                        originalUrl={one.url}
-                        isEnabled={one.is_enabled}
-                        onClose={() => {
-                          setCurrentSelectedForEdit(null);
-                          mutate({ ...data });
-                        }}
-                      />
-                    ) : (
-                      <></>
-                    )}
                   </IconButton>
+                  {
+                    currentSelectedForEdit !== null ? (<UpdateShortenedUrlDialog
+                      isOpen={currentSelectedForEdit === one.shortened_url}
+                      uniqueIdentifier={one.unique_identifier}
+                      originalUrl={one.url}
+                      isEnabled={one.is_enabled}
+                      close={() => {
+                        setCurrentSelectedForEdit(null);
+                      }}
+                      onApply={() => {
+                        mutate();
+                        setCurrentSelectedForEdit(null);
+                      }}
+                      title={one.title}
+                    />) : (<></>)
+                  }
                 </TableCell>
                 <TableCell>
                   <Button
                     onClick={() => {
-                      const uid = one?.shortened_url?.substring(
-                        one?.shortened_url?.indexOf("/goto/") + 6,
-                      );
-                      const infoUrl = `/browse/${uid}/info`;
-                      redirect(infoUrl);
+                      redirect(buildInfoPagePath(one.unique_identifier));
                     }}
                   >
                     INFO
@@ -183,6 +221,52 @@ export default function ShortnetedUrlsTable() {
         </Table>
       </TableContainer>
     </Box>
+  );
+}
+
+function Title(params: {
+  title?: string;
+  updateTitle: (newTitle: string) => void;
+}) {
+  const [title, setTitle] = useState<string>(params.title);
+  // the mutation will reload the props with new values however it will not update, since title has its own state already,
+  useEffect(() => {
+    setTitle(params.title);
+  }, [params.title]);
+  const isValid = (input?: string) => {
+    return input == null || input?.length < 100;
+  };
+  const isEdited = (input?: string) => {
+    return input !== params.title;
+  };
+  return (
+    <Grid container direction="row">
+      <TextField
+        sx={{ width: 200 }}
+        placeholder={EMPTY_VALUE}
+        hiddenLabel
+        variant="outlined"
+        size="small"
+        value={title ?? ""}
+        error={!isValid(title)}
+        helperText={!isValid(title) ? TITLE_ERROR_MESSAGE : ""}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <IconButton
+        disabled={!isEdited(title) || !isValid(title)}
+        onClick={() => params.updateTitle(title.trim())}
+        title="Save"
+      >
+        <SaveIcon fontSize="small" />
+      </IconButton>
+      <IconButton
+        disabled={!isEdited(title)}
+        onClick={() => setTitle(params.title)}
+        title="Undo"
+      >
+        <UndoIcon fontSize="small" />
+      </IconButton>
+    </Grid>
   );
 }
 

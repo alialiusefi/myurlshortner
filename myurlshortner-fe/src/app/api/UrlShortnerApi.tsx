@@ -45,8 +45,9 @@ export async function shortenUrlOperaton(
   url: string,
   uid: string,
   userId: number,
+  title?: string,
 ): Promise<ShortenUrlResponse | ErrorResponse> {
-  const request = new ShortenUrlRequest(url, uid);
+  const request = new ShortenUrlRequest(url, uid, title);
   const requestConfig = {
     method: "POST",
     body: JSON.stringify(request),
@@ -72,14 +73,39 @@ export async function shortenUrlOperaton(
   }
 }
 
+type PatchShortenedUrlResponse = {
+  unique_identifier: string;
+  shortened_url: string;
+  url: string;
+  is_enabled: boolean;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+};
+
+/**
+ * Patch shortened url.
+ * @param uniqueIdentifier Required Field
+ * @param userId Required Field
+ * @param newOriginalUrl Optional by passing 'undefined' or 'string'
+ * @param isEnabled Optional by passing 'undefined' or 'string'
+ * @param title Optional by passing 'undefined' otherwise can be 'null' or 'string'
+ * @returns Updated Shortened Url
+ */
 export async function updateShortenedUrl(
   uniqueIdentifier: string,
+  userId: number,
   newOriginalUrl: string,
   isEnabled: boolean,
-  userId: number,
-): Promise<ErrorResponse | null> {
+  title?: string,
+): Promise<PatchShortenedUrlResponse> {
   const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  const request = new UpdateShortenedUrlRequest(newOriginalUrl, isEnabled);
+  const request = {
+    url: newOriginalUrl,
+    is_enabled: isEnabled,
+    title: title,
+  };
   const url = `${serverUrl}/shortened-urls/${uniqueIdentifier}`;
   const requestConfig = {
     method: "PATCH",
@@ -90,18 +116,12 @@ export async function updateShortenedUrl(
     },
   };
   return fetch(url, requestConfig)
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         console.error(`Unexpected BE response! code: ${response.status}`);
-        return response.json();
+        return (await response.json()) as ErrorResponse;
       }
-      return null;
-    })
-    .then((json) => {
-      if (json) {
-        return json as ErrorResponse;
-      }
-      return null;
+      return (await response.json()) as PatchShortenedUrlResponse;
     })
     .catch((e) => {
       console.error(`Unexpected error! error: ${e}`);
@@ -109,22 +129,15 @@ export async function updateShortenedUrl(
     });
 }
 
-class UpdateShortenedUrlRequest {
-  url: string;
-  is_enabled: boolean;
-  constructor(url: string, is_enabled: boolean) {
-    this.url = url;
-    this.is_enabled = is_enabled;
-  }
-}
-
 class ShortenUrlRequest {
   url: string;
   unique_identifier: string;
+  title?: string;
 
-  constructor(url: string, unique_identifier: string) {
+  constructor(url: string, unique_identifier: string, title?: string) {
     this.url = url;
     this.unique_identifier = unique_identifier;
+    this.title = title;
   }
 }
 

@@ -16,14 +16,21 @@ public class ShortenedUrlEventMetadata {
 
     private OffsetDateTime eventDateTime;
 
+    private String uniqueIdentifier;
 
     public ShortenedUrlEventMetadata() {
     }
 
-    public ShortenedUrlEventMetadata(Integer version, ShortenedUrlRecordType recordName, OffsetDateTime eventDateTime) {
+    public ShortenedUrlEventMetadata(
+            Integer version,
+            ShortenedUrlRecordType recordName,
+            OffsetDateTime eventDateTime,
+            String uniqueIdentifier
+    ) {
         this.version = version;
         this.recordName = recordName;
         this.eventDateTime = eventDateTime;
+        this.uniqueIdentifier = uniqueIdentifier;
     }
 
     public Integer getVersion() {
@@ -48,5 +55,13 @@ public class ShortenedUrlEventMetadata {
 
     public void setEventDateTime(OffsetDateTime eventDateTime) {
         this.eventDateTime = eventDateTime;
+    }
+
+    public String getUniqueIdentifier() {
+        return uniqueIdentifier;
+    }
+
+    public void setUniqueIdentifier(String uniqueIdentifier) {
+        this.uniqueIdentifier = uniqueIdentifier;
     }
 }

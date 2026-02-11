@@ -14,7 +14,6 @@ import java.util.UUID;
 public class ShortenedUrlEventEntity {
     @Id
     private UUID eventId;
-    private String uniqueIdentifier;
     @Embedded
     private ShortenedUrlEventMetadata metadata;
     @JdbcTypeCode(SqlTypes.JSON)
@@ -23,9 +22,8 @@ public class ShortenedUrlEventEntity {
     public ShortenedUrlEventEntity() {
     }
 
-    public ShortenedUrlEventEntity(UUID eventId, String uniqueIdentifier, ShortenedUrlEventMetadata metadata, String event) {
+    public ShortenedUrlEventEntity(UUID eventId, ShortenedUrlEventMetadata metadata, String event) {
         this.eventId = eventId;
-        this.uniqueIdentifier = uniqueIdentifier;
         this.metadata = metadata;
         this.event = event;
     }
@@ -53,13 +51,4 @@ public class ShortenedUrlEventEntity {
     public void setEventId(UUID eventId) {
         this.eventId = eventId;
     }
-
-    public String getUniqueIdentifier() {
-        return uniqueIdentifier;
-    }
-
-    public void setUniqueIdentifier(String uniqueIdentifier) {
-        this.uniqueIdentifier = uniqueIdentifier;
-    }
 }
-
