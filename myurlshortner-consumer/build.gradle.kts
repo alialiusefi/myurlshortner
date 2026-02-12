@@ -28,16 +28,18 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:1.0.0-rc-1")
+
     implementation("org.apache.avro:avro:1.12.0")
     implementation("io.apicurio:apicurio-registry-serdes-avro-serde:3.0.0.M4")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-java-time:1.0.0-rc-1")
     implementation("org.jetbrains.exposed:exposed-json:1.0.0-rc-1")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jsoup:jsoup:1.22.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    implementation("org.jsoup:jsoup:1.22.1")
     //implementation("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("io.mockk:mockk:1.14.6")
