@@ -13,7 +13,6 @@ import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 
 @Repository
@@ -24,7 +23,6 @@ class KafkaRetryQueueRepository {
         BUSY
     }
 
-    @Transactional
     suspend fun insertFailedEvent(
         event: String,
         eventDateTime: OffsetDateTime,
@@ -50,7 +48,7 @@ class KafkaRetryQueueRepository {
         return@newSuspendedTransaction
     }
 
-    @Transactional
+
     suspend fun fetchEarliestFailedEventAndLockKey(topic: String): KafkaFailedEvent? =
         newSuspendedTransaction(Dispatchers.IO) {
             val event = KafkaRetryKeysTable.join(
@@ -99,21 +97,21 @@ class KafkaRetryQueueRepository {
             return@newSuspendedTransaction event
         }
 
-    @Transactional
+
     suspend fun deleteFailedEventFromQueue(id: Long) = newSuspendedTransaction(Dispatchers.IO) {
         KafkaRetryQueueTable.deleteWhere {
             KafkaRetryQueueTable.id.eq(id)
         }
     }
 
-    @Transactional
-    suspend fun updateRetryCountOfFailedEvent(id: Long, setRetryCount: Int) {
+
+    suspend fun updateRetryCountOfFailedEvent(id: Long, setRetryCount: Int) = newSuspendedTransaction(Dispatchers.IO) {
         KafkaRetryQueueTable.update(limit = null, where = { KafkaRetryQueueTable.id.eq(id) }) {
             it[KafkaRetryQueueTable.retryCount] = setRetryCount
         }
     }
 
-    @Transactional
+
     suspend fun unlockKey(key: String, topic: String) = newSuspendedTransaction(Dispatchers.IO) {
         KafkaRetryKeysTable.update(limit = null, where = {
             KafkaRetryKeysTable.key.eq(key).and(

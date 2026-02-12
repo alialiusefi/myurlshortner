@@ -10,7 +10,6 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 
 @Repository
 class UserAccessedShortenedUrlRepoImpl(
@@ -30,7 +29,7 @@ class UserAccessedShortenedUrlRepoImpl(
         }
     }
 
-    @Transactional
+
     override suspend fun countById(uid: String): Long = newSuspendedTransaction(Dispatchers.IO) {
         UserAccessedShortenedUrlTable.select(UserAccessedShortenedUrlTable.uniqueIdentifier.count()).where {
             UserAccessedShortenedUrlTable.uniqueIdentifier eq uid

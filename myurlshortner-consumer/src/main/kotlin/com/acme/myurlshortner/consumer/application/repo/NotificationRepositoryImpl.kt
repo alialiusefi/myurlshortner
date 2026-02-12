@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 
 @Repository
@@ -17,7 +16,7 @@ class NotificationRepositoryImpl : NotificationRepository {
 
     private val objectMapper = ObjectMapper()
 
-    @Transactional
+    
     override suspend fun insertShortenedUrlViewedNTimesNotification(
         userId: Long,
         uid: String,
