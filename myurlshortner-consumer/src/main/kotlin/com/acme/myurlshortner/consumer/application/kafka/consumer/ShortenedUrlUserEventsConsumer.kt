@@ -42,7 +42,7 @@ class ShortenedUrlUserEventsConsumer(
                 retry.handleFailedKafkaUserAccessedShortenedUrlEvent(record.userAccessedShortenedUrlEvent)
             }
 
-            record.userCreatedShortenedUrlEvent != null -> try {
+            record.userCreatedShortenedUrlEvent != null && record.userCreatedShortenedUrlEvent.userId != null -> try {
                 useCases.handleUserCreatedShortenedUrl(record.userCreatedShortenedUrlEvent)
             } catch (e: Throwable) {
                 logger.error("Failed to process message: $e", e)
