@@ -3,6 +3,8 @@ package com.acme.myurlshortner.consumer.application.kafka.consumer
 import com.acme.events.ShortenedUrlUserEvents
 import com.acme.myurlshortner.consumer.application.kafka.retry.ShortenedUrlUserEventsRetry
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -26,7 +28,10 @@ class ShortenedUrlUserEventsConsumer(
         topics = [$$"${app.kafka.topic-name}"],
         autoStartup = $$"${app.kafka.enabled}"
     )
-    fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
+    suspend fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) = coroutineScope {
+        logger.debug("Running on: {}", Thread.currentThread())
+        logger.debug("currentCoroutineContext(): {}", currentCoroutineContext())
+        logger.debug("coroutineContext: {}", coroutineContext)
         val key = message.key()
         val record = message.value()
         val datetime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp()), ZoneId.systemDefault())
@@ -38,6 +43,13 @@ class ShortenedUrlUserEventsConsumer(
             } catch (e: Throwable) {
                 logger.error("Failed to process message: $e", e)
                 retry.handleFailedKafkaUserAccessedShortenedUrlEvent(record.userAccessedShortenedUrlEvent)
+            }
+
+            record.userCreatedShortenedUrlEvent != null && record.userCreatedShortenedUrlEvent.userId != null -> try {
+                useCases.handleUserCreatedShortenedUrl(record.userCreatedShortenedUrlEvent)
+            } catch (e: Throwable) {
+                logger.error("Failed to process message: $e", e)
+                retry.handleFailedKafkaUserCreatedShortenedUrlEvent(record.userCreatedShortenedUrlEvent)
             }
         }
     }

@@ -2,6 +2,8 @@ package com.acme.myurlshortner.consumer.application.kafka.retry
 
 import com.acme.myurlshortner.consumer.application.repo.KafkaRetryQueueRepository
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import org.apache.avro.io.DatumWriter
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.io.EncoderFactory
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 import java.time.OffsetDateTime
 import com.acme.events.UserAccessedShortenedUrl as AvroUserAccessedShortenedUrl
+import com.acme.events.UserCreatedShortenedUrl as AvroUserCreatedShortenedUrl
 
 @Component
 class ShortenedUrlUserEventsRetry(
@@ -25,7 +28,7 @@ class ShortenedUrlUserEventsRetry(
     @Value($$"${app.kafka.topic-name}")
     lateinit var topic: String
 
-    fun handleFailedKafkaUserAccessedShortenedUrlEvent(event: AvroUserAccessedShortenedUrl) {
+    suspend fun handleFailedKafkaUserAccessedShortenedUrlEvent(event: AvroUserAccessedShortenedUrl) {
         val writer: DatumWriter<AvroUserAccessedShortenedUrl> =
             SpecificDatumWriter(AvroUserAccessedShortenedUrl.getClassSchema())
         val byteOutputStream = ByteArrayOutputStream()
@@ -40,14 +43,37 @@ class ShortenedUrlUserEventsRetry(
             eventDateTime = OffsetDateTime.parse(event.accessedAt),
             key = event.uniqueIdentifier,
             type = KafkaEventType.USER_ACCESSED_SHORTENED_URL,
-            version = 6,
+            version = 7,
+            topic = topic
+        )
+    }
+
+    suspend fun handleFailedKafkaUserCreatedShortenedUrlEvent(event: AvroUserCreatedShortenedUrl) {
+        val writer: DatumWriter<AvroUserCreatedShortenedUrl> =
+            SpecificDatumWriter(AvroUserCreatedShortenedUrl.getClassSchema())
+        val byteOutputStream = ByteArrayOutputStream()
+        val encoder = EncoderFactory.get().jsonEncoder(AvroUserCreatedShortenedUrl.getClassSchema(), byteOutputStream)
+        byteOutputStream.use {
+            writer.write(event, encoder)
+        }
+        encoder.flush()
+        val json = byteOutputStream.toString()
+        repository.insertFailedEvent(
+            event = json,
+            eventDateTime = OffsetDateTime.parse(event.createdAt),
+            key = event.uniqueIdentifier,
+            type = KafkaEventType.USER_CREATED_SHORTENED_URL,
+            version = 7,
             topic = topic
         )
     }
 
     @Scheduled(fixedRate = 5000)
-    fun retryFailedKafkaEvents() {
-        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return
+    suspend fun retryFailedKafkaEvents() = coroutineScope {
+        logger.debug("Running on: ${Thread.currentThread()}")
+        logger.debug("currentCoroutineContext(): ${currentCoroutineContext()}")
+        logger.debug("coroutineContext: $coroutineContext")
+        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return@coroutineScope
         try {
             logger.info("Retrying failed event id=${failedEvent.id} type=${failedEvent.eventType} with retryCount=${failedEvent.retryCount}")
             when (failedEvent.eventType) {
@@ -60,6 +86,18 @@ class ShortenedUrlUserEventsRetry(
                         SpecificDatumReader(AvroUserAccessedShortenedUrl.getClassSchema())
                     val record = reader.read(null, decoder)
                     useCases.handleUserAccessedShortenedUrl(record)
+                    repository.deleteFailedEventFromQueue(failedEvent.id)
+                }
+
+                KafkaEventType.USER_CREATED_SHORTENED_URL -> {
+                    val decoder = DecoderFactory.get().jsonDecoder(
+                        AvroUserCreatedShortenedUrl.getClassSchema(),
+                        failedEvent.event
+                    )
+                    val reader: SpecificDatumReader<AvroUserCreatedShortenedUrl> =
+                        SpecificDatumReader(AvroUserCreatedShortenedUrl.getClassSchema())
+                    val record = reader.read(null, decoder)
+                    useCases.handleUserCreatedShortenedUrl(record)
                     repository.deleteFailedEventFromQueue(failedEvent.id)
                 }
             }

@@ -1,17 +1,22 @@
 package com.acme.myurlshortner.consumer.userevent.service
 
+import com.acme.myurlshortner.consumer.application.client.ExternalWebApiClient
 import com.acme.myurlshortner.consumer.application.client.ShortenedUrlApiClient
-import com.acme.myurlshortner.consumer.application.service.UserAccessedShortenedUrlEventServiceImpl
+import com.acme.myurlshortner.consumer.application.service.UserShortenedUrlEventServiceImpl
 import com.acme.myurlshortner.consumer.domain.notification.repo.NotificationRepository
 import com.acme.myurlshortner.consumer.domain.useragent.Browser
 import com.acme.myurlshortner.consumer.domain.useragent.Device
 import com.acme.myurlshortner.consumer.domain.useragent.OperatingSystem
 import com.acme.myurlshortner.consumer.domain.userevent.command.UserAccessedShortenedUrlCommand
+import com.acme.myurlshortner.consumer.domain.userevent.command.UserCreatedShortenedUrlCommand
 import com.acme.myurlshortner.consumer.domain.userevent.entity.UserAccessedShortenedUrl
 import com.acme.myurlshortner.consumer.domain.userevent.repo.UserAccessedShortenedUrlRepo
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
@@ -20,6 +25,7 @@ class ShortenedUrlUserEventsServiceTest {
     val mockRepo = mockk<UserAccessedShortenedUrlRepo>(relaxed = true);
     val mockClient = mockk<ShortenedUrlApiClient>()
     val mockNotificationRepo = mockk<NotificationRepository>()
+    val mockExternalWebClient = mockk<ExternalWebApiClient>()
     val listOfNormalUserAgents = mapOf(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 to Triple(Device.PC, OperatingSystem.Windows, Browser.Chrome),
@@ -45,16 +51,17 @@ class ShortenedUrlUserEventsServiceTest {
         "PostmanRuntime/7.26.5" to Triple(Device.Other, OperatingSystem.Other, Browser.Other),
     )
 
+    val service = UserShortenedUrlEventServiceImpl(mockClient, mockExternalWebClient, mockRepo, mockNotificationRepo, "test")
+
     @Test
-    fun shouldSaveUserAccessEvent() {
-        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo)
+    fun shouldSaveUserAccessEvent() = runTest {
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
         val accessedAt = OffsetDateTime.now()
         coEvery {
             mockClient.getShortenedUrlById(uid)
-        } returns ShortenedUrlApiClient.GetShortenedUrlByIdResponse(1)
+        } returns Result.success(ShortenedUrlApiClient.GetShortenedUrlByIdResponse(1))
         coEvery {
             mockRepo.countById(uid)
         } returns 0L
@@ -85,8 +92,7 @@ class ShortenedUrlUserEventsServiceTest {
     }
 
     @Test
-    fun shouldSaveNotificationWhen10Views() {
-        val service = UserAccessedShortenedUrlEventServiceImpl(mockClient, mockRepo, mockNotificationRepo)
+    fun shouldSaveNotificationWhen10Views() = runTest {
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
@@ -94,7 +100,7 @@ class ShortenedUrlUserEventsServiceTest {
         val validAgent = listOfNormalUserAgents.entries.first()
         coEvery {
             mockClient.getShortenedUrlById(uid)
-        } returns ShortenedUrlApiClient.GetShortenedUrlByIdResponse(1)
+        } returns Result.success(ShortenedUrlApiClient.GetShortenedUrlByIdResponse(1))
         coEvery {
             mockRepo.countById(uid)
         } returns 9L
@@ -103,7 +109,7 @@ class ShortenedUrlUserEventsServiceTest {
                 1,
                 uid,
                 10,
-                OffsetDateTime.now()
+                any()
             )
         } returns Unit
         service.handleShortenedUrlUserAccessed(
@@ -137,5 +143,41 @@ class ShortenedUrlUserEventsServiceTest {
             )
         }
 
+    }
+
+    @Test
+    fun shouldExtractTitleWhenCallingTargetUrl() = runTest {
+        val now = OffsetDateTime.now()
+        val title = "Welcome to the google search."
+        val command = UserCreatedShortenedUrlCommand(
+            uniqueIdentifier = "abcdabcd11",
+            originalUrl = URI.create("www.google.com?q=abc"),
+            userId = 1L,
+            title = null,
+            createdAt = now
+        )
+        coEvery {
+            mockExternalWebClient.callAndReturnHtmlBody(command.originalUrl)
+        } returns Result.success(
+            """
+                <html>
+                    <head>
+                        <title>
+                            Welcome to the google search.
+                        </title>
+                    </head>
+                </html>
+            """.trimIndent()
+        )
+        coEvery {
+            mockClient.patchShortenedUrl(command.uniqueIdentifier, command.userId, title)
+        } returns null
+
+        service.handleShortenedUrlCreated(command)
+
+        coVerify {
+            mockExternalWebClient.callAndReturnHtmlBody(command.originalUrl)
+            mockClient.patchShortenedUrl(command.uniqueIdentifier, command.userId, title)
+        }
     }
 }
