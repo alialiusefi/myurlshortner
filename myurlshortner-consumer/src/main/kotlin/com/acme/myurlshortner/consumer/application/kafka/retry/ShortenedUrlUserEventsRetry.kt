@@ -2,6 +2,7 @@ package com.acme.myurlshortner.consumer.application.kafka.retry
 
 import com.acme.myurlshortner.consumer.application.repo.KafkaRetryQueueRepository
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import org.apache.avro.io.DatumWriter
 import org.apache.avro.io.DecoderFactory
@@ -68,9 +69,11 @@ class ShortenedUrlUserEventsRetry(
     }
 
     @Scheduled(fixedRate = 5000)
-    suspend fun retryFailedKafkaEvents() {
-        logger.debug("Running on coroutine context: ${currentCoroutineContext()}")
-        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return
+    suspend fun retryFailedKafkaEvents() = coroutineScope {
+        logger.debug("Running on: ${Thread.currentThread()}")
+        logger.debug("currentCoroutineContext(): ${currentCoroutineContext()}")
+        logger.debug("coroutineContext: $coroutineContext")
+        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return@coroutineScope
         try {
             logger.info("Retrying failed event id=${failedEvent.id} type=${failedEvent.eventType} with retryCount=${failedEvent.retryCount}")
             when (failedEvent.eventType) {

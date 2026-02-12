@@ -3,6 +3,7 @@ package com.acme.myurlshortner.consumer.application.kafka.consumer
 import com.acme.events.ShortenedUrlUserEvents
 import com.acme.myurlshortner.consumer.application.kafka.retry.ShortenedUrlUserEventsRetry
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -27,8 +28,10 @@ class ShortenedUrlUserEventsConsumer(
         topics = [$$"${app.kafka.topic-name}"],
         autoStartup = $$"${app.kafka.enabled}"
     )
-    suspend fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) {
-        logger.debug("Running on coroutine context: ${currentCoroutineContext()}")
+    suspend fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) = coroutineScope {
+        logger.debug("Running on: {}", Thread.currentThread())
+        logger.debug("currentCoroutineContext(): {}", currentCoroutineContext())
+        logger.debug("coroutineContext: {}", coroutineContext)
         val key = message.key()
         val record = message.value()
         val datetime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp()), ZoneId.systemDefault())
