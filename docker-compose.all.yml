@@ -21,7 +21,7 @@ services:
     networks:
       - docker-network
   consumer:
-    image: alialiusefi/myurlshortner-consumer:1.0.3
+    image: alialiusefi/myurlshortner-consumer:1.0.4
     environment:
       REGISTRY_URL: "http://schema-registry:8080/apis/registry/v3"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"
