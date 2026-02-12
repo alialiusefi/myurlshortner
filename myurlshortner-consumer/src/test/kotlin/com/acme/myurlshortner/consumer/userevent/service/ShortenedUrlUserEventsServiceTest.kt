@@ -16,6 +16,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import java.net.URI
 import java.time.OffsetDateTime
 import kotlin.test.Test
@@ -53,7 +54,7 @@ class ShortenedUrlUserEventsServiceTest {
     val service = UserShortenedUrlEventServiceImpl(mockClient, mockExternalWebClient, mockRepo, mockNotificationRepo, "test")
 
     @Test
-    fun shouldSaveUserAccessEvent() {
+    fun shouldSaveUserAccessEvent() = runTest {
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
@@ -91,7 +92,7 @@ class ShortenedUrlUserEventsServiceTest {
     }
 
     @Test
-    fun shouldSaveNotificationWhen10Views() {
+    fun shouldSaveNotificationWhen10Views() = runTest {
         val uid = "abcabcabc1"
         val originalUrl = URI.create("https://www.example.com")
         val shortenedUrl = URI.create("http://localhost/goto${uid}")
@@ -145,7 +146,7 @@ class ShortenedUrlUserEventsServiceTest {
     }
 
     @Test
-    fun shouldExtractTitleWhenCallingTargetUrl() {
+    fun shouldExtractTitleWhenCallingTargetUrl() = runTest {
         val now = OffsetDateTime.now()
         val title = "Welcome to the google search."
         val command = UserCreatedShortenedUrlCommand(
@@ -155,7 +156,7 @@ class ShortenedUrlUserEventsServiceTest {
             title = null,
             createdAt = now
         )
-        every {
+        coEvery {
             mockExternalWebClient.callAndReturnHtmlBody(command.originalUrl)
         } returns Result.success(
             """
@@ -168,13 +169,13 @@ class ShortenedUrlUserEventsServiceTest {
                 </html>
             """.trimIndent()
         )
-        every {
+        coEvery {
             mockClient.patchShortenedUrl(command.uniqueIdentifier, command.userId, title)
         } returns null
 
         service.handleShortenedUrlCreated(command)
 
-        verify {
+        coVerify {
             mockExternalWebClient.callAndReturnHtmlBody(command.originalUrl)
             mockClient.patchShortenedUrl(command.uniqueIdentifier, command.userId, title)
         }
