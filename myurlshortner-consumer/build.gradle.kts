@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.acme.myurlshortner"
-version = "1.0.3"
+version = "1.0.4"
 description = "MyUrlShortner Consumer"
 
 java {
