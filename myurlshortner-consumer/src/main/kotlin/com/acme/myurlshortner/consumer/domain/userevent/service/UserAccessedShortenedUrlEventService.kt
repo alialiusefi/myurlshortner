@@ -9,7 +9,7 @@ interface UserAccessedShortenedUrlEventService {
      * 1. https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent
      * 2. https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers
      */
-    fun handleShortenedUrlUserAccessed(
+    suspend fun handleShortenedUrlUserAccessed(
         command: UserAccessedShortenedUrlCommand,
     )
 }
