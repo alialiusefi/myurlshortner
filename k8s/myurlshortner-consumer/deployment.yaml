@@ -25,8 +25,6 @@ spec:
               value: http://apicurio-service:8888/apis/registry/v3
             - name: KAFKA_SERVERS
               value: kafka-service:9094
-            - name: POSTGRES_URL
-              value: jdbc:postgresql://postgres-rw:5432/myurlshortner
             - name: SPRING_PROFILES_ACTIVE
               value: prod
             - name: POSTGRES_USERNAME
@@ -39,6 +37,8 @@ spec:
                 secretKeyRef:
                   name: db-secret
                   key: password
+            - name: POSTGRES_URL
+              value: "r2dbc:postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:5432/postgres"
             - name: API_KEY
               valueFrom:
                 secretKeyRef:

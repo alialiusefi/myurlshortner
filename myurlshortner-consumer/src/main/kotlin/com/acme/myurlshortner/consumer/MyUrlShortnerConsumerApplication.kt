@@ -1,16 +1,20 @@
 package com.acme.myurlshortner.consumer
 
-import org.jetbrains.exposed.v1.spring.boot.autoconfigure.ExposedAutoConfiguration
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+import org.springframework.boot.autoconfigure.data.r2dbc.R2dbcDataAutoConfiguration
+import org.springframework.boot.autoconfigure.data.r2dbc.R2dbcRepositoriesAutoConfiguration
+import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
+import org.springframework.boot.autoconfigure.r2dbc.R2dbcTransactionManagerAutoConfiguration
 import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
 
-@SpringBootApplication
-@ImportAutoConfiguration(
-    value = [ExposedAutoConfiguration::class],
-    exclude = [DataSourceTransactionManagerAutoConfiguration::class]
+@SpringBootApplication(
+    exclude = [
+        R2dbcAutoConfiguration::class,
+        R2dbcDataAutoConfiguration::class,
+        R2dbcRepositoriesAutoConfiguration::class,
+        R2dbcTransactionManagerAutoConfiguration::class
+    ]
 )
 @EnableScheduling
 class MyUrlShortnerConsumerApplication

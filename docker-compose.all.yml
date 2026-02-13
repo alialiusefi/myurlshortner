@@ -25,7 +25,7 @@ services:
     environment:
       REGISTRY_URL: "http://schema-registry:8080/apis/registry/v3"
       KAFKA_SERVERS: "kafka-broker-and-controller:9094"
-      POSTGRES_URL: "jdbc:postgresql://postgres:5432/postgres"
+      POSTGRES_URL: "r2dbc:postgresql://postgres:safetypassword@postgres:5432/postgres"
       API_KEY: safetypassword
       spring_profiles_active: "dev"
     ports:

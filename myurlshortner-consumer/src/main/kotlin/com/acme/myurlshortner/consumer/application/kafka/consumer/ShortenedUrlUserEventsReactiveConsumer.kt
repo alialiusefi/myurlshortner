@@ -19,7 +19,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 
 @Component
-@ConditionalOnProperty(value = [$$"${app.kafka.enabled}"])
+@ConditionalOnProperty(name = ["app.kafka.consumer.enabled"], havingValue = "true")
 class ShortenedUrlUserEventsReactiveConsumer(
     private val template: ReactiveKafkaConsumerTemplate<String?, ShortenedUrlUserEvents>,
     private val useCases: ShortenedUrlUserEventsUseCases,
@@ -55,7 +55,6 @@ class ShortenedUrlUserEventsReactiveConsumer(
         logger.debug("Message: {}", message)
         logger.debug("Running on: {}", Thread.currentThread())
         logger.debug("currentCoroutineContext(): {}", currentCoroutineContext())
-        logger.debug("coroutineContext: {}", currentCoroutineContext())
         val key = message.key()
         val record = message.value()
         val datetime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp()), ZoneId.systemDefault())
