@@ -2,14 +2,15 @@ package com.acme.myurlshortner.consumer.application.kafka.retry
 
 import com.acme.myurlshortner.consumer.application.repo.KafkaRetryQueueRepository
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.withContext
 import org.apache.avro.io.DatumWriter
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.io.EncoderFactory
 import org.apache.avro.specific.SpecificDatumReader
 import org.apache.avro.specific.SpecificDatumWriter
-import org.jboss.logging.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -23,9 +24,9 @@ class ShortenedUrlUserEventsRetry(
     private val repository: KafkaRetryQueueRepository,
     private val useCases: ShortenedUrlUserEventsUseCases
 ) {
-    private val logger = Logger.getLogger(ShortenedUrlUserEventsRetry::class.java)
+    private val logger = LoggerFactory.getLogger(ShortenedUrlUserEventsRetry::class.java)
 
-    @Value($$"${app.kafka.topic-name}")
+    @Value($$"${app.kafka.consumer.topic-name}")
     lateinit var topic: String
 
     suspend fun handleFailedKafkaUserAccessedShortenedUrlEvent(event: AvroUserAccessedShortenedUrl) {
@@ -69,11 +70,11 @@ class ShortenedUrlUserEventsRetry(
     }
 
     @Scheduled(fixedRate = 5000)
-    suspend fun retryFailedKafkaEvents() = coroutineScope {
-        logger.debug("Running on: ${Thread.currentThread()}")
-        logger.debug("currentCoroutineContext(): ${currentCoroutineContext()}")
-        logger.debug("coroutineContext: $coroutineContext")
-        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return@coroutineScope
+    suspend fun retryFailedKafkaEvents() = withContext(Dispatchers.Default) {
+        logger.debug("Running on: {}", Thread.currentThread())
+        logger.debug("currentCoroutineContext(): {}", currentCoroutineContext())
+        logger.debug("coroutineContext: {}", coroutineContext)
+        val failedEvent = repository.fetchEarliestFailedEventAndLockKey(topic) ?: return@withContext
         try {
             logger.info("Retrying failed event id=${failedEvent.id} type=${failedEvent.eventType} with retryCount=${failedEvent.retryCount}")
             when (failedEvent.eventType) {

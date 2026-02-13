@@ -3,35 +3,59 @@ package com.acme.myurlshortner.consumer.application.kafka.consumer
 import com.acme.events.ShortenedUrlUserEvents
 import com.acme.myurlshortner.consumer.application.kafka.retry.ShortenedUrlUserEventsRetry
 import com.acme.myurlshortner.consumer.application.usecase.ShortenedUrlUserEventsUseCases
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.currentCoroutineContext
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.reactive.asFlow
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate
 import org.springframework.stereotype.Component
+import reactor.kafka.receiver.ReceiverRecord
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
 @Component
-class ShortenedUrlUserEventsConsumer(
+@ConditionalOnProperty(value = [$$"${app.kafka.enabled}"])
+class ShortenedUrlUserEventsReactiveConsumer(
+    private val template: ReactiveKafkaConsumerTemplate<String?, ShortenedUrlUserEvents>,
     private val useCases: ShortenedUrlUserEventsUseCases,
     private val retry: ShortenedUrlUserEventsRetry
 ) {
+    private var jobReference: Job? = null
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Value($$"${app.podname}")
     lateinit var podName: String
 
-    @KafkaListener(
-        topics = [$$"${app.kafka.topic-name}"],
-        autoStartup = $$"${app.kafka.enabled}"
-    )
-    suspend fun consume(message: ConsumerRecord<String, ShortenedUrlUserEvents>) = coroutineScope {
+    private val consumerFlow = template.receive().asFlow().flowOn(Dispatchers.Default)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    @PostConstruct
+    fun subscribeConsumer() {
+        logger.info("Setting up consumer.")
+        jobReference = GlobalScope.launch(Dispatchers.Default) {
+            consumerFlow.onEach { record ->
+                doConsume(record)
+            }.onCompletion {
+                logger.info("Consumption from kafka stopped.")
+            }.catch { ex ->
+                // todo handle deserialization error case
+                logger.error("Unhandled exception! Will attempt to restart. cause: ${ex.cause}", ex)
+                subscribeConsumer()
+            }.collect()
+        }
+        logger.info("Consumer set.")
+    }
+
+    private suspend fun doConsume(message: ReceiverRecord<String?, ShortenedUrlUserEvents>) {
+        logger.debug("Message: {}", message)
         logger.debug("Running on: {}", Thread.currentThread())
         logger.debug("currentCoroutineContext(): {}", currentCoroutineContext())
-        logger.debug("coroutineContext: {}", coroutineContext)
+        logger.debug("coroutineContext: {}", currentCoroutineContext())
         val key = message.key()
         val record = message.value()
         val datetime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp()), ZoneId.systemDefault())
@@ -52,5 +76,12 @@ class ShortenedUrlUserEventsConsumer(
                 retry.handleFailedKafkaUserCreatedShortenedUrlEvent(record.userCreatedShortenedUrlEvent)
             }
         }
+        message.receiverOffset().commit()
+    }
+
+    @PreDestroy
+    fun cleanup() {
+        logger.info("Cleaning up consumer.")
+        jobReference?.cancel("App Termination.", null)
     }
 }

@@ -1,7 +1,7 @@
 package com.acme.myurlshortner.consumer.application.client
 
-import jakarta.ws.rs.core.HttpHeaders
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient

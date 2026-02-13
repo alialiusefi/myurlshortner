@@ -1,10 +1,10 @@
 package com.acme.myurlshortner.consumer.application.util
 
-import org.jboss.logging.Logger
+import org.slf4j.LoggerFactory
 import kotlin.random.Random
 
 object TestErrorGenerator {
-    private val logger = Logger.getLogger(TestErrorGenerator::class.java)
+    private val logger = LoggerFactory.getLogger(TestErrorGenerator::class.java)
 
     fun generateTestError() {
         val randomError = Random.nextInt(1, 101)
