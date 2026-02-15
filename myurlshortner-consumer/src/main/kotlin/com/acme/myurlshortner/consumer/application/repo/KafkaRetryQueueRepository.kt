@@ -4,14 +4,16 @@ import com.acme.myurlshortner.consumer.application.kafka.retry.KafkaEventType
 import com.acme.myurlshortner.consumer.application.kafka.retry.KafkaFailedEvent
 import com.acme.myurlshortner.consumer.application.repo.table.KafkaRetryKeysTable
 import com.acme.myurlshortner.consumer.application.repo.table.KafkaRetryQueueTable
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption
-import org.jetbrains.exposed.v1.jdbc.*
-import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.r2dbc.*
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.springframework.stereotype.Repository
 import java.time.OffsetDateTime
 
@@ -30,7 +32,7 @@ class KafkaRetryQueueRepository {
         type: KafkaEventType,
         version: Int,
         topic: String
-    ) = newSuspendedTransaction(Dispatchers.IO) {
+    ) = suspendTransaction {
         KafkaRetryKeysTable.insertIgnore {
             it[this.key] = key
             it[this.topic] = topic
@@ -45,12 +47,12 @@ class KafkaRetryQueueRepository {
             it[this.topic] = topic
             it[this.retryCount] = 0
         }
-        return@newSuspendedTransaction
+        return@suspendTransaction
     }
 
 
     suspend fun fetchEarliestFailedEventAndLockKey(topic: String): KafkaFailedEvent? =
-        newSuspendedTransaction(Dispatchers.IO) {
+        suspendTransaction {
             val event = KafkaRetryKeysTable.join(
                 KafkaRetryQueueTable,
                 onColumn = null,
@@ -85,7 +87,7 @@ class KafkaRetryQueueRepository {
                         retryCount = it[KafkaRetryQueueTable.retryCount],
                         topic = it[KafkaRetryQueueTable.topic]
                     )
-                }.firstOrNull() ?: return@newSuspendedTransaction null
+                }.firstOrNull() ?: return@suspendTransaction null
 
             KafkaRetryKeysTable.update(limit = null, where = {
                 KafkaRetryKeysTable.key.eq(event.key).and(
@@ -94,25 +96,25 @@ class KafkaRetryQueueRepository {
             }) {
                 it[KafkaRetryKeysTable.status] = KafkaRetryKeyStatus.BUSY
             }
-            return@newSuspendedTransaction event
+            return@suspendTransaction event
         }
 
 
-    suspend fun deleteFailedEventFromQueue(id: Long) = newSuspendedTransaction(Dispatchers.IO) {
+    suspend fun deleteFailedEventFromQueue(id: Long) = suspendTransaction {
         KafkaRetryQueueTable.deleteWhere {
             KafkaRetryQueueTable.id.eq(id)
         }
     }
 
 
-    suspend fun updateRetryCountOfFailedEvent(id: Long, setRetryCount: Int) = newSuspendedTransaction(Dispatchers.IO) {
+    suspend fun updateRetryCountOfFailedEvent(id: Long, setRetryCount: Int) = suspendTransaction {
         KafkaRetryQueueTable.update(limit = null, where = { KafkaRetryQueueTable.id.eq(id) }) {
             it[KafkaRetryQueueTable.retryCount] = setRetryCount
         }
     }
 
 
-    suspend fun unlockKey(key: String, topic: String) = newSuspendedTransaction(Dispatchers.IO) {
+    suspend fun unlockKey(key: String, topic: String) = suspendTransaction {
         KafkaRetryKeysTable.update(limit = null, where = {
             KafkaRetryKeysTable.key.eq(key).and(
                 KafkaRetryKeysTable.topic.eq(topic)

@@ -3,7 +3,7 @@ package com.acme.myurlshortner.consumer.application.client
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.netty.channel.ConnectTimeoutException
 import io.netty.handler.timeout.ReadTimeoutException
-import org.jboss.logging.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.client.ClientHttpResponse
@@ -22,7 +22,7 @@ class ShortenedUrlApiClient(
     private val apiKey: String
 ) {
     private val mapper = ObjectMapper()
-    private val logger = Logger.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val errorHandler = object : ResponseErrorHandler {
         override fun hasError(response: ClientHttpResponse): Boolean = response.statusCode.value() >= 400
         override fun handleError(url: URI, method: HttpMethod, response: ClientHttpResponse) {
