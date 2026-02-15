@@ -38,7 +38,7 @@ spec:
                   name: db-secret
                   key: password
             - name: POSTGRES_URL
-              value: "r2dbc:postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@localhost:5432/postgres"
+              value: r2dbc:postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@postgres-rw:5432/myurlshortner
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
