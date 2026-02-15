@@ -5,9 +5,8 @@ import com.acme.myurlshortner.consumer.domain.notification.entity.ShortenedUrlVi
 import com.acme.myurlshortner.consumer.domain.notification.repo.NotificationRepository
 import com.acme.myurlshortner.consumer.domain.notification.repo.NotificationType
 import com.fasterxml.jackson.databind.ObjectMapper
-import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.springframework.stereotype.Repository
 import java.time.OffsetDateTime
 
@@ -16,13 +15,13 @@ class NotificationRepositoryImpl : NotificationRepository {
 
     private val objectMapper = ObjectMapper()
 
-    
+
     override suspend fun insertShortenedUrlViewedNTimesNotification(
         userId: Long,
         uid: String,
         viewCount: Long,
         createdAt: OffsetDateTime,
-    ) = newSuspendedTransaction(Dispatchers.IO) {
+    ) = suspendTransaction {
         val paramsJson = objectMapper.writeValueAsString(ShortenedUrlViewedNTimes(uid, viewCount))
         NotificationTable.insert {
             it[NotificationTable.userId] = userId
@@ -32,6 +31,6 @@ class NotificationRepositoryImpl : NotificationRepository {
             it[NotificationTable.createdAt] = createdAt
             it[NotificationTable.readAt] = null
         }
-        return@newSuspendedTransaction
+        return@suspendTransaction
     }
 }
