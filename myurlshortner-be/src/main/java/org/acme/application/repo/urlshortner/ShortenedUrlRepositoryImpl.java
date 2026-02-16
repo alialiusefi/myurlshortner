@@ -25,6 +25,12 @@ import java.util.Optional;
 @Singleton
 public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, PanacheRepository<ShortenedUrlEntity> {
 
+    private final ShortenedUrlIndexedRepositoryImpl indexed;
+
+    public ShortenedUrlRepositoryImpl(ShortenedUrlIndexedRepositoryImpl indexed) {
+        this.indexed = indexed;
+    }
+
     @Override
     @Transactional
     public void insertShortenedUrl(@NonNull ShortenedUrl shortenedUrl) throws SaveShortenedUrlConflictError {
@@ -34,6 +40,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
             throw new SaveShortenedUrlConflictError(shortenedUrl.getPublicIdentifier());
 
         }
+        indexed.upsertShortenedUrlIndexed(shortenedUrl.getPublicIdentifier(), shortenedUrl.getTitle());
     }
 
     @Override
@@ -115,6 +122,7 @@ public class ShortenedUrlRepositoryImpl implements ShortenedUrlRepository, Panac
         if (count != 1) {
             throw new ShortenedUrlOptimisticLockException(shortenedUrl.getPublicIdentifier(), existingUpdatedAt);
         }
+        indexed.upsertShortenedUrlIndexed(shortenedUrl.getPublicIdentifier(), shortenedUrl.getTitle());
     }
 
     private ShortenedUrlEntity toEntity(ShortenedUrl from) {
