@@ -23,7 +23,7 @@ import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
-import { TextField } from "@mui/material";
+import { TextField, Paper } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import Grid from "@mui/material/Grid";
@@ -92,135 +92,152 @@ export default function ShortnetedUrlsTable() {
   const [currentSelectedForEdit, setCurrentSelectedForEdit] =
     useState<string>(null);
   return (
-    <Box>
-      <Typography>Browse Shortened Urls:</Typography>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Status</TableCell>
-              <TableCell>Title</TableCell>
-              <TableCell>Shortened URL</TableCell>
-              <TableCell>Access Count</TableCell>
-              <TableCell>Original URL</TableCell>
-              <TableCell>
-                Created At
-                <TableSortLabel
-                  active={true}
-                  direction={directonState}
-                  onClick={toggleDirection}
-                />
-              </TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data?.data.map((one, idx) => (
-              <TableRow key={one.shortened_url}>
+    <Grid container direction="column" rowGap={1} >
+      <Typography padding={2}> Browse Shortened Urls:</Typography>
+      <Grid container direction="row" columnSpacing={2} alignItems="center" justifyContent="center">
+        <Grid size={10}>
+          <TextField fullWidth size="small" placeholder="Search by title" />
+        </Grid>
+        <Grid>
+          <Button variant="contained">
+            Search
+          </Button>
+        </Grid>
+        <Grid>
+          <Button variant="outlined">
+            Reset
+          </Button>
+        </Grid>
+      </Grid>
+      <Paper sx={{ p: 1 }}>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Status</TableCell>
+                <TableCell>Title</TableCell>
+                <TableCell>Shortened URL</TableCell>
+                <TableCell>Access Count</TableCell>
+                <TableCell>Original URL</TableCell>
                 <TableCell>
-                  {one.is_enabled ? (
-                    <CircleIcon sx={{ p: 1, fontSize: 30 }} color="success" />
-                  ) : (
-                    <CircleIcon sx={{ p: 1, fontSize: 30 }} color="error" />
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Title
-                    title={one.title}
-                    updateTitle={async (newTitle: string) => {
-                      const updated = await updateShortenedUrl(
-                        one.unique_identifier,
-                        userId,
-                        undefined,
-                        undefined,
-                        newTitle,
-                      );
-                      const newOne = {
-                        unique_identifier: one.unique_identifier,
-                        title: updated.title,
-                        created_at: updated.created_at,
-                        is_enabled: updated.is_enabled,
-                        url: updated.url,
-                        shortened_url: updated.shortened_url,
-                        access_count: one.access_count,
-                      };
-                      mutate(
-                        () => {
-                          return {
-                            data: data.data.toSpliced(idx, 1, newOne),
-                            total: data.total,
-                          };
-                        },
-                        { revalidate: false },
-                      );
-                    }}
+                  Created At
+                  <TableSortLabel
+                    active={true}
+                    direction={directonState}
+                    onClick={toggleDirection}
                   />
                 </TableCell>
-                <TableCell>
-                  <NewTabLink url={one.shortened_url} />
-                </TableCell>
-                <TableCell>{one.access_count}</TableCell>
-                <TableCell>
-                  <OriginalUrl url={one.url} />
-                </TableCell>
-                <TableCell>
-                  <Typography>{readableTimestamp(one?.created_at)}</Typography>
-                </TableCell>
-                <TableCell>
-                  <IconButton
-                    onClick={() => setCurrentSelectedForEdit(one.shortened_url)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  {
-                    currentSelectedForEdit !== null ? (<UpdateShortenedUrlDialog
-                      isOpen={currentSelectedForEdit === one.shortened_url}
-                      uniqueIdentifier={one.unique_identifier}
-                      originalUrl={one.url}
-                      isEnabled={one.is_enabled}
-                      close={() => {
-                        setCurrentSelectedForEdit(null);
-                      }}
-                      onApply={() => {
-                        mutate();
-                        setCurrentSelectedForEdit(null);
-                      }}
-                      title={one.title}
-                    />) : (<></>)
-                  }
-                </TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => {
-                      redirect(buildInfoPagePath(one.unique_identifier));
-                    }}
-                  >
-                    INFO
-                  </Button>
-                </TableCell>
+                <TableCell></TableCell>
+                <TableCell></TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 15]}
-                count={data?.total}
-                rowsPerPage={size}
-                page={page}
-                onPageChange={(event, page) => {
-                  setPageState(page);
-                }}
-                onRowsPerPageChange={(event) => {
-                  setSizeState(parseInt(event.target.value));
-                }}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
-    </Box>
+            </TableHead>
+            <TableBody>
+              {data?.data.map((one, idx) => (
+                <TableRow key={one.shortened_url}>
+                  <TableCell>
+                    {one.is_enabled ? (
+                      <CircleIcon sx={{ p: 1, fontSize: 30 }} color="success" />
+                    ) : (
+                      <CircleIcon sx={{ p: 1, fontSize: 30 }} color="error" />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Title
+                      title={one.title}
+                      updateTitle={async (newTitle: string) => {
+                        const updated = await updateShortenedUrl(
+                          one.unique_identifier,
+                          userId,
+                          undefined,
+                          undefined,
+                          newTitle,
+                        );
+                        const newOne = {
+                          unique_identifier: one.unique_identifier,
+                          title: updated.title,
+                          created_at: updated.created_at,
+                          is_enabled: updated.is_enabled,
+                          url: updated.url,
+                          shortened_url: updated.shortened_url,
+                          access_count: one.access_count,
+                        };
+                        mutate(
+                          () => {
+                            return {
+                              data: data.data.toSpliced(idx, 1, newOne),
+                              total: data.total,
+                            };
+                          },
+                          { revalidate: false },
+                        );
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <NewTabLink url={one.shortened_url} />
+                  </TableCell>
+                  <TableCell>{one.access_count}</TableCell>
+                  <TableCell>
+                    <OriginalUrl url={one.url} />
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{readableTimestamp(one?.created_at)}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={() => setCurrentSelectedForEdit(one.shortened_url)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    {
+                      currentSelectedForEdit !== null ? (<UpdateShortenedUrlDialog
+                        isOpen={currentSelectedForEdit === one.shortened_url}
+                        uniqueIdentifier={one.unique_identifier}
+                        originalUrl={one.url}
+                        isEnabled={one.is_enabled}
+                        close={() => {
+                          setCurrentSelectedForEdit(null);
+                        }}
+                        onApply={() => {
+                          mutate();
+                          setCurrentSelectedForEdit(null);
+                        }}
+                        title={one.title}
+                      />) : (<></>)
+                    }
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => {
+                        redirect(buildInfoPagePath(one.unique_identifier));
+                      }}
+                    >
+                      INFO
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 15]}
+                  count={data?.total}
+                  rowsPerPage={size}
+                  page={page}
+                  onPageChange={(event, page) => {
+                    setPageState(page);
+                  }}
+                  onRowsPerPageChange={(event) => {
+                    setSizeState(parseInt(event.target.value));
+                  }}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Grid>
   );
 }
 
