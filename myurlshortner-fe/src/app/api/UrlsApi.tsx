@@ -53,6 +53,7 @@ export const GetAvailableUrlsSWR = (
   size: number,
   order: string,
   userId: number,
+  title: string,
 ) => {
   const fetcher = (url) =>
     fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(
@@ -72,10 +73,17 @@ export const GetAvailableUrlsSWR = (
         throw error;
       },
     );
-  return useSWR(
-    `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`,
-    fetcher,
-  );
+  if (title !== undefined) {
+    return useSWR(
+      `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}&title=${title}`,
+      fetcher,
+    );
+  } else {
+    return useSWR(
+      `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`,
+      fetcher,
+    );
+  }
 };
 
 export const GetShortenedUrlHistorySWR = (

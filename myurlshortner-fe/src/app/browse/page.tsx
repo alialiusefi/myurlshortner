@@ -3,9 +3,7 @@ import ShortnetedUrlsTable from "components/BrowseShortenedUrlsPageComponent/Sho
 
 export default async function Browse() {
   return (
-    <Box
-      sx={{ p: 3 }}
-    >
+    <Box sx={{ p: 3 }}>
       <ShortnetedUrlsTable />
     </Box>
   );

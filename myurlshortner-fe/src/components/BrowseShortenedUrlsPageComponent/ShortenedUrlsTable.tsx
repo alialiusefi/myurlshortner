@@ -13,7 +13,7 @@ import TablePagination from "@mui/material/TablePagination";
 import { GetAvailableUrlsSWR } from "../../app/api/UrlsApi";
 import TableContainer from "@mui/material/TableContainer";
 import Link from "@mui/material/Link";
-import { useSearchParams } from "next/navigation";
+import { RedirectType, useSearchParams } from "next/navigation";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -29,6 +29,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import Grid from "@mui/material/Grid";
 import { updateShortenedUrl } from "app/api/UrlShortnerApi";
 import {
+  buildBrowsePagePath,
   buildInfoPagePath,
   EMPTY_VALUE,
   TITLE_ERROR_MESSAGE,
@@ -37,74 +38,80 @@ import {
 export default function ShortnetedUrlsTable() {
   type Direction = "asc" | "desc";
   const searchParams = useSearchParams();
-  const getIntParam = (
-    key: string,
-    validator: (string: string) => boolean,
-    def: number,
-  ) => {
-    const value = searchParams.get(key);
-    if (value && validator(value)) {
-      return parseInt(value);
-    } else {
-      return def;
-    }
-  };
-  const getOrderParam = () => {
-    const value = searchParams.get("order");
-    if (value == "desc" || value == "asc") {
-      return value;
-    } else {
-      return "desc";
-    }
-  };
-  const sizeParam = getIntParam(
-    "size",
-    (string: string) => {
-      return parseInt(string) > 0 && parseInt(string) <= 101;
-    },
+  const sizeParam = coaleseIntParam(
+    searchParams.get("size"),
+    (string: string) => parseInt(string) > 0 && parseInt(string) < 101,
     10,
   );
-  const pageParam = getIntParam(
-    "page",
-    (string: string) => {
-      return parseInt(string) > 0;
-    },
+  const pageParam = coaleseIntParam(
+    searchParams.get("page"),
+    (string: string) => parseInt(string) > 0,
     1,
   );
-  const orderParam = getOrderParam();
+  const orderParam = coaleseOrderParam(searchParams.get("order"));
+  const titleParam = searchParams.get("title");
   const [directonState, setDirectionState] = useState<Direction>(orderParam);
   const [size, setSizeState] = useState(sizeParam);
   const [page, setPageState] = useState(pageParam - 1);
+  const [titleInput, setTitle] = useState<string>(titleParam);
+  const [searchTitle, setSearchTitle] = useState<string>(titleInput);
+  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState<string>(null);
+  const isTitleValid = (titleInput: string) => titleInput == null || titleInput.length < 101
   const userId = useContext(UserProvider);
   const { data, mutate } = GetAvailableUrlsSWR(
     page + 1,
     size,
     directonState,
     userId,
+    searchTitle == null ? undefined : searchTitle,
   );
-  const toggleDirection = () => {
-    if (directonState == "desc") {
-      setDirectionState("asc");
-    } else {
-      setDirectionState("desc");
-    }
-  };
-  const [currentSelectedForEdit, setCurrentSelectedForEdit] =
-    useState<string>(null);
+
   return (
-    <Grid container direction="column" rowGap={1} >
-      <Typography padding={2}> Browse Shortened Urls:</Typography>
-      <Grid container direction="row" columnSpacing={2} alignItems="center" justifyContent="center">
+    <Grid container direction="column" rowGap={1}>
+      <Typography padding={2}>Browse Shortened Urls:</Typography>
+      <Grid
+        container
+        direction="row"
+        columnSpacing={2}
+        alignItems="center"
+        justifyContent="center"
+      >
         <Grid size={10}>
-          <TextField fullWidth size="small" placeholder="Search by title" />
+          <TextField
+            fullWidth
+            size="small"
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Search by title"
+            value={titleInput ?? ""}
+            helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
+            error={!isTitleValid(titleInput)}
+          />
         </Grid>
         <Grid>
-          <Button variant="contained">
+          <Button
+            variant="contained"
+            disabled={!isTitleValid(titleInput)}
+            onClick={() => {
+              if (titleInput !== null) {
+                setSearchTitle(titleInput);
+              } else if (titleInput == null) {
+                setSearchTitle("");
+              }
+            }}
+          >
             Search
           </Button>
         </Grid>
         <Grid>
-          <Button variant="outlined">
+          <Button
+            variant="outlined"
+            disabled={searchTitle == null}
+            onClick={() => {
+              setSearchTitle(null);
+              setTitle(null);
+              redirect(buildBrowsePagePath(), RedirectType.push);
+            }}
+          >
             Reset
           </Button>
         </Grid>
@@ -121,11 +128,21 @@ export default function ShortnetedUrlsTable() {
                 <TableCell>Original URL</TableCell>
                 <TableCell>
                   Created At
-                  <TableSortLabel
-                    active={true}
-                    direction={directonState}
-                    onClick={toggleDirection}
-                  />
+                  {
+                    searchTitle === null ? (
+                      <TableSortLabel
+                        active={true}
+                        direction={directonState}
+                        onClick={() => {
+                          if (directonState == "desc") {
+                            setDirectionState("asc");
+                          } else {
+                            setDirectionState("desc");
+                          }
+                        }}
+                      />
+                    ) : (<></>)
+                  }
                 </TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
@@ -181,16 +198,20 @@ export default function ShortnetedUrlsTable() {
                     <OriginalUrl url={one.url} />
                   </TableCell>
                   <TableCell>
-                    <Typography>{readableTimestamp(one?.created_at)}</Typography>
+                    <Typography>
+                      {readableTimestamp(one?.created_at)}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <IconButton
-                      onClick={() => setCurrentSelectedForEdit(one.shortened_url)}
+                      onClick={() =>
+                        setCurrentSelectedForEdit(one.shortened_url)
+                      }
                     >
                       <EditIcon />
                     </IconButton>
-                    {
-                      currentSelectedForEdit !== null ? (<UpdateShortenedUrlDialog
+                    {currentSelectedForEdit !== null ? (
+                      <UpdateShortenedUrlDialog
                         isOpen={currentSelectedForEdit === one.shortened_url}
                         uniqueIdentifier={one.unique_identifier}
                         originalUrl={one.url}
@@ -203,8 +224,10 @@ export default function ShortnetedUrlsTable() {
                           setCurrentSelectedForEdit(null);
                         }}
                         title={one.title}
-                      />) : (<></>)
-                    }
+                      />
+                    ) : (
+                      <></>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -240,6 +263,26 @@ export default function ShortnetedUrlsTable() {
     </Grid>
   );
 }
+
+const coaleseIntParam = (
+  value: string,
+  validator: (string: string) => boolean,
+  def: number,
+) => {
+  if (value && validator(value)) {
+    return parseInt(value);
+  } else {
+    return def;
+  }
+};
+
+const coaleseOrderParam = (value: string) => {
+  if (value == "desc" || value == "asc") {
+    return value;
+  } else {
+    return "desc";
+  }
+};
 
 function Title(params: {
   title?: string;
