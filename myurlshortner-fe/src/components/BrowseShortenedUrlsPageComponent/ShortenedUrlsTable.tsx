@@ -71,62 +71,58 @@ export default function ShortnetedUrlsTable() {
   return (
     <Grid container direction="column" rowGap={1}>
       <Typography padding={2}>Browse Shortened Urls:</Typography>
-      <Grid
-        container
-        direction="row"
-        columnSpacing={2}
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Grid size={10}>
-          <TextField
-            fullWidth
-            size="small"
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Search by title"
-            value={titleInput ?? ""}
-            helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
-            error={!isTitleValid(titleInput)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
+      <Paper>
+        <Grid container flexDirection={"row"} columnGap={2} padding={2}>
+          <Grid size={"grow"}>
+            <TextField
+              fullWidth
+              size="small"
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Search by title"
+              value={titleInput ?? ""}
+              helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
+              error={!isTitleValid(titleInput)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (titleInput !== null) {
+                    setSearchTitle(titleInput);
+                  } else if (titleInput == null) {
+                    setSearchTitle("");
+                  }
+                }
+              }}
+            />
+          </Grid>
+          <Grid>
+            <Button
+              variant="contained"
+              disabled={!isTitleValid(titleInput)}
+              onClick={() => {
                 if (titleInput !== null) {
                   setSearchTitle(titleInput);
                 } else if (titleInput == null) {
                   setSearchTitle("");
                 }
-              }
-            }}
-          />
+              }}
+            >
+              Search
+            </Button>
+          </Grid>
+          <Grid>
+            <Button
+              variant="outlined"
+              disabled={searchTitle == null}
+              onClick={() => {
+                setSearchTitle(null);
+                setTitle(null);
+                redirect(buildBrowsePagePath(), RedirectType.push);
+              }}
+            >
+              Reset
+            </Button>
+          </Grid>
         </Grid>
-        <Grid>
-          <Button
-            variant="contained"
-            disabled={!isTitleValid(titleInput)}
-            onClick={() => {
-              if (titleInput !== null) {
-                setSearchTitle(titleInput);
-              } else if (titleInput == null) {
-                setSearchTitle("");
-              }
-            }}
-          >
-            Search
-          </Button>
-        </Grid>
-        <Grid>
-          <Button
-            variant="outlined"
-            disabled={searchTitle == null}
-            onClick={() => {
-              setSearchTitle(null);
-              setTitle(null);
-              redirect(buildBrowsePagePath(), RedirectType.push);
-            }}
-          >
-            Reset
-          </Button>
-        </Grid>
-      </Grid>
+      </Paper>
       <Paper sx={{ p: 1 }}>
         <TableContainer>
           <Table>
