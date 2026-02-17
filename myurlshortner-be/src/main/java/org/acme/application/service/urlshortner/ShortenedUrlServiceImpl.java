@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -202,7 +203,21 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
 
     @Override
     public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(GetAvailableShortenedUrlsQuery query) {
-        return readRepository.getAvailableShortenedUrls(query);
+        if (query.title() == null) {
+            return readRepository.getAvailableShortenedUrls(
+                    query.page(),
+                    query.size(),
+                    query.isAscending(),
+                    query.userId()
+            );
+        } else {
+            return readRepository.getAvailableShortenedUrlsByTitle(
+                    query.title().isBlank() ? List.of() : Arrays.asList(query.title().split(" ")),
+                    query.userId(),
+                    query.size(),
+                    query.page()
+            );
+        }
     }
 
     @Transactional
