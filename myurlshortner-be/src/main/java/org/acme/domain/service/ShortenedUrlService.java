@@ -28,7 +28,7 @@ public interface ShortenedUrlService {
     Either<ShortenUrlError, ShortenedUrl> createShortenedUrl(@NonNull CreateShortenedUrlCommand command);
 
     Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(
-            GetAvailableShortenedUrlsQuery query
+            @NonNull GetAvailableShortenedUrlsQuery query
     );
 
     List<? extends ShortenedUrlEvent> getShortenedUrlHistory(

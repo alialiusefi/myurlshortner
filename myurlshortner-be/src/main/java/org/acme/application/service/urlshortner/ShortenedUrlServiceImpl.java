@@ -202,7 +202,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(GetAvailableShortenedUrlsQuery query) {
+     public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(@NonNull GetAvailableShortenedUrlsQuery query) {
         if (query.title() == null) {
             return readRepository.getAvailableShortenedUrls(
                     query.page(),
