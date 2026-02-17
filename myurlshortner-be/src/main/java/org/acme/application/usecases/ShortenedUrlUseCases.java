@@ -21,6 +21,7 @@ import org.acme.domain.exceptions.UniqueIdentifierCannotBeEmptyValidationExcepti
 import org.acme.domain.exceptions.UniqueIdentifierIsTooLongValidationException;
 import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.projection.AvailableShortenedUrl;
+import org.acme.domain.query.GetAvailableShortenedUrlsQuery;
 import org.acme.domain.service.ShortenedUrlService;
 import org.acme.domain.validator.TitleValidator;
 import org.acme.domain.validator.UniqueIdValidator;
@@ -68,17 +69,39 @@ public class ShortenedUrlUseCases {
     }
 
     public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrl>>> listAvailableUrls(
-            Integer page,
-            Integer size,
+            String page,
+            String size,
             String order,
+            String title,
             String userId
     ) {
         List<ApplicationException> errors = new ArrayList<>();
-        if (page == null || page < 1) {
+        Integer validPage = null;
+        Integer validSize = null;
+
+        if (page == null) {
             errors.add(new PageNumberIsNotCorrectException(page));
+        } else {
+            try {
+                validPage = Integer.parseInt(page);
+                if (validPage < 1) {
+                    errors.add(new PageNumberIsNotCorrectException(page));
+                }
+            } catch (NumberFormatException e) {
+                errors.add(new PageNumberIsNotCorrectException(page));
+            }
         }
-        if (size == null || size < 1 || size > 100) {
+        if (size == null) {
             errors.add(new PageSizeIsNotCorrectException(size));
+        } else {
+            try {
+                validSize = Integer.parseInt(size);
+                if (validSize < 1 || validSize > 100) {
+                    errors.add(new PageSizeIsNotCorrectException(size));
+                }
+            } catch (NumberFormatException e) {
+                errors.add(new PageSizeIsNotCorrectException(size));
+            }
         }
 
         if (order != null) {
@@ -90,13 +113,27 @@ public class ShortenedUrlUseCases {
             order = "desc";
         }
 
+        var validTitle = TitleValidator.validateNullable(title).mapLeft(
+                a -> errors.add(new ApplicationException(a))
+        );
+
         var userIdValidation = UserIdValidator.validate(userId);
         if (userIdValidation.isLeft()) {
             errors.add(new ApplicationException(userIdValidation.getLeft()));
         }
 
         if (errors.isEmpty()) {
-            return Either.right(service.listOfAvailableUrls(page, size, order.equals("asc"), userIdValidation.get()));
+            return Either.right(
+                    service.listOfAvailableUrls(
+                            new GetAvailableShortenedUrlsQuery(
+                                    validPage,
+                                    validSize,
+                                    validTitle.get(),
+                                    order.equals("asc"),
+                                    userIdValidation.get()
+                            )
+                    )
+            );
         } else {
             return Either.left(new GetAvailableUrlsError(errors));
         }

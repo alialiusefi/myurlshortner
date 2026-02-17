@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.acme.application.kafka.KafkaUrlPublisher;
 import org.acme.application.repo.eventstore.ShortenedUrlEventRepository;
 import org.acme.application.repo.urlshortner.ShortenedUrlCache;
+import org.acme.application.repo.urlshortner.ShortenedUrlReadRepositoryImpl;
 import org.acme.domain.command.CreateShortenedUrlCommand;
 import org.acme.domain.command.PatchShortenedUrlCommand;
 import org.acme.domain.entity.ShortenedUrl;
@@ -18,6 +19,7 @@ import org.acme.domain.exceptions.url.ShortenUrlError;
 import org.acme.domain.exceptions.url.UniqueIdentifierAlreadyExists;
 import org.acme.domain.exceptions.url.UrlValidationException;
 import org.acme.domain.projection.AvailableShortenedUrl;
+import org.acme.domain.query.GetAvailableShortenedUrlsQuery;
 import org.acme.domain.repo.GiftRequestRepository;
 import org.acme.domain.repo.SaveShortenedUrlConflictError;
 import org.acme.domain.repo.ShortenedUrlRepository;
@@ -48,6 +50,7 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     private final KafkaUrlPublisher publisher;
     private final ShortenedUrlCache cache;
     private final GiftRequestRepository giftRequestRepo;
+    private final ShortenedUrlReadRepositoryImpl readRepository;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     ShortenedUrlServiceImpl(
@@ -55,13 +58,15 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
             ShortenedUrlEventRepository eventStore,
             KafkaUrlPublisher publisher,
             ShortenedUrlCache cache,
-            GiftRequestRepository giftRequestRepo
+            GiftRequestRepository giftRequestRepo,
+            ShortenedUrlReadRepositoryImpl readRepository
     ) {
         this.repo = repo;
         this.eventStore = eventStore;
         this.publisher = publisher;
         this.cache = cache;
         this.giftRequestRepo = giftRequestRepo;
+        this.readRepository = readRepository;
     }
 
     @Override
@@ -196,8 +201,8 @@ public class ShortenedUrlServiceImpl implements ShortenedUrlService {
     }
 
     @Override
-    public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(@NonNull Integer page, @NonNull Integer size, boolean isAscending, @NonNull Long userId) {
-        return repo.listAvailableShortenedUrls(page, size, isAscending, userId);
+    public Tuple2<Long, List<AvailableShortenedUrl>> listOfAvailableUrls(GetAvailableShortenedUrlsQuery query) {
+        return readRepository.getAvailableShortenedUrls(query);
     }
 
     @Transactional
