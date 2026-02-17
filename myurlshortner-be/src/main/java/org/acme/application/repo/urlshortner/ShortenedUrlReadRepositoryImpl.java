@@ -4,6 +4,7 @@ import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import org.acme.domain.projection.AvailableShortenedUrl;
+import org.acme.domain.repo.ShortenedUrlReadRepository;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -14,7 +15,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 @ApplicationScoped
-public class ShortenedUrlReadRepositoryImpl {
+public class ShortenedUrlReadRepositoryImpl implements ShortenedUrlReadRepository {
 
     private final EntityManager em;
 

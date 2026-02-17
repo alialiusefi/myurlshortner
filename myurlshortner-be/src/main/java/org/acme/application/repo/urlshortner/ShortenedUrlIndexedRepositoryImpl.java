@@ -3,9 +3,10 @@ package org.acme.application.repo.urlshortner;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.acme.domain.repo.ShortenedUrlIndexedRepository;
 
 @ApplicationScoped
-public class ShortenedUrlIndexedRepositoryImpl {
+public class ShortenedUrlIndexedRepositoryImpl implements ShortenedUrlIndexedRepository {
 
     private final EntityManager entityManager;
 
@@ -14,7 +15,7 @@ public class ShortenedUrlIndexedRepositoryImpl {
     }
 
     @Transactional
-    void upsertShortenedUrlIndexed(String uniqueIdentifier, String title) {
+    public void upsertShortenedUrlIndexed(String uniqueIdentifier, String title) {
         var query = entityManager.createNativeQuery(
                 """
                         insert into shortened_urls_indexed (unique_identifier, title) values (?1, to_tsvector(?2))
