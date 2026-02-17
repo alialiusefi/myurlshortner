@@ -73,17 +73,11 @@ export const GetAvailableUrlsSWR = (
         throw error;
       },
     );
-  if (title !== undefined) {
-    return useSWR(
-      `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}&title=${title}`,
-      fetcher,
-    );
-  } else {
-    return useSWR(
-      `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`,
-      fetcher,
-    );
-  }
+  const path =
+    title !== undefined
+      ? `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}&title=${title}`
+      : `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`;
+  return useSWR(path, fetcher);
 };
 
 export const GetShortenedUrlHistorySWR = (
