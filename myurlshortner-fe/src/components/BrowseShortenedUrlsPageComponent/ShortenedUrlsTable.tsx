@@ -87,6 +87,15 @@ export default function ShortnetedUrlsTable() {
             value={titleInput ?? ""}
             helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
             error={!isTitleValid(titleInput)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (titleInput !== null) {
+                  setSearchTitle(titleInput);
+                } else if (titleInput == null) {
+                  setSearchTitle("");
+                }
+              }
+            }}
           />
         </Grid>
         <Grid>
