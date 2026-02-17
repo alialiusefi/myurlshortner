@@ -55,8 +55,10 @@ export default function ShortnetedUrlsTable() {
   const [page, setPageState] = useState(pageParam - 1);
   const [titleInput, setTitle] = useState<string>(titleParam);
   const [searchTitle, setSearchTitle] = useState<string>(titleInput);
-  const [currentSelectedForEdit, setCurrentSelectedForEdit] = useState<string>(null);
-  const isTitleValid = (titleInput: string) => titleInput == null || titleInput.length < 101
+  const [currentSelectedForEdit, setCurrentSelectedForEdit] =
+    useState<string>(null);
+  const isTitleValid = (titleInput: string) =>
+    titleInput == null || titleInput.length < 101;
   const userId = useContext(UserProvider);
   const { data, mutate } = GetAvailableUrlsSWR(
     page + 1,
@@ -128,21 +130,21 @@ export default function ShortnetedUrlsTable() {
                 <TableCell>Original URL</TableCell>
                 <TableCell>
                   Created At
-                  {
-                    searchTitle === null ? (
-                      <TableSortLabel
-                        active={true}
-                        direction={directonState}
-                        onClick={() => {
-                          if (directonState == "desc") {
-                            setDirectionState("asc");
-                          } else {
-                            setDirectionState("desc");
-                          }
-                        }}
-                      />
-                    ) : (<></>)
-                  }
+                  {searchTitle === null ? (
+                    <TableSortLabel
+                      active={true}
+                      direction={directonState}
+                      onClick={() => {
+                        if (directonState == "desc") {
+                          setDirectionState("asc");
+                        } else {
+                          setDirectionState("desc");
+                        }
+                      }}
+                    />
+                  ) : (
+                    <></>
+                  )}
                 </TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
