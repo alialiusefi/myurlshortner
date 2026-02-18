@@ -31,6 +31,8 @@ public interface ShortenedUrlService {
             @NonNull GetAvailableShortenedUrlsQuery query
     );
 
+    List<String> getTitleSuggestions(@NonNull List<String> tokens, @NonNull Long userId);
+
     List<? extends ShortenedUrlEvent> getShortenedUrlHistory(
             @NonNull String uniqueIdentifier,
             @NonNull Integer offset,

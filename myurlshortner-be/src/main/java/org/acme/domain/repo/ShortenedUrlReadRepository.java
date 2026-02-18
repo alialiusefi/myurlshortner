@@ -9,6 +9,12 @@ import java.util.List;
 
 public interface ShortenedUrlReadRepository {
 
+    List<String> getTitleSearchSuggestions(
+            @NonNull List<String> titleKeywords,
+            @NonNull Long userId,
+            @NonNull Integer size
+    );
+
     Tuple2<Long, List<AvailableShortenedUrl>> getAvailableShortenedUrlsByTitle(
             @NonNull List<String> titleKeywords,
             @Nullable Long userId,

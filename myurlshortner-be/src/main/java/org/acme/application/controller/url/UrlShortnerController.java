@@ -12,6 +12,7 @@ import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.events.V1UserUpdatedTitleEvent;
 import org.acme.domain.events.V2UserCreatedShortenedUrlEvent;
 import org.acme.domain.events.V2UserGiftedShortenedUrlEvent;
+import org.acme.domain.repo.ShortenedUrlReadRepository;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
@@ -30,7 +31,8 @@ public class UrlShortnerController {
     private final ShortenedUrlUseCases shortenedUrlUseCases;
 
     public UrlShortnerController(
-            ShortenedUrlUseCases shortenedUrlUseCases
+            ShortenedUrlUseCases shortenedUrlUseCases,
+            ShortenedUrlReadRepository readRepository
     ) {
         this.shortenedUrlUseCases = shortenedUrlUseCases;
     }
@@ -58,6 +60,20 @@ public class UrlShortnerController {
                         ).build(),
                 success -> Response.status(Response.Status.CREATED)
                         .entity(new ShortenUrlResponse(success.shortenedUrl(hostname))).build()
+        );
+    }
+
+    @GET
+    @Path("/shortened-urls/titles")
+    @Produces(APPLICATION_JSON)
+    public Response getShortenedUrlTitleSuggestions(
+            @QueryParam("query") String query,
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
+    ) {
+        return shortenedUrlUseCases.getShortenedUrlTitleSuggestions(query, userIdHeader).fold(
+                error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainErrors(error)).build()
+                ,
+                success -> Response.ok(success).build()
         );
     }
 

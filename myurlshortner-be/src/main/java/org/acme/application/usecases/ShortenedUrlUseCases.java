@@ -69,6 +69,28 @@ public class ShortenedUrlUseCases {
         );
     }
 
+    public Either<List<DomainException>, List<String>> getShortenedUrlTitleSuggestions(String title, String userId) {
+        var errors = new ArrayList<DomainException>();
+        var validTitle = TitleValidator.validate(title).mapLeft(errors::add);
+        var validUserId = UserIdValidator.validate(userId).mapLeft(errors::add);
+
+        if (!errors.isEmpty()) {
+            return Either.left(errors);
+        }
+
+        if (validTitle.get().isBlank()) {
+            return Either.right(List.of());
+        }
+
+        return Either.right(
+                service.getTitleSuggestions(
+                        Arrays.stream(validTitle.get().split(" "))
+                                .filter(a -> !a.isBlank())
+                                .toList(),
+                        validUserId.get()
+                ));
+    }
+
     public Either<GetAvailableUrlsError, Tuple2<Long, List<AvailableShortenedUrl>>> listAvailableUrls(
             String page,
             String size,
