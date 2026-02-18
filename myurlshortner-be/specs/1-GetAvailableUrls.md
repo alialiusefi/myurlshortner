@@ -14,7 +14,7 @@ Returns list of shortened urls. The list is ordered by `created_at`. `created_at
 ```http
 Authorization:
 User-Id: 1
-https://{hostname}/shortened-urls?page=1&size=10&order=desc&title=e
+https://{hostname}/shortened-urls?page=1&size=10&order=desc&title=red
 ```
 
 ### Responses
@@ -29,7 +29,7 @@ https://{hostname}/shortened-urls?page=1&size=10&order=desc&title=e
       "shortened_url": "https://{hostname}/goto/nbjgop38vn",
       "created_at": "2025-01-01T01:05:12Z",
       "access_count": 1,
-      "title": "red" // nullable
+      "title": "the red box" // nullable
     }
   ],
   "total": 1
