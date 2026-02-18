@@ -9,6 +9,6 @@ public record GetAvailableShortenedUrlsQuery(
         @NonNull Integer size,
         @Nullable List<String> title,
         boolean isAscending,
-        @Nullable Long userId
+        @NonNull Long userId
 ) {
 }

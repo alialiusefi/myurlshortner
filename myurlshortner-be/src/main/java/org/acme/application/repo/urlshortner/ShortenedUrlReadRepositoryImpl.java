@@ -6,7 +6,6 @@ import jakarta.persistence.EntityManager;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.ShortenedUrlReadRepository;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 import java.time.Instant;
@@ -25,7 +24,7 @@ public class ShortenedUrlReadRepositoryImpl implements ShortenedUrlReadRepositor
 
     public Tuple2<Long, List<AvailableShortenedUrl>> getAvailableShortenedUrlsByTitle(
             @NonNull List<String> titleKeywords,
-            @Nullable Long userId,
+            @NonNull Long userId,
             @NonNull Integer size,
             @NonNull Integer page
     ) {
@@ -38,8 +37,8 @@ public class ShortenedUrlReadRepositoryImpl implements ShortenedUrlReadRepositor
                 group by %s
                 """.stripIndent();
 
-        String whereClause = (titleKeywords.isEmpty() ? "us1.title = '' or us1.title is null" : "to_tsquery(:orquery) @@ idx.title or to_tsquery(:followquery) @@ idx.title")
-                + (userId == null ? "" : String.format(" and us1.user_id = %s", userId));
+        String whereClause = (titleKeywords.isEmpty() ? "(us1.title = '' or us1.title is null)" : "(to_tsquery(:orquery) @@ idx.title or to_tsquery(:followquery) @@ idx.title)")
+                + (String.format(" and us1.user_id = %s", userId));
         String groupByClause = !titleKeywords.isEmpty() ? "us1.unique_identifier, idx.title" : "us1.unique_identifier";
         String query = String.format(join, whereClause, groupByClause);
 
@@ -84,15 +83,16 @@ public class ShortenedUrlReadRepositoryImpl implements ShortenedUrlReadRepositor
             @NonNull Integer page,
             @NonNull Integer size,
             boolean isAscending,
-            @Nullable Long userId
+            @NonNull Long userId
     ) {
-        String userIdPredicate = userId == null ? "" : String.format("and us1.user_id = %s", userId);
+        String userIdPredicate = String.format("us1.user_id = %s", userId);
         String limitAndOffset = " limit :limit offset :offset";
         var sql = String.format(
                 """
                         select us1.unique_identifier, count(acc.unique_identifier) as access_count, us1.title,
                         us1.original_url, us1.is_enabled, us1.created_at from shortened_urls us1
-                        left join shortened_url_user_access acc on us1.unique_identifier = acc.unique_identifier %s
+                        left join shortened_url_user_access acc on us1.unique_identifier = acc.unique_identifier
+                        where %s
                         group by us1.unique_identifier
                         order by us1.created_at %s
                         """.stripIndent(),
