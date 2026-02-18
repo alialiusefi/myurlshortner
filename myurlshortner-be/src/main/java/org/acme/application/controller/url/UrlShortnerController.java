@@ -74,11 +74,7 @@ public class UrlShortnerController {
             if (queryParam.get(key) == null) {
                 return null;
             }
-            if (queryParam.isEmpty()) {
-                return "";
-            } else {
-                return queryParam.get(key).getFirst();
-            }
+            return queryParam.get(key).getFirst();
         };
         return this.shortenedUrlUseCases.listAvailableUrls(
                 extractFirstValue.apply("page"),

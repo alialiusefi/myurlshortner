@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,12 +124,15 @@ public class ShortenedUrlUseCases {
         }
 
         if (errors.isEmpty()) {
+            List<String> validTitleTokens = validTitle.get() == null ? List.of() : Arrays.stream(validTitle.get().split(" "))
+                    .filter(a -> !a.isBlank())
+                    .toList();
             return Either.right(
                     service.listOfAvailableUrls(
                             new GetAvailableShortenedUrlsQuery(
                                     validPage,
                                     validSize,
-                                    validTitle.get(),
+                                    validTitleTokens,
                                     order.equals("asc"),
                                     userIdValidation.get()
                             )
