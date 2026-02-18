@@ -3,6 +3,7 @@ package org.acme.application.repo.urlshortner;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.acme.domain.projection.AvailableShortenedUrl;
 import org.acme.domain.repo.ShortenedUrlReadRepository;
 import org.jspecify.annotations.NonNull;
@@ -20,6 +21,39 @@ public class ShortenedUrlReadRepositoryImpl implements ShortenedUrlReadRepositor
 
     public ShortenedUrlReadRepositoryImpl(EntityManager em) {
         this.em = em;
+    }
+
+    private String buildOrQuery(List<String> titleKeywords) {
+        return titleKeywords.stream()
+                .reduce(new StringBuilder(), (a, b) -> a.isEmpty() ? a.append(String.format("%s", b)) : a.append(String.format(" | %s", b)), StringBuilder::append)
+                .toString();
+    }
+
+    private String buildfollowQuery(List<String> titleKeywords) {
+        return titleKeywords.stream()
+                .reduce(new StringBuilder(), (a, b) -> a.isEmpty() ? a.append(String.format("%s", b)) : a.append(String.format(" <-> %s", b)), StringBuilder::append)
+                .toString();
+    }
+
+    public List<String> getTitleSearchSuggestions(
+            @NonNull List<String> titleKeywords,
+            @NonNull Long userId,
+            @NonNull Integer size
+    ) {
+        var sql = """
+                select distinct s1.title, ts_rank(idx.title, to_tsquery(:orquery)) + ts_rank(idx.title, to_tsquery(:followquery)) as rnk
+                from shortened_urls s1
+                inner join shortened_urls_indexed idx
+                on s1.unique_identifier = idx.unique_identifier
+                where (to_tsquery(:orquery) @@ idx.title or to_tsquery(:followquery) @@ idx.title) and s1.user_id = %s
+                order by rnk desc
+                limit %s
+                """.stripIndent();
+
+        Query query = em.createNativeQuery(String.format(sql, userId, size));
+        query.setParameter("orquery", buildOrQuery(titleKeywords));
+        query.setParameter("followquery", buildfollowQuery(titleKeywords));
+        return query.getResultList().stream().map(a -> ((Object[]) a)[0]).toList();
     }
 
     public Tuple2<Long, List<AvailableShortenedUrl>> getAvailableShortenedUrlsByTitle(
@@ -60,12 +94,8 @@ public class ShortenedUrlReadRepositoryImpl implements ShortenedUrlReadRepositor
             String count = String.format("select count(*) from (%s)", query);
 
             var paginatedQuery = em.createNativeQuery(paginated);
-            String orQuery = titleKeywords.stream()
-                    .reduce(new StringBuilder(), (a, b) -> a.isEmpty() ? a.append(String.format("%s", b)) : a.append(String.format(" | %s", b)), StringBuilder::append)
-                    .toString();
-            String followedQuery = titleKeywords.stream()
-                    .reduce(new StringBuilder(), (a, b) -> a.isEmpty() ? a.append(String.format("%s", b)) : a.append(String.format(" <-> %s", b)), StringBuilder::append)
-                    .toString();
+            String orQuery = buildOrQuery(titleKeywords);
+            String followedQuery = buildfollowQuery(titleKeywords);
             paginatedQuery.setParameter("orquery", orQuery);
             paginatedQuery.setParameter("followquery", followedQuery);
             List<AvailableShortenedUrl> urls = paginatedQuery.getResultList().stream()
