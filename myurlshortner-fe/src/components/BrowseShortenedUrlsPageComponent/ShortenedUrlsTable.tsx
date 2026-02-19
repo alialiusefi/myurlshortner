@@ -10,7 +10,7 @@ import Box from "@mui/material/Box";
 import TableBody from "@mui/material/TableBody";
 import TableFooter from "@mui/material/TableFooter";
 import TablePagination from "@mui/material/TablePagination";
-import { GetAvailableUrlsSWR } from "../../app/api/UrlsApi";
+import { GetAvailableUrlsSWR, GetTitleSuggestionsSWR } from "../../app/api/UrlsApi";
 import TableContainer from "@mui/material/TableContainer";
 import Link from "@mui/material/Link";
 import { RedirectType, useSearchParams } from "next/navigation";
@@ -23,7 +23,7 @@ import { redirect } from "next/navigation";
 import NewTabLink from "components/NewTabLinkComponent/NewTabLink";
 import { readableTimestamp } from "components/ReadableTimestampComponent/ReadableTimestamp";
 import { UserProvider } from "app/context";
-import { TextField, Paper } from "@mui/material";
+import { TextField, Paper, Autocomplete } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import Grid from "@mui/material/Grid";
@@ -67,6 +67,7 @@ export default function ShortnetedUrlsTable() {
     userId,
     searchTitle == null ? undefined : searchTitle,
   );
+  const { data: titleOptions } = GetTitleSuggestionsSWR(titleInput, userId) // note: destructuring in a different way
 
   return (
     <Grid container direction="column" rowGap={1}>
@@ -74,23 +75,32 @@ export default function ShortnetedUrlsTable() {
       <Paper>
         <Grid container flexDirection={"row"} columnGap={2} padding={2}>
           <Grid size={"grow"}>
-            <TextField
-              fullWidth
-              size="small"
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Search by title"
-              value={titleInput ?? ""}
-              helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
-              error={!isTitleValid(titleInput)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  if (titleInput !== null) {
-                    setSearchTitle(titleInput);
-                  } else if (titleInput == null) {
-                    setSearchTitle("");
-                  }
-                }
-              }}
+            <Autocomplete
+              filterOptions={(x) => x}
+              options={titleOptions ?? []}
+              freeSolo
+              disableClearable
+              renderInput={(params) =>
+                <TextField
+                  {...params}
+                  fullWidth
+                  size="small"
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Search by title"
+                  value={titleInput ?? ""}
+                  helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
+                  error={!isTitleValid(titleInput)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (titleInput !== null) {
+                        setSearchTitle(titleInput);
+                      } else if (titleInput == null) {
+                        setSearchTitle("");
+                      }
+                    }
+                  }}
+                />
+              }
             />
           </Grid>
           <Grid>
