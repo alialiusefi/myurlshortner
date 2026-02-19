@@ -80,6 +80,7 @@ export default function ShortnetedUrlsTable() {
               options={titleOptions ?? []}
               freeSolo
               disableClearable
+              value={titleInput ?? ""}
               renderInput={(params) =>
                 <TextField
                   {...params}
@@ -87,7 +88,6 @@ export default function ShortnetedUrlsTable() {
                   size="small"
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Search by title"
-                  value={titleInput ?? ""}
                   helperText={isTitleValid(titleInput) ? "" : TITLE_ERROR_MESSAGE}
                   error={!isTitleValid(titleInput)}
                   onKeyDown={(e) => {
