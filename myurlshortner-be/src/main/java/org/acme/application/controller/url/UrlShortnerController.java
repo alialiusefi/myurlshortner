@@ -3,6 +3,7 @@ package org.acme.application.controller.url;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.acme.application.controller.error.ErrorResponse;
 import org.acme.application.usecases.ShortenedUrlUseCases;
 import org.acme.application.util.PatchField;
@@ -11,10 +12,12 @@ import org.acme.domain.events.V1UserUpdatedOriginalUrlEvent;
 import org.acme.domain.events.V1UserUpdatedTitleEvent;
 import org.acme.domain.events.V2UserCreatedShortenedUrlEvent;
 import org.acme.domain.events.V2UserGiftedShortenedUrlEvent;
+import org.acme.domain.repo.ShortenedUrlReadRepository;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.acme.application.controller.Constants.API_KEY;
@@ -28,7 +31,8 @@ public class UrlShortnerController {
     private final ShortenedUrlUseCases shortenedUrlUseCases;
 
     public UrlShortnerController(
-            ShortenedUrlUseCases shortenedUrlUseCases
+            ShortenedUrlUseCases shortenedUrlUseCases,
+            ShortenedUrlReadRepository readRepository
     ) {
         this.shortenedUrlUseCases = shortenedUrlUseCases;
     }
@@ -60,22 +64,44 @@ public class UrlShortnerController {
     }
 
     @GET
+    @Path("/shortened-urls/titles")
+    @Produces(APPLICATION_JSON)
+    public Response getShortenedUrlTitleSuggestions(
+            @QueryParam("query") String query,
+            @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
+    ) {
+        return shortenedUrlUseCases.getShortenedUrlTitleSuggestions(query, userIdHeader).fold(
+                error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromDomainErrors(error)).build()
+                ,
+                success -> Response.ok(success).build()
+        );
+    }
+
+    @GET
     @Path("/shortened-urls")
     @Produces(APPLICATION_JSON)
     public Response getShortenedUrls(
-            @QueryParam("page") Integer page,
-            @QueryParam("size") Integer size,
-            @QueryParam("order") String order,
+            UriInfo uriInfo,
             @DefaultValue("1")
             @HeaderParam(USER_ID_HEADER_KEY) String userIdHeader
     ) {
+        var queryParam = uriInfo.getQueryParameters();
+        Function<String, String> extractFirstValue = (String key) -> {
+            if (queryParam.get(key) == null) {
+                return null;
+            }
+            return queryParam.get(key).getFirst();
+        };
         return this.shortenedUrlUseCases.listAvailableUrls(
-                page,
-                size,
-                order,
+                extractFirstValue.apply("page"),
+                extractFirstValue.apply("size"),
+                extractFirstValue.apply("order"),
+                extractFirstValue.apply("title"),
                 userIdHeader
         ).fold(
-                error -> Response.status(Response.Status.BAD_REQUEST).entity(ErrorResponse.buildFromApplicationErrors(error.getErrors())).build(),
+                error -> Response.status(Response.Status.BAD_REQUEST)
+                        .entity(ErrorResponse.buildFromApplicationErrors(error.getErrors()))
+                        .build(),
                 success -> {
                     var total = success._1;
                     var results = success._2.stream()

@@ -10,4 +10,13 @@ public class TitleValidator {
         }
         return Either.right(titleInput);
     }
+
+    public static Either<TitleIsNotCorrectException, String> validateNullable(String titleInput) {
+        if (titleInput == null) {
+            return Either.right(null);
+        } else if (titleInput.length() > 100) {
+            return Either.left(new TitleIsNotCorrectException());
+        }
+        return Either.right(titleInput);
+    }
 }

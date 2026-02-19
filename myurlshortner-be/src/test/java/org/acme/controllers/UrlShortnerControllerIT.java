@@ -82,6 +82,25 @@ class UrlShortnerControllerIT {
     }
 
     @Test
+    void testGetUrlsEndpointWithTitle() throws SaveShortenedUrlConflictError {
+        var datetime = OffsetDateTime.now();
+        var datetime2 = OffsetDateTime.now();
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.google.com", "abcdefghik", datetime, datetime, true, 1L, "the booking"));
+        repo.insertShortenedUrl(new ShortenedUrl("https://www.dis.com", "abcdefghi2", datetime2, datetime2, false, 1L, "the book of lords"));
+        var result = given()
+                .when().get("/shortened-urls?page=1&size=10&title=book")
+                .then()
+                .statusCode(200)
+                .body("total", Matchers.equalTo(2));
+        var data = result.extract().jsonPath(config).getList("data", UrlList.UrlRow.class);
+        assertThat(data, Matchers.not(Matchers.empty()));
+        assertThat(data, Matchers.contains(
+                new UrlList.UrlRow("abcdefghi2", "https://www.dis.com", "http://localhost/goto/abcdefghi2", 0L, datetime2, false, "the book of lords"),
+                new UrlList.UrlRow("abcdefghik", "https://www.google.com", "http://localhost/goto/abcdefghik", 0L, datetime, true, "the booking")
+        ));
+    }
+
+    @Test
     void generateUniqueId() {
         given()
                 .post("/unique-identifiers")

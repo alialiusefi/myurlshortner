@@ -53,6 +53,7 @@ export const GetAvailableUrlsSWR = (
   size: number,
   order: string,
   userId: number,
+  title: string,
 ) => {
   const fetcher = (url) =>
     fetch(url, { headers: { ...buildUserIdHeader(userId) } }).then(
@@ -72,11 +73,28 @@ export const GetAvailableUrlsSWR = (
         throw error;
       },
     );
-  return useSWR(
-    `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`,
-    fetcher,
-  );
+  const path =
+    title !== undefined
+      ? `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}&title=${title}`
+      : `${GetAvailableUrlsPath()}?page=${page}&size=${size}&order=${order}`;
+  return useSWR(path, fetcher);
 };
+
+const GetTitleSuggestionsPath = () => `${GetAvailableUrlsPath()}/titles` 
+export const GetTitleSuggestionsSWR = (titleInput: string, userId: number) => {
+  const fetcher = (url) => {
+    return fetch(url, {headers: {...buildUserIdHeader(userId)}}).then(res => {
+      if (!res.ok) {
+        console.error("Unexpected BE response!")
+        const error = new Error("Unexpected BE response!");
+        throw error;
+      }
+      return res.json() as Promise<[string]>
+    })
+  }
+  const url = !titleInput || titleInput.length == 0 ? null : `${GetTitleSuggestionsPath()}?query=${titleInput}`
+  return useSWR(url, fetcher)
+}
 
 export const GetShortenedUrlHistorySWR = (
   size: number,

@@ -1,8 +1,5 @@
 # Browse available shortened urls
 
-Development Time: 3 days
-Testing Time: 1/2 day
-
 ### User flow
 
 The user is able to navigate to the 'Browse' page using the navigation panel above.
@@ -10,8 +7,22 @@ The browse page returns the available shortned urls starting from the first page
 The ordering default is by created_at, and the direction is changeable.
 Support pagination by 10 elements.
 
-The following columns are to be supported:
+Search Bar:
+  - Text Input
+    - On Input:
+      - Show popover with 5 matching titles
+        - On Click:
+          - Set the title and search
+    - Placeholder:
+      - Search By Title
+    - Validation:
+      - Up to 100 chars
+  - Search Button
+    - Search shortened urls by title
+  - Reset Button
+    - Reset and fetch first page
 
+Table:
 - Is Enabled
   - Enabled/Disabled state
 - Title
@@ -34,8 +45,9 @@ The following columns are to be supported:
 > page - page number, [1,INTEGER_MAX], optional
 > size - page size, [1, 100], optional
 > order - order direction. [asc, desc], optional, default: desc
+> title - title search param, [0, 100], optional.
 ```
 
 ```http
-http://{hostname}/browse?page=5&size=10&order=desc
+http://{hostname}/browse?page=5&size=10&order=desc&title=yellow
 ```
