@@ -124,7 +124,7 @@ public class ShortenedUrlUseCases {
         }
 
         if (errors.isEmpty()) {
-            List<String> validTitleTokens = validTitle.get() == null ? List.of() : Arrays.stream(validTitle.get().split(" "))
+            List<String> validTitleTokens = validTitle.get() == null ? null : Arrays.stream(validTitle.get().split(" "))
                     .filter(a -> !a.isBlank())
                     .toList();
             return Either.right(
