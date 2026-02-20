@@ -12,7 +12,7 @@ public class UrlValidator {
     private final static String HTTP_PREFIX = "http";
     private final static String HTTPS_PREFIX = "https";
     private final static String SEPARATOR = "://";
-    private final static String REGEX = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
+    private final static String REGEX = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
 
     public static Either<List<UrlValidationException>, URI> validateUrl(String hostname, String url) {
         if (url == null) {
