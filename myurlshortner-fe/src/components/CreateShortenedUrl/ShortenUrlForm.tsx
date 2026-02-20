@@ -73,7 +73,9 @@ export default function ShortenUrlForm() {
     if (result instanceof ShortenUrlResponse) {
       const shortenedUrl = (result as ShortenUrlResponse).shortened_url;
       setShortenedUrlState({ errorResponse: null, shortenedUrl: shortenedUrl });
-      setUidExists(true);
+      if (selectedMode == CUSTOM_TYPE_VALUE) {
+        setUidExists(true);
+      }
       setOpenModalUrlState(true);
     } else {
       const error = result as ErrorResponse;
@@ -131,7 +133,10 @@ export default function ShortenUrlForm() {
           sx={{ paddingBottom: 2 }}
           data-testid="tabs-selection"
           value={selectedMode}
-          onChange={(e, value) => setSelectedMode(value)}
+          onChange={async (e, value) => {
+            setSelectedMode(value);
+            handleUniqueIdChange((await GenerateUniqueIdFetch()).unique_identifier);
+          }}
         >
           <Tab
             data-testid="tabs-selection-0"
