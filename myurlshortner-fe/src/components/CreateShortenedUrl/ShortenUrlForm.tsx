@@ -135,7 +135,9 @@ export default function ShortenUrlForm() {
           value={selectedMode}
           onChange={async (e, value) => {
             setSelectedMode(value);
-            handleUniqueIdChange((await GenerateUniqueIdFetch()).unique_identifier);
+            handleUniqueIdChange(
+              (await GenerateUniqueIdFetch()).unique_identifier,
+            );
           }}
         >
           <Tab
