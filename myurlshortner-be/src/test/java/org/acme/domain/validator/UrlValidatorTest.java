@@ -34,7 +34,8 @@ public class UrlValidatorTest {
                 "www.google.com",
                 "http://www.google.com",
                 "https://www.google.com",
-                "google.com"
+                "google.com",
+                "https://x.com"
         );
         for (String testCase : testCases) {
             var either = UrlValidator.validateUrl("localhost", testCase);
