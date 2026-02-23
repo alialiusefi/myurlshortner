@@ -3,7 +3,7 @@ import {
   shortenUrlOperaton,
   ShortenUrlResponse,
   GenerateUniqueIdSWR,
-  GenerateUniqueIdFetch,
+  GenerateUniqueIdFetch
 } from "../../app/api/UrlShortnerApi";
 import { ErrorResponse } from "../../app/api/Errors";
 import Button from "@mui/material/Button";
@@ -36,7 +36,7 @@ export default function ShortenUrlForm() {
   const [targetUrlInput, setTargetUrlInput] = useState("");
   const [selectedMode, setSelectedMode] = useState(AUTO_TYPE_VALUE);
   const { data } = GenerateUniqueIdSWR();
-  const [uidInput, setUidInput] = useState(null);
+  const [uidInput, setUidInput] = useState(data.unique_identifier);
   const [shortenedUrlState, setShortenedUrlState] = useState({
     errorResponse: null,
     shortenedUrl: "",
@@ -46,8 +46,7 @@ export default function ShortenUrlForm() {
   const [uidExists, setUidExists] = useState(false);
   const userId = useContext(UserProvider);
   const validateUidExists = async (uidInput: string) => {
-    const uid = uidInput == null ? data?.unique_identifier : uidInput;
-    const res = await GetShortenedUrlInfoFetch(uid, userId);
+    const res = await GetShortenedUrlInfoFetch(uidInput, userId);
     setUidExists(res != null);
   };
 
@@ -66,7 +65,7 @@ export default function ShortenUrlForm() {
     setLoadingButtonState(true);
     const result = await shortenUrlOperaton(
       targetUrlInput,
-      uidInput == null ? data?.unique_identifier : uidInput,
+      uidInput,
       userId,
       titleInput == null ? titleInput : titleInput.trim(),
     );
@@ -127,112 +126,109 @@ export default function ShortenUrlForm() {
   };
 
   return (
-    <Paper sx={{ minWidth: 400, minHeight: 200 }}>
-      <Grid container direction="column" rowSpacing={2} padding={2}>
-        <Tabs
-          sx={{ paddingBottom: 2 }}
-          data-testid="tabs-selection"
-          value={selectedMode}
-          onChange={async (e, value) => {
-            setSelectedMode(value);
-            handleUniqueIdChange(
-              (await GenerateUniqueIdFetch()).unique_identifier,
-            );
-          }}
-        >
-          <Tab
-            data-testid="tabs-selection-0"
-            label="Auto"
-            tabIndex={AUTO_TYPE_VALUE}
-          />
-          <Tab
-            data-testid="tabs-selection-1"
-            label="Custom"
-            tabIndex={CUSTOM_TYPE_VALUE}
-          />
-        </Tabs>
-        <Grow
-          in={selectedMode == CUSTOM_TYPE_VALUE}
-          hidden={selectedMode == AUTO_TYPE_VALUE}
-        >
-          <Box>
-            <TextField
-              value={titleInput ?? ""}
-              sx={{ paddingBottom: 2 }}
-              onChange={(e) => setTitleInput(e.target.value)}
-              label={"Title"}
-              error={!titleIsValid()}
-              helperText={
-                !titleIsValid()
-                  ? TITLE_ERROR_MESSAGE
-                  : "Short text that describes the shortened url"
-              }
-              placeholder="Your Title"
-              fullWidth
+      <Paper sx={{ minWidth: 400, minHeight: 200 }}>
+        <Grid container direction="column" rowSpacing={2} padding={2}>
+          <Tabs
+            sx={{ paddingBottom: 2 }}
+            data-testid="tabs-selection"
+            value={selectedMode}
+            onChange={async (e, value) => {
+              setSelectedMode(value);
+              handleUniqueIdChange(
+                (await GenerateUniqueIdFetch()).unique_identifier,
+              );
+            }}
+          >
+            <Tab
+              data-testid="tabs-selection-0"
+              label="Auto"
+              tabIndex={AUTO_TYPE_VALUE}
             />
-            <Paper sx={{ padding: 1 }} variant="outlined">
-              <Typography>Shortened URL:</Typography>
-              <Grid container direction="row" rowSpacing={3} columnSpacing={1}>
-                <Typography alignContent={"center"}>
-                  {`${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/`}
-                </Typography>
-                <TextField
-                  type="text"
-                  size="small"
-                  label="Unique ID"
-                  value={
-                    (uidInput == null ? data?.unique_identifier : uidInput) ??
-                    ""
-                  }
-                  onChange={(e) => handleUniqueIdChange(e.target.value)}
-                  placeholder="fancyid"
-                  slotProps={{
-                    htmlInput: { "data-testid": "unique-id-input" },
-                  }}
-                  helperText={uidExists ? "The unique id already exists." : ""}
-                  error={uidExists}
-                  required
-                />
-                <Button
-                  data-testid="refresh-button"
-                  onClick={async () =>
-                    handleUniqueIdChange(
-                      (await GenerateUniqueIdFetch()).unique_identifier,
-                    )
-                  }
-                >
-                  <RefreshIcon />
-                </Button>
-              </Grid>
-            </Paper>
-          </Box>
-        </Grow>
-        <TextField
-          type="url"
-          value={targetUrlInput}
-          onChange={(e) => setTargetUrlInput(e.target.value)}
-          placeholder="https://www.example.com"
-          slotProps={{ htmlInput: { "data-testid": "url-input" } }}
-          label="Target URL"
-          required
-          fullWidth
-        />
-        <Button
-          data-testid="shorten-button-input"
-          onClick={handleSubmit}
-          loading={buttonIsLoadingState}
-          disabled={
-            !validateForm(
-              targetUrlInput,
-              uidInput == null ? data?.unique_identifier : uidInput,
-            ) || uidExists
-          }
-        >
-          Shorten!
-        </Button>
-        {successDialog()}
-        {apiErrorSnackBar(shortenedUrlState.errorResponse)}
-      </Grid>
-    </Paper>
+            <Tab
+              data-testid="tabs-selection-1"
+              label="Custom"
+              tabIndex={CUSTOM_TYPE_VALUE}
+            />
+          </Tabs>
+          <Grow
+            in={selectedMode == CUSTOM_TYPE_VALUE}
+            hidden={selectedMode == AUTO_TYPE_VALUE}
+          >
+            <Box>
+              <TextField
+                value={titleInput ?? ""}
+                sx={{ paddingBottom: 2 }}
+                onChange={(e) => setTitleInput(e.target.value)}
+                label={"Title"}
+                error={!titleIsValid()}
+                helperText={
+                  !titleIsValid()
+                    ? TITLE_ERROR_MESSAGE
+                    : "Short text that describes the shortened url"
+                }
+                placeholder="Your Title"
+                fullWidth
+              />
+              <Paper sx={{ padding: 1 }} variant="outlined">
+                <Typography>Shortened URL:</Typography>
+                <Grid container direction="row" rowSpacing={3} columnSpacing={1}>
+                  <Typography alignContent={"center"}>
+                    {`${process.env.NEXT_PUBLIC_EXTERNAL_CLIENT_URL}/`}
+                  </Typography>
+                  <TextField
+                    type="text"
+                    size="small"
+                    label="Unique ID"
+                    value={uidInput}
+                    onChange={(e) => handleUniqueIdChange(e.target.value)}
+                    placeholder="fancyid"
+                    slotProps={{
+                      htmlInput: { "data-testid": "unique-id-input" },
+                    }}
+                    helperText={uidExists ? "The unique id already exists." : ""}
+                    error={uidExists}
+                    required
+                  />
+                  <Button
+                    data-testid="refresh-button"
+                    onClick={async () =>
+                      handleUniqueIdChange(
+                        (await GenerateUniqueIdFetch()).unique_identifier,
+                      )
+                    }
+                  >
+                    <RefreshIcon />
+                  </Button>
+                </Grid>
+              </Paper>
+            </Box>
+          </Grow>
+          <TextField
+            type="url"
+            value={targetUrlInput}
+            onChange={(e) => setTargetUrlInput(e.target.value)}
+            placeholder="https://www.example.com"
+            slotProps={{ htmlInput: { "data-testid": "url-input" } }}
+            label="Target URL"
+            required
+            fullWidth
+          />
+          <Button
+            data-testid="shorten-button-input"
+            onClick={handleSubmit}
+            loading={buttonIsLoadingState}
+            disabled={
+              !validateForm(
+                targetUrlInput,
+                uidInput,
+              ) || uidExists
+            }
+          >
+            Shorten!
+          </Button>
+          {successDialog()}
+          {apiErrorSnackBar(shortenedUrlState.errorResponse)}
+        </Grid>
+      </Paper>
   );
 }

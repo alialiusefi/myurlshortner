@@ -1,45 +1,31 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, from "swr";
 import { ErrorResponse } from "./Errors";
 import { buildUserIdHeader } from "./Utility";
 
-export const GenerateUniqueIdSWR = () => {
+const GenerateUniqueIdUrl = `${process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL}/unique-identifiers`;
+const fetcher = (url): Promise<GenerateUniqueIdResponse> => {
   const requestConfig = {
     method: "POST",
   };
-  const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-  const fetcher = (url) =>
-    fetch(url, requestConfig)
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error("Unexpected Error Response!");
-        }
-      })
-      .then((json) => json as GenerateUniqueIdResponse)
-      .catch((err) => err);
-  return useSWR(`${serverUrl}/unique-identifiers`, fetcher);
+  return fetch(url, requestConfig)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error("Unexpected Error Response!");
+      }
+    })
+    .then((json) => json as GenerateUniqueIdResponse)
+    .catch((err) => err);
 };
-
-export const GenerateUniqueIdFetch =
-  async (): Promise<GenerateUniqueIdResponse> => {
-    const serverUrl = process.env.NEXT_PUBLIC_EXTERNAL_SERVER_URL;
-    const requestConfig = {
-      method: "POST",
-    };
-    return fetch(`${serverUrl}/unique-identifiers`, requestConfig)
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error("Unexpected Error Response!");
-        }
-      })
-      .then((json) => json as GenerateUniqueIdResponse)
-      .catch((err) => err);
-  };
+export const GenerateUniqueIdSWR = () =>
+  useSWR(GenerateUniqueIdUrl, fetcher, {
+    suspense: true,
+    fallbackData: { unique_identifier: "" },
+  });
+export const GenerateUniqueIdFetch = () => fetcher(GenerateUniqueIdUrl);
 
 export async function shortenUrlOperaton(
   url: string,
