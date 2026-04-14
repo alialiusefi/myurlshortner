@@ -1,0 +1,15 @@
+name: Testing workflow
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+  push:
+    branches:
+      - workflow/**
+jobs:
+  Testing-Script:
+    runs-on: self-hosted
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+  Testing-Container:
+    runs-on: self-hosted
+    container:
+      image: hello-world:latest
