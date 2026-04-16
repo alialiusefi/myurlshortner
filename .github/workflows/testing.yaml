@@ -6,7 +6,7 @@ on:
       - workflow/**
 jobs:
   Testing-Script:
-    runs-on: self-hosted
+    runs-on: arc-runner-set
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
 #  Testing-Container:
@@ -14,6 +14,6 @@ jobs:
 #    container:
 #      image: hello-world:latest
   Testing-Actions:
-    runs-on: self-hosted
+    runs-on: arc-runner-set
     steps:
       - uses: actions/checkout@v6
