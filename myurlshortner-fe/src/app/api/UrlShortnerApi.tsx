@@ -1,6 +1,6 @@
 "use client";
 
-import useSWR, from "swr";
+import useSWR from "swr";
 import { ErrorResponse } from "./Errors";
 import { buildUserIdHeader } from "./Utility";
 
